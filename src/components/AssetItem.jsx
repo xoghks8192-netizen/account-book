@@ -15,7 +15,10 @@ export default function AssetItem({ asset, onUpdate, onDelete }) {
   const [shares, setShares] = useState(asset.shares ?? '')
   const [avgPrice, setAvgPrice] = useState(asset.avg_price ?? '')
   const [currentPrice, setCurrentPrice] = useState(asset.current_price ?? '')
+  const [ticker, setTicker] = useState(asset.ticker ?? '')
   const [saving, setSaving] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [refreshError, setRefreshError] = useState('')
 
   const isStock = STOCK_CATEGORIES.includes(asset.category) && asset.shares != null
 
@@ -28,6 +31,7 @@ export default function AssetItem({ asset, onUpdate, onDelete }) {
     setShares(asset.shares ?? '')
     setAvgPrice(asset.avg_price ?? '')
     setCurrentPrice(asset.current_price ?? '')
+    setTicker(asset.ticker ?? '')
     setEditing(false)
   }
 
@@ -48,6 +52,7 @@ export default function AssetItem({ asset, onUpdate, onDelete }) {
         shares: Number(shares),
         avg_price: Number(avgPrice),
         current_price: Number(currentPrice),
+        ticker: ticker.trim() || null,
       })
     } else {
       if (amount === '' || Number(amount) < 0) {
@@ -107,6 +112,15 @@ export default function AssetItem({ asset, onUpdate, onDelete }) {
               <label>현재가 (원)</label>
               <input type="number" value={currentPrice} onChange={(e) => setCurrentPrice(e.target.value)} />
             </div>
+            <div className="form-row">
+              <label>종목코드 (선택, 시세 자동조회용)</label>
+              <input
+                type="text"
+                value={ticker}
+                onChange={(e) => setTicker(e.target.value)}
+                placeholder="예: 069500"
+              />
+            </div>
           </>
         ) : (
           <div className="form-row">
@@ -152,6 +166,24 @@ export default function AssetItem({ asset, onUpdate, onDelete }) {
     const profit = asset.amount - buyAmount
     const profitRate = buyAmount > 0 ? (profit / buyAmount) * 100 : 0
 
+    async function handleRefreshPrice() {
+      if (!asset.ticker) return
+      setRefreshing(true)
+      setRefreshError('')
+      try {
+        const res = await fetch(`/api/stock-price?code=${encodeURIComponent(asset.ticker)}`)
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || '시세 조회에 실패했습니다.')
+        await onUpdate(asset.id, {
+          current_price: data.price,
+          amount: Number(asset.shares) * data.price,
+        })
+      } catch (e) {
+        setRefreshError(e.message)
+      }
+      setRefreshing(false)
+    }
+
     return (
       <div className="tx-item">
         <div className="tx-info">
@@ -160,6 +192,7 @@ export default function AssetItem({ asset, onUpdate, onDelete }) {
             {asset.owner} · {formatAmount(asset.shares)}주 · 평단 {formatAmount(asset.avg_price)} · 현재{' '}
             {formatAmount(asset.current_price)}
           </span>
+          {refreshError && <span className="meta" style={{ color: '#ff7aa2' }}>{refreshError}</span>}
         </div>
         <div className="tx-amount">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
@@ -169,6 +202,11 @@ export default function AssetItem({ asset, onUpdate, onDelete }) {
               {formatAmount(profit)} ({profitRate.toFixed(1)}%)
             </span>
           </div>
+          {asset.ticker && (
+            <button onClick={handleRefreshPrice} disabled={refreshing} title="시세 새로고침">
+              {refreshing ? '⏳' : '🔄'}
+            </button>
+          )}
           <button onClick={() => setEditing(true)} title="수정">
             ✎
           </button>
