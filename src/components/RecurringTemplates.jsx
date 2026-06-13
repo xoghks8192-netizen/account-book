@@ -21,6 +21,13 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser }) 
   const [adding, setAdding] = useState(null)
   const [lastAdded, setLastAdded] = useState({})
   const [ownerFilter, setOwnerFilter] = useState('전체')
+  const [editingId, setEditingId] = useState(null)
+  const [editName, setEditName] = useState('')
+  const [editType, setEditType] = useState('expense')
+  const [editCategory, setEditCategory] = useState(CATEGORIES.expense[0])
+  const [editAmount, setEditAmount] = useState('')
+  const [editMemo, setEditMemo] = useState('')
+  const [editAuthor, setEditAuthor] = useState(currentUser || OWNERS[0])
 
   useEffect(() => {
     let cancelled = false
@@ -60,6 +67,42 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser }) 
   async function handleDelete(id) {
     await supabase.from('recurring_templates').delete().eq('id', id)
     setTemplates((prev) => prev.filter((t) => t.id !== id))
+  }
+
+  function startEdit(t) {
+    setEditingId(t.id)
+    setEditName(t.name)
+    setEditType(t.type)
+    setEditCategory(t.category)
+    setEditAmount(t.amount)
+    setEditMemo(t.memo ?? '')
+    setEditAuthor(t.author || OWNERS[0])
+  }
+
+  function handleEditTypeChange(newType) {
+    setEditType(newType)
+    setEditCategory(CATEGORIES[newType][0])
+  }
+
+  async function handleUpdate(id) {
+    if (!editName.trim() || !editAmount) return
+    const { data, error } = await supabase
+      .from('recurring_templates')
+      .update({
+        name: editName.trim(),
+        type: editType,
+        category: editCategory,
+        amount: Number(editAmount),
+        memo: editMemo.trim() || null,
+        author: editAuthor,
+      })
+      .eq('id', id)
+      .select()
+      .single()
+    if (!error) {
+      setTemplates((prev) => prev.map((t) => (t.id === id ? data : t)))
+      setEditingId(null)
+    }
   }
 
   async function handleQuickAdd(template) {
@@ -106,57 +149,138 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser }) 
 
       {visibleTemplates.length === 0 && !showForm && <div className="empty">등록된 항목이 없습니다.</div>}
 
-      {visibleTemplates.map((t) => (
-        <div className="tx-item" key={t.id}>
-          <div className="tx-info">
-            <span className="category">{t.name}</span>
-            <span className="meta">
-              {t.category}
-              {t.author ? ` · ${t.author}` : ''} ·{' '}
-              <span className={t.type === 'income' ? 'amount income' : 'amount expense'}>
-                {t.type === 'income' ? '+' : '-'}
-                {formatAmount(t.amount)}원
-              </span>
-            </span>
-          </div>
-          <div className="tx-amount">
-            {lastAdded[t.id] ? (
+      {visibleTemplates.map((t) =>
+        editingId === t.id ? (
+          <div className="tx-item asset-edit" key={t.id}>
+            <div className="type-toggle">
               <button
-                onClick={() => handleUndo(t.id)}
-                className="submit-btn"
+                type="button"
+                className={`income ${editType === 'income' ? 'active' : ''}`}
+                onClick={() => handleEditTypeChange('income')}
+              >
+                수입
+              </button>
+              <button
+                type="button"
+                className={`expense ${editType === 'expense' ? 'active' : ''}`}
+                onClick={() => handleEditTypeChange('expense')}
+              >
+                지출
+              </button>
+            </div>
+            <div className="form-row">
+              <label>이름</label>
+              <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} />
+            </div>
+            <div className="form-row">
+              <label>카테고리</label>
+              <select value={editCategory} onChange={(e) => setEditCategory(e.target.value)}>
+                {CATEGORIES[editType].map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-row">
+              <label>금액</label>
+              <input
+                type="number"
+                inputMode="numeric"
+                min="1"
+                value={editAmount}
+                onChange={(e) => setEditAmount(e.target.value)}
+              />
+            </div>
+            <div className="form-row">
+              <label>구분</label>
+              <select value={editAuthor} onChange={(e) => setEditAuthor(e.target.value)}>
+                {OWNERS.map((o) => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-row">
+              <label>메모 (선택)</label>
+              <input type="text" value={editMemo} onChange={(e) => setEditMemo(e.target.value)} placeholder="메모" />
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => handleUpdate(t.id)} className="submit-btn" style={{ flex: 1 }}>
+                저장
+              </button>
+              <button
+                onClick={() => setEditingId(null)}
                 style={{
-                  width: 'auto',
-                  padding: '6px 14px',
-                  fontSize: 13,
-                  margin: 0,
+                  flex: 1,
+                  border: 'none',
+                  borderRadius: 999,
                   background: '#fdeef3',
-                  color: '#ff8fab',
-                  boxShadow: 'none',
+                  color: '#b88a9c',
+                  fontWeight: 600,
+                  cursor: 'pointer',
                 }}
               >
-                되돌리기
+                취소
               </button>
-            ) : (
-              <button
-                onClick={() => handleQuickAdd(t)}
-                disabled={adding === t.id}
-                className="submit-btn"
-                style={{ width: 'auto', padding: '6px 14px', fontSize: 13, margin: 0 }}
-              >
-                {adding === t.id ? '추가 중...' : '오늘 추가'}
-              </button>
-            )}
-            <button
-              onClick={() => {
-                if (window.confirm('이 항목을 삭제할까요?')) handleDelete(t.id)
-              }}
-              title="삭제"
-            >
-              ✕
-            </button>
+            </div>
           </div>
-        </div>
-      ))}
+        ) : (
+          <div className="tx-item" key={t.id}>
+            <div className="tx-info">
+              <span className="category">{t.name}</span>
+              <span className="meta">
+                {t.category}
+                {t.author ? ` · ${t.author}` : ''} ·{' '}
+                <span className={t.type === 'income' ? 'amount income' : 'amount expense'}>
+                  {t.type === 'income' ? '+' : '-'}
+                  {formatAmount(t.amount)}원
+                </span>
+              </span>
+            </div>
+            <div className="tx-amount">
+              {lastAdded[t.id] ? (
+                <button
+                  onClick={() => handleUndo(t.id)}
+                  className="submit-btn"
+                  style={{
+                    width: 'auto',
+                    padding: '6px 14px',
+                    fontSize: 13,
+                    margin: 0,
+                    background: '#fdeef3',
+                    color: '#ff8fab',
+                    boxShadow: 'none',
+                  }}
+                >
+                  되돌리기
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleQuickAdd(t)}
+                  disabled={adding === t.id}
+                  className="submit-btn"
+                  style={{ width: 'auto', padding: '6px 14px', fontSize: 13, margin: 0 }}
+                >
+                  {adding === t.id ? '추가 중...' : '오늘 추가'}
+                </button>
+              )}
+              <button onClick={() => startEdit(t)} title="수정">
+                ✎
+              </button>
+              <button
+                onClick={() => {
+                  if (window.confirm('이 항목을 삭제할까요?')) handleDelete(t.id)
+                }}
+                title="삭제"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        ),
+      )}
 
       {showForm ? (
         <div style={{ marginTop: 12 }}>
