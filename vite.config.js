@@ -1,6 +1,8 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fetchStockPrice } from './api/lib/fetchPrice.js'
+import loginHandler from './api/login.js'
+import changePwHandler from './api/change-pw.js'
 
 function stockPriceApi() {
   return {
@@ -27,9 +29,48 @@ function stockPriceApi() {
   }
 }
 
-export default defineConfig({
-  plugins: [react(), stockPriceApi()],
-  server: {
-    host: true,
-  },
+function jsonApi(path, handler) {
+  return {
+    name: `json-api-${path}`,
+    configureServer(server) {
+      server.middlewares.use(path, async (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405
+          res.end()
+          return
+        }
+        let body = ''
+        for await (const chunk of req) body += chunk
+        req.body = body ? JSON.parse(body) : {}
+        res.setHeader('Content-Type', 'application/json')
+        const wrappedRes = {
+          status(code) {
+            res.statusCode = code
+            return this
+          },
+          json(obj) {
+            res.end(JSON.stringify(obj))
+          },
+        }
+        await handler(req, wrappedRes)
+      })
+    },
+  }
+}
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  Object.assign(process.env, env)
+
+  return {
+    plugins: [
+      react(),
+      stockPriceApi(),
+      jsonApi('/api/login', loginHandler),
+      jsonApi('/api/change-pw', changePwHandler),
+    ],
+    server: {
+      host: true,
+    },
+  }
 })

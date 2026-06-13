@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabase'
 
 export default function ChangePassword({ user, onClose }) {
   const [current, setCurrent] = useState('')
@@ -24,33 +23,26 @@ export default function ChangePassword({ user, onClose }) {
     }
 
     setSaving(true)
-    const { data, error: fetchError } = await supabase
-      .from('app_users')
-      .select('password')
-      .eq('username', user)
-      .maybeSingle()
-
-    if (fetchError || !data || data.password !== current) {
+    try {
+      const res = await fetch('/api/change-pw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: user, currentPassword: current, newPassword: next }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || '비밀번호 변경에 실패했습니다.')
+        return
+      }
+      setCurrent('')
+      setNext('')
+      setConfirm('')
+      setSuccess('비밀번호가 변경되었습니다.')
+    } catch {
+      setError('비밀번호 변경 중 오류가 발생했습니다.')
+    } finally {
       setSaving(false)
-      setError('현재 비밀번호가 올바르지 않습니다.')
-      return
     }
-
-    const { error: updateError } = await supabase
-      .from('app_users')
-      .update({ password: next })
-      .eq('username', user)
-
-    setSaving(false)
-    if (updateError) {
-      setError(updateError.message)
-      return
-    }
-
-    setCurrent('')
-    setNext('')
-    setConfirm('')
-    setSuccess('비밀번호가 변경되었습니다.')
   }
 
   return (
