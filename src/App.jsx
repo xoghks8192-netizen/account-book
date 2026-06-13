@@ -8,6 +8,7 @@ import AssetsPage from './components/AssetsPage'
 import ExpenseChart from './components/ExpenseChart'
 import RecurringTemplates from './components/RecurringTemplates'
 import MonthComparison from './components/MonthComparison'
+import ChangePassword from './components/ChangePassword'
 import { AUTH_KEY } from './users'
 import { OWNERS } from './assetMeta'
 
@@ -37,6 +38,7 @@ export default function App() {
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
   const [ownerFilter, setOwnerFilter] = useState('전체')
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
 
   const { start, end } = useMemo(() => monthRange(cursor.year, cursor.month), [cursor])
   const { start: prevStart, end: prevEnd } = useMemo(
@@ -166,13 +168,23 @@ export default function App() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', fontSize: 13, color: '#c0a3b0' }}>
         <span>{user}님 반가워요 🌸</span>
-        <button
-          onClick={handleLogout}
-          style={{ border: 'none', background: 'none', color: '#ff8fab', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
-        >
-          로그아웃
-        </button>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button
+            onClick={() => setShowPasswordForm((prev) => !prev)}
+            style={{ border: 'none', background: 'none', color: '#b896ff', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+          >
+            비밀번호 변경
+          </button>
+          <button
+            onClick={handleLogout}
+            style={{ border: 'none', background: 'none', color: '#ff8fab', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+          >
+            로그아웃
+          </button>
+        </div>
       </div>
+
+      {showPasswordForm && <ChangePassword user={user} onClose={() => setShowPasswordForm(false)} />}
 
       <div className="page-tabs">
         <button className={page === 'transactions' ? 'active' : ''} onClick={() => setPage('transactions')}>

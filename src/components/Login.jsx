@@ -1,19 +1,29 @@
 import { useState } from 'react'
-import { USERS, AUTH_KEY } from '../users'
+import { supabase } from '../lib/supabase'
+import { AUTH_KEY } from '../users'
 
 export default function Login({ onLogin }) {
   const [id, setId] = useState('')
   const [pw, setPw] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    if (USERS[id] && USERS[id] === pw) {
-      localStorage.setItem(AUTH_KEY, id)
-      onLogin(id)
-    } else {
+    setLoading(true)
+    setError('')
+    const { data, error } = await supabase
+      .from('app_users')
+      .select('username, password')
+      .eq('username', id)
+      .maybeSingle()
+    setLoading(false)
+    if (error || !data || data.password !== pw) {
       setError('아이디 또는 비밀번호가 올바르지 않습니다.')
+      return
     }
+    localStorage.setItem(AUTH_KEY, id)
+    onLogin(id)
   }
 
   return (
@@ -33,8 +43,8 @@ export default function Login({ onLogin }) {
             <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} required />
           </div>
           {error && <div style={{ color: '#ff8fab', fontSize: 13, marginBottom: 10 }}>{error}</div>}
-          <button type="submit" className="submit-btn">
-            로그인 💗
+          <button type="submit" className="submit-btn" disabled={loading}>
+            {loading ? '확인 중...' : '로그인 💗'}
           </button>
         </form>
       </div>
