@@ -10,6 +10,7 @@ import RecurringTemplates from './components/RecurringTemplates'
 import MonthComparison from './components/MonthComparison'
 import ChangePassword from './components/ChangePassword'
 import Collapsible from './components/Collapsible'
+import { toCSV, downloadCSV } from './lib/csv'
 import { AUTH_KEY } from './users'
 import { OWNERS, STOCK_CATEGORIES } from './assetMeta'
 
@@ -41,6 +42,7 @@ export default function App() {
   const [ownerFilter, setOwnerFilter] = useState('전체')
   const [showPasswordForm, setShowPasswordForm] = useState(false)
   const [linkableAssets, setLinkableAssets] = useState([])
+  const [exporting, setExporting] = useState(false)
 
   const { start, end } = useMemo(() => monthRange(cursor.year, cursor.month), [cursor])
   const { start: prevStart, end: prevEnd } = useMemo(
@@ -202,6 +204,77 @@ export default function App() {
     )
   }, [ownedTransactions, search])
 
+  async function handleExportAll() {
+    setExporting(true)
+    const date = new Date().toISOString().slice(0, 10)
+
+    try {
+      const { data: txData } = await supabase
+        .from('transactions')
+        .select('*')
+        .order('date', { ascending: false })
+        .order('id', { ascending: false })
+      if (txData) {
+        const csv = toCSV(
+          ['날짜', '구분', '유형', '카테고리', '금액', '메모', '작성자', '연동자산ID'],
+          txData.map((t) => [
+            t.date,
+            t.owner ?? '',
+            t.type === 'income' ? '수입' : '지출',
+            t.category,
+            t.amount,
+            t.memo ?? '',
+            t.author ?? '',
+            t.linked_asset_id ?? '',
+          ]),
+        )
+        downloadCSV(`거래내역_${date}.csv`, csv)
+      }
+
+      const { data: assetData } = await supabase
+        .from('assets')
+        .select('*')
+        .order('category', { ascending: true })
+        .order('id', { ascending: true })
+      if (assetData) {
+        const csv = toCSV(
+          ['이름', '카테고리', '유동성', '구분', '금액'],
+          assetData.map((a) => [
+            a.name,
+            a.category,
+            a.liquidity ?? '',
+            a.owner ?? '',
+            a.amount,
+          ]),
+        )
+        downloadCSV(`자산_${date}.csv`, csv)
+      }
+
+      const { data: recurringData } = await supabase
+        .from('recurring_templates')
+        .select('*')
+        .order('sort_order', { ascending: true, nullsFirst: false })
+        .order('id', { ascending: true })
+      if (recurringData) {
+        const csv = toCSV(
+          ['이름', '유형', '카테고리', '금액', '메모', '구분', '연동자산ID'],
+          recurringData.map((t) => [
+            t.name,
+            t.type === 'income' ? '수입' : '지출',
+            t.category,
+            t.amount,
+            t.memo ?? '',
+            t.author ?? '',
+            t.linked_asset_id ?? '',
+          ]),
+        )
+        downloadCSV(`고정지출수입_${date}.csv`, csv)
+      }
+    } finally {
+      setExporting(false)
+    }
+  }
+
   if (!user) {
     return <Login onLogin={setUser} />
   }
@@ -223,6 +296,13 @@ export default function App() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', fontSize: 13, color: '#c0a3b0' }}>
         <span>{user}님 반가워요 🌸</span>
         <div style={{ display: 'flex', gap: 12 }}>
+          <button
+            onClick={handleExportAll}
+            disabled={exporting}
+            style={{ border: 'none', background: 'none', color: '#7ec8a0', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+          >
+            {exporting ? '내보내는 중...' : '데이터 백업'}
+          </button>
           <button
             onClick={() => setShowPasswordForm((prev) => !prev)}
             style={{ border: 'none', background: 'none', color: '#b896ff', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
