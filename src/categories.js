@@ -14,6 +14,7 @@ export const CATEGORIES = {
     '적금(주택청약)',
     '적금(연금저축)',
     '적금(ISA계좌)',
+    '비상금',
     '기타지출',
   ],
 }
@@ -32,5 +33,6 @@ export const EXPENSE_CATEGORY_COLORS = {
   '적금(주택청약)': '#fdffb6',
   '적금(연금저축)': '#9bf6ff',
   '적금(ISA계좌)': '#ffd6e8',
+  비상금: '#ffc6ff',
   기타지출: '#e0c3cf',
 }
