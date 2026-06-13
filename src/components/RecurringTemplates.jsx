@@ -33,6 +33,13 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
   const [editLinkedAssetId, setEditLinkedAssetId] = useState('')
 
   useEffect(() => {
+    if (ownerFilter === '박태환' || ownerFilter === '류진주' || ownerFilter === '공동') {
+      setAuthor(ownerFilter)
+      setLinkedAssetId('')
+    }
+  }, [ownerFilter])
+
+  useEffect(() => {
     let cancelled = false
     async function load() {
       const { data, error } = await supabase
