@@ -15,11 +15,11 @@ export default async function handler(req, res) {
   const { username, password } = req.body
   if (!username || !password) return res.status(400).json({ error: '아이디와 비밀번호를 입력해주세요.' })
 
-  const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
   const ip = req.headers['x-forwarded-for']?.split(',')[0] || 'unknown'
   const identifier = `${ip}:${username}`
 
   try {
+    const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
     const cutoff = new Date(Date.now() - WINDOW_MIN * 60 * 1000).toISOString()
     supabase.from('login_attempts').delete().lt('created_at', cutoff) // 오래된 기록 정리 (await 안 함)
 

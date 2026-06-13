@@ -17,9 +17,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: '새 비밀번호는 4자 이상으로 입력해주세요.' })
   }
 
-  const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
-
   try {
+    const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
     const { data } = await supabase
       .from('app_users')
       .select('password')
