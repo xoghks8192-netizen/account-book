@@ -46,8 +46,7 @@ export default function TransactionForm({ onAdd, currentUser, assets = [] }) {
   }
 
   return (
-    <form className="form" onSubmit={handleSubmit}>
-      <h3>내역 추가</h3>
+    <form onSubmit={handleSubmit}>
       <div className="type-toggle">
         <button
           type="button"

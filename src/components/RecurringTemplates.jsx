@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { CATEGORIES } from '../categories'
 import { OWNERS } from '../assetMeta'
+import Collapsible from './Collapsible'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
@@ -178,9 +179,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
     ownerFilter === '전체' ? templates : templates.filter((t) => t.author === ownerFilter)
 
   return (
-    <div className="form">
-      <h3>고정 지출/수입</h3>
-
+    <Collapsible title="고정 지출/수입">
       <div className="owner-tabs" style={{ padding: '0 0 12px', margin: 0 }}>
         {['전체', ...OWNERS].map((o) => (
           <button key={o} className={ownerFilter === o ? 'active' : ''} onClick={() => setOwnerFilter(o)}>
@@ -468,6 +467,6 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
           + 항목 추가
         </button>
       )}
-    </div>
+    </Collapsible>
   )
 }

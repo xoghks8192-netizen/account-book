@@ -9,6 +9,7 @@ import ExpenseChart from './components/ExpenseChart'
 import RecurringTemplates from './components/RecurringTemplates'
 import MonthComparison from './components/MonthComparison'
 import ChangePassword from './components/ChangePassword'
+import Collapsible from './components/Collapsible'
 import { AUTH_KEY } from './users'
 import { OWNERS, STOCK_CATEGORIES } from './assetMeta'
 
@@ -309,7 +310,9 @@ export default function App() {
           />
 
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === user ? (
-            <TransactionForm onAdd={handleAdd} currentUser={user} assets={linkableAssets} />
+            <Collapsible title="내역 추가">
+              <TransactionForm onAdd={handleAdd} currentUser={user} assets={linkableAssets} />
+            </Collapsible>
           ) : null}
 
           <div className="search-bar">
@@ -326,12 +329,14 @@ export default function App() {
           {loading ? (
             <div className="container">불러오는 중...</div>
           ) : (
-            <TransactionList
-              transactions={filteredTransactions}
-              onDelete={handleDelete}
-              onUpdate={handleUpdateTransaction}
-              assets={linkableAssets}
-            />
+            <Collapsible title="내역" className="list">
+              <TransactionList
+                transactions={filteredTransactions}
+                onDelete={handleDelete}
+                onUpdate={handleUpdateTransaction}
+                assets={linkableAssets}
+              />
+            </Collapsible>
           )}
         </>
       )}

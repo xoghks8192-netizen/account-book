@@ -4,6 +4,7 @@ import { OWNERS, defaultLiquidity } from '../assetMeta'
 import AssetForm from './AssetForm'
 import AssetItem from './AssetItem'
 import AssetChart from './AssetChart'
+import Collapsible from './Collapsible'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
@@ -136,7 +137,9 @@ export default function AssetsPage({ currentUser }) {
       <AssetChart data={chartData} total={total} />
 
       {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === currentUser ? (
-        <AssetForm onAdd={handleAdd} />
+        <Collapsible title="자산 항목 추가">
+          <AssetForm onAdd={handleAdd} />
+        </Collapsible>
       ) : null}
 
       {error && <div className="container" style={{ color: '#e0524c' }}>오류: {error}</div>}
@@ -150,8 +153,7 @@ export default function AssetsPage({ currentUser }) {
       ) : (
         <div className="list">
           {liquidAssets.length > 0 && (
-            <>
-              <div className="section-title">💧 유동자산 · {formatAmount(liquidTotal)}원</div>
+            <Collapsible title={`💧 유동자산 · ${formatAmount(liquidTotal)}원`} className="section-collapsible">
               {Object.entries(liquidGrouped).map(([category, items]) => (
                 <div key={category}>
                   <h3>
@@ -162,12 +164,11 @@ export default function AssetsPage({ currentUser }) {
                   ))}
                 </div>
               ))}
-            </>
+            </Collapsible>
           )}
 
           {nonLiquidAssets.length > 0 && (
-            <>
-              <div className="section-title">🔒 비유동자산 · {formatAmount(nonLiquidTotal)}원</div>
+            <Collapsible title={`🔒 비유동자산 · ${formatAmount(nonLiquidTotal)}원`} className="section-collapsible">
               {Object.entries(nonLiquidGrouped).map(([category, items]) => (
                 <div key={category}>
                   <h3>
@@ -178,7 +179,7 @@ export default function AssetsPage({ currentUser }) {
                   ))}
                 </div>
               ))}
-            </>
+            </Collapsible>
           )}
         </div>
       )}

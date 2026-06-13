@@ -62,9 +62,7 @@ export default function AssetForm({ onAdd }) {
   }
 
   return (
-    <form className="form" onSubmit={handleSubmit}>
-      <h3>자산 항목 추가</h3>
-
+    <form onSubmit={handleSubmit}>
       <div className="form-row">
         <label>이름</label>
         <input

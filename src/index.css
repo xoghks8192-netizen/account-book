@@ -185,6 +185,60 @@ body {
   color: #4d4570;
 }
 
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.collapsible-header h3 {
+  margin: 0;
+}
+
+.collapsible-toggle {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #9b8fc0;
+  background: #f1eefb;
+  border-radius: 999px;
+  padding: 5px 12px;
+  margin-left: 8px;
+}
+
+.collapsible-body {
+  margin-top: 14px;
+}
+
+.section-collapsible .collapsible-header h3 {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: #4d4570;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #efebfa;
+  flex: 1;
+}
+
+.section-collapsible .collapsible-toggle {
+  margin-left: 8px;
+  margin-bottom: 6px;
+}
+
+.section-collapsible {
+  margin: 20px 0 4px;
+}
+
+.section-collapsible .collapsible-body {
+  margin-top: 4px;
+}
+
 .type-toggle {
   display: flex;
   gap: 8px;

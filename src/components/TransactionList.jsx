@@ -50,16 +50,11 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
   }
 
   if (transactions.length === 0) {
-    return (
-      <div className="list">
-        <div className="empty">이번 달 내역이 없습니다.</div>
-      </div>
-    )
+    return <div className="empty">이번 달 내역이 없습니다.</div>
   }
 
   return (
-    <div className="list">
-      <h3>내역</h3>
+    <>
       {transactions.map((tx) =>
         editingId === tx.id ? (
           <div className="tx-item asset-edit" key={tx.id}>
@@ -178,6 +173,6 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
           </div>
         ),
       )}
-    </div>
+    </>
   )
 }
