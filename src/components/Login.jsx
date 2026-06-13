@@ -22,7 +22,7 @@ export default function Login({ onLogin }) {
         setError(data.error || '아이디 또는 비밀번호가 올바르지 않습니다.')
         return
       }
-      localStorage.setItem(AUTH_KEY, id)
+      sessionStorage.setItem(AUTH_KEY, id)
       onLogin(id)
     } catch {
       setError('로그인 중 오류가 발생했습니다.')
