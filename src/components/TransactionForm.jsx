@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import { CATEGORIES } from '../categories'
-import { OWNERS } from '../assetMeta'
+import { OWNERS, STOCK_CATEGORIES } from '../assetMeta'
 
 function todayStr() {
   const d = new Date()
@@ -15,6 +16,22 @@ export default function TransactionForm({ onAdd, currentUser }) {
   const [memo, setMemo] = useState('')
   const [owner, setOwner] = useState(currentUser || OWNERS[0])
   const [saving, setSaving] = useState(false)
+  const [assets, setAssets] = useState([])
+  const [linkedAssetId, setLinkedAssetId] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      const { data, error } = await supabase.from('assets').select('*').order('id', { ascending: true })
+      if (!cancelled && !error) {
+        setAssets(data.filter((a) => !STOCK_CATEGORIES.includes(a.category)))
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   function handleTypeChange(newType) {
     setType(newType)
@@ -33,8 +50,18 @@ export default function TransactionForm({ onAdd, currentUser }) {
       memo: memo.trim() || null,
       owner,
     })
+    if (result && linkedAssetId) {
+      const asset = assets.find((a) => String(a.id) === linkedAssetId)
+      if (asset) {
+        await supabase
+          .from('assets')
+          .update({ amount: Number(asset.amount) + Number(amount), updated_at: new Date().toISOString() })
+          .eq('id', asset.id)
+      }
+    }
     setAmount('')
     setMemo('')
+    setLinkedAssetId('')
     setSaving(false)
     if (result) {
       alert('추가 완료되었습니다.')
@@ -97,6 +124,18 @@ export default function TransactionForm({ onAdd, currentUser }) {
           {OWNERS.map((o) => (
             <option key={o} value={o}>
               {o}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="form-row">
+        <label>연동될 자산 (선택)</label>
+        <select value={linkedAssetId} onChange={(e) => setLinkedAssetId(e.target.value)}>
+          <option value="">선택 안함</option>
+          {assets.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.name} ({a.category} · {a.owner})
             </option>
           ))}
         </select>
