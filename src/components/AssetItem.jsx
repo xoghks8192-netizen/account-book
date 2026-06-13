@@ -109,10 +109,6 @@ export default function AssetItem({ asset, onUpdate, onDelete }) {
               <input type="number" value={avgPrice} onChange={(e) => setAvgPrice(e.target.value)} />
             </div>
             <div className="form-row">
-              <label>현재가 (원)</label>
-              <input type="number" value={currentPrice} onChange={(e) => setCurrentPrice(e.target.value)} />
-            </div>
-            <div className="form-row">
               <label>종목코드 (선택, 시세 자동조회용)</label>
               <input
                 type="text"
@@ -121,6 +117,17 @@ export default function AssetItem({ asset, onUpdate, onDelete }) {
                 placeholder="예: 069500"
               />
             </div>
+            {ticker.trim() ? (
+              <div className="form-row">
+                <label>현재가 (원) · 🔄 새로고침으로 자동 갱신됩니다</label>
+                <input type="number" value={currentPrice} disabled style={{ opacity: 0.6 }} />
+              </div>
+            ) : (
+              <div className="form-row">
+                <label>현재가 (원)</label>
+                <input type="number" value={currentPrice} onChange={(e) => setCurrentPrice(e.target.value)} />
+              </div>
+            )}
           </>
         ) : (
           <div className="form-row">
