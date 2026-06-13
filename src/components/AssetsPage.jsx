@@ -135,7 +135,9 @@ export default function AssetsPage({ currentUser }) {
 
       <AssetChart data={chartData} total={total} />
 
-      <AssetForm onAdd={handleAdd} />
+      {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === currentUser ? (
+        <AssetForm onAdd={handleAdd} />
+      ) : null}
 
       {error && <div className="container" style={{ color: '#e0524c' }}>오류: {error}</div>}
 

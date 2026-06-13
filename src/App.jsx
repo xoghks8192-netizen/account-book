@@ -308,7 +308,9 @@ export default function App() {
             }
           />
 
-          <TransactionForm onAdd={handleAdd} currentUser={user} assets={linkableAssets} />
+          {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === user ? (
+            <TransactionForm onAdd={handleAdd} currentUser={user} assets={linkableAssets} />
+          ) : null}
 
           <div className="search-bar">
             <input
