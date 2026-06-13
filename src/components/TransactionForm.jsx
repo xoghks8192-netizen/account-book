@@ -25,7 +25,7 @@ export default function TransactionForm({ onAdd, currentUser }) {
     e.preventDefault()
     if (!amount || Number(amount) <= 0) return
     setSaving(true)
-    await onAdd({
+    const result = await onAdd({
       type,
       date,
       category,
@@ -36,6 +36,10 @@ export default function TransactionForm({ onAdd, currentUser }) {
     setAmount('')
     setMemo('')
     setSaving(false)
+    if (result) {
+      alert('추가 완료되었습니다.')
+      window.location.reload()
+    }
   }
 
   return (
