@@ -39,8 +39,9 @@ function jsonApi(path, handler) {
           res.end()
           return
         }
-        let body = ''
-        for await (const chunk of req) body += chunk
+        const chunks = []
+        for await (const chunk of req) chunks.push(chunk)
+        const body = Buffer.concat(chunks).toString('utf-8')
         req.body = body ? JSON.parse(body) : {}
         res.setHeader('Content-Type', 'application/json')
         const wrappedRes = {
