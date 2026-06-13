@@ -5,6 +5,7 @@ import AssetForm from './AssetForm'
 import AssetItem from './AssetItem'
 import AssetChart from './AssetChart'
 import Collapsible from './Collapsible'
+import AssetForecast from './AssetForecast'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
@@ -183,6 +184,8 @@ export default function AssetsPage({ currentUser }) {
           )}
         </div>
       )}
+
+      <AssetForecast total={total} liquidTotal={liquidTotal} nonLiquidTotal={nonLiquidTotal} chartData={chartData} />
     </div>
   )
 }

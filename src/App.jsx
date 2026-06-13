@@ -10,6 +10,7 @@ import RecurringTemplates from './components/RecurringTemplates'
 import MonthComparison from './components/MonthComparison'
 import ChangePassword from './components/ChangePassword'
 import Collapsible from './components/Collapsible'
+import TransactionInsight from './components/TransactionInsight'
 import { toCSV, downloadCSV } from './lib/csv'
 import { AUTH_KEY } from './users'
 import { OWNERS, STOCK_CATEGORIES } from './assetMeta'
@@ -418,6 +419,14 @@ export default function App() {
               />
             </Collapsible>
           )}
+
+          <TransactionInsight
+            transactions={ownedTransactions}
+            totalIncome={totalIncome}
+            totalExpense={totalExpense}
+            balance={balance}
+            monthLabel={`${cursor.year}년 ${cursor.month + 1}월`}
+          />
         </>
       )}
     </div>

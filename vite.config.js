@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { fetchStockPrice } from './api/lib/fetchPrice.js'
 import loginHandler from './api/login.js'
 import changePwHandler from './api/change-pw.js'
+import aiInsightHandler from './api/ai-insight.js'
 
 function stockPriceApi() {
   return {
@@ -69,6 +70,7 @@ export default defineConfig(({ mode }) => {
       stockPriceApi(),
       jsonApi('/api/login', loginHandler),
       jsonApi('/api/change-pw', changePwHandler),
+      jsonApi('/api/ai-insight', aiInsightHandler),
     ],
     server: {
       host: true,
