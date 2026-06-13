@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { useState } from 'react'
 import { CATEGORIES } from '../categories'
-import { OWNERS, STOCK_CATEGORIES } from '../assetMeta'
+import { OWNERS } from '../assetMeta'
 
 function todayStr() {
   const d = new Date()
   return d.toISOString().slice(0, 10)
 }
 
-export default function TransactionForm({ onAdd, currentUser }) {
+export default function TransactionForm({ onAdd, currentUser, assets = [] }) {
   const [type, setType] = useState('expense')
   const [date, setDate] = useState(todayStr())
   const [category, setCategory] = useState(CATEGORIES.expense[0])
@@ -16,22 +15,7 @@ export default function TransactionForm({ onAdd, currentUser }) {
   const [memo, setMemo] = useState('')
   const [owner, setOwner] = useState(currentUser || OWNERS[0])
   const [saving, setSaving] = useState(false)
-  const [assets, setAssets] = useState([])
   const [linkedAssetId, setLinkedAssetId] = useState('')
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      const { data, error } = await supabase.from('assets').select('*').order('id', { ascending: true })
-      if (!cancelled && !error) {
-        setAssets(data.filter((a) => !STOCK_CATEGORIES.includes(a.category)))
-      }
-    }
-    load()
-    return () => {
-      cancelled = true
-    }
-  }, [])
 
   function handleTypeChange(newType) {
     setType(newType)
@@ -49,16 +33,8 @@ export default function TransactionForm({ onAdd, currentUser }) {
       amount: Number(amount),
       memo: memo.trim() || null,
       owner,
+      linked_asset_id: linkedAssetId || null,
     })
-    if (result && linkedAssetId) {
-      const asset = assets.find((a) => String(a.id) === linkedAssetId)
-      if (asset) {
-        await supabase
-          .from('assets')
-          .update({ amount: Number(asset.amount) + Number(amount), updated_at: new Date().toISOString() })
-          .eq('id', asset.id)
-      }
-    }
     setAmount('')
     setMemo('')
     setLinkedAssetId('')

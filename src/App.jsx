@@ -10,7 +10,7 @@ import RecurringTemplates from './components/RecurringTemplates'
 import MonthComparison from './components/MonthComparison'
 import ChangePassword from './components/ChangePassword'
 import { AUTH_KEY } from './users'
-import { OWNERS } from './assetMeta'
+import { OWNERS, STOCK_CATEGORIES } from './assetMeta'
 
 const PAGE_KEY = 'household-budget-page'
 
@@ -39,6 +39,7 @@ export default function App() {
   const [search, setSearch] = useState('')
   const [ownerFilter, setOwnerFilter] = useState('전체')
   const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [linkableAssets, setLinkableAssets] = useState([])
 
   const { start, end } = useMemo(() => monthRange(cursor.year, cursor.month), [cursor])
   const { start: prevStart, end: prevEnd } = useMemo(
@@ -49,6 +50,20 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(PAGE_KEY, page)
   }, [page])
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      const { data, error } = await supabase.from('assets').select('*').order('id', { ascending: true })
+      if (!cancelled && !error) {
+        setLinkableAssets(data.filter((a) => !STOCK_CATEGORIES.includes(a.category)))
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -93,6 +108,16 @@ export default function App() {
     }
   }, [prevStart, prevEnd])
 
+  async function adjustAssetAmount(assetId, delta) {
+    if (!assetId || !delta) return
+    const { data } = await supabase.from('assets').select('amount').eq('id', assetId).single()
+    if (!data) return
+    await supabase
+      .from('assets')
+      .update({ amount: Number(data.amount) + delta, updated_at: new Date().toISOString() })
+      .eq('id', assetId)
+  }
+
   async function handleAdd(tx) {
     const { data, error } = await supabase
       .from('transactions')
@@ -108,16 +133,44 @@ export default function App() {
         [...prev, data].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id)),
       )
     }
+    if (data.linked_asset_id) {
+      await adjustAssetAmount(data.linked_asset_id, Number(data.amount))
+    }
     return data
   }
 
   async function handleDelete(id) {
+    const target = transactions.find((t) => t.id === id)
     const { error } = await supabase.from('transactions').delete().eq('id', id)
     if (error) {
       setError(error.message)
       return
     }
     setTransactions((prev) => prev.filter((t) => t.id !== id))
+    if (target?.linked_asset_id) {
+      await adjustAssetAmount(target.linked_asset_id, -Number(target.amount))
+    }
+  }
+
+  async function handleUpdateTransaction(id, fields) {
+    const old = transactions.find((t) => t.id === id)
+    const { data, error } = await supabase.from('transactions').update(fields).eq('id', id).select().single()
+    if (error) {
+      setError(error.message)
+      return false
+    }
+    setTransactions((prev) =>
+      prev
+        .map((t) => (t.id === id ? data : t))
+        .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id)),
+    )
+    if (old?.linked_asset_id) {
+      await adjustAssetAmount(old.linked_asset_id, -Number(old.amount))
+    }
+    if (data.linked_asset_id) {
+      await adjustAssetAmount(data.linked_asset_id, Number(data.amount))
+    }
+    return true
   }
 
   function changeMonth(delta) {
@@ -239,6 +292,7 @@ export default function App() {
 
           <RecurringTemplates
             currentUser={user}
+            assets={linkableAssets}
             onUndo={handleDelete}
             onQuickAdd={(t) =>
               handleAdd({
@@ -249,11 +303,12 @@ export default function App() {
                 author: t.author,
                 owner: t.author,
                 date: new Date().toISOString().slice(0, 10),
+                linked_asset_id: t.linked_asset_id ?? null,
               })
             }
           />
 
-          <TransactionForm onAdd={handleAdd} currentUser={user} />
+          <TransactionForm onAdd={handleAdd} currentUser={user} assets={linkableAssets} />
 
           <div className="search-bar">
             <input
@@ -269,7 +324,12 @@ export default function App() {
           {loading ? (
             <div className="container">불러오는 중...</div>
           ) : (
-            <TransactionList transactions={filteredTransactions} onDelete={handleDelete} />
+            <TransactionList
+              transactions={filteredTransactions}
+              onDelete={handleDelete}
+              onUpdate={handleUpdateTransaction}
+              assets={linkableAssets}
+            />
           )}
         </>
       )}

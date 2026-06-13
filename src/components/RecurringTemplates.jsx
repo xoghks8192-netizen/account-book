@@ -9,7 +9,7 @@ function formatAmount(n) {
 
 const UNDO_TIMEOUT = 8000
 
-export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser }) {
+export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, assets = [] }) {
   const [templates, setTemplates] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
@@ -28,6 +28,8 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser }) 
   const [editAmount, setEditAmount] = useState('')
   const [editMemo, setEditMemo] = useState('')
   const [editAuthor, setEditAuthor] = useState(currentUser || OWNERS[0])
+  const [linkedAssetId, setLinkedAssetId] = useState('')
+  const [editLinkedAssetId, setEditLinkedAssetId] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -52,7 +54,15 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser }) 
     if (!name.trim() || !amount) return
     const { data, error } = await supabase
       .from('recurring_templates')
-      .insert({ name: name.trim(), type, category, amount: Number(amount), memo: memo.trim() || null, author })
+      .insert({
+        name: name.trim(),
+        type,
+        category,
+        amount: Number(amount),
+        memo: memo.trim() || null,
+        author,
+        linked_asset_id: linkedAssetId || null,
+      })
       .select()
       .single()
     if (!error) {
@@ -60,6 +70,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser }) 
       setName('')
       setAmount('')
       setMemo('')
+      setLinkedAssetId('')
       setShowForm(false)
     }
   }
@@ -77,6 +88,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser }) 
     setEditAmount(t.amount)
     setEditMemo(t.memo ?? '')
     setEditAuthor(t.author || OWNERS[0])
+    setEditLinkedAssetId(t.linked_asset_id ? String(t.linked_asset_id) : '')
   }
 
   function handleEditTypeChange(newType) {
@@ -95,6 +107,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser }) 
         amount: Number(editAmount),
         memo: editMemo.trim() || null,
         author: editAuthor,
+        linked_asset_id: editLinkedAssetId || null,
       })
       .eq('id', id)
       .select()
@@ -198,6 +211,17 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser }) 
                 {OWNERS.map((o) => (
                   <option key={o} value={o}>
                     {o}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-row">
+              <label>연동될 자산 (선택)</label>
+              <select value={editLinkedAssetId} onChange={(e) => setEditLinkedAssetId(e.target.value)}>
+                <option value="">선택 안함</option>
+                {assets.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name} ({a.category} · {a.owner})
                   </option>
                 ))}
               </select>
@@ -331,6 +355,17 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser }) 
               {OWNERS.map((o) => (
                 <option key={o} value={o}>
                   {o}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-row">
+            <label>연동될 자산 (선택)</label>
+            <select value={linkedAssetId} onChange={(e) => setLinkedAssetId(e.target.value)}>
+              <option value="">선택 안함</option>
+              {assets.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} ({a.category} · {a.owner})
                 </option>
               ))}
             </select>
