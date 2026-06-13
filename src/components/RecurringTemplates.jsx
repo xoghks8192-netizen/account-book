@@ -34,7 +34,11 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const { data, error } = await supabase.from('recurring_templates').select('*').order('id')
+      const { data, error } = await supabase
+        .from('recurring_templates')
+        .select('*')
+        .order('sort_order', { ascending: true, nullsFirst: false })
+        .order('id', { ascending: true })
       if (cancelled) return
       if (!error) setTemplates(data)
     }
@@ -52,6 +56,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
   async function handleCreate(e) {
     e.preventDefault()
     if (!name.trim() || !amount) return
+    const maxOrder = templates.reduce((max, t) => Math.max(max, t.sort_order ?? 0), 0)
     const { data, error } = await supabase
       .from('recurring_templates')
       .insert({
@@ -62,6 +67,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
         memo: memo.trim() || null,
         author,
         linked_asset_id: linkedAssetId || null,
+        sort_order: maxOrder + 1,
       })
       .select()
       .single()
@@ -78,6 +84,29 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
   async function handleDelete(id) {
     await supabase.from('recurring_templates').delete().eq('id', id)
     setTemplates((prev) => prev.filter((t) => t.id !== id))
+  }
+
+  async function handleMove(id, direction) {
+    const index = templates.findIndex((t) => t.id === id)
+    const targetIndex = index + direction
+    if (index === -1 || targetIndex < 0 || targetIndex >= templates.length) return
+    const current = templates[index]
+    const target = templates[targetIndex]
+    const currentOrder = current.sort_order ?? current.id
+    const targetOrder = target.sort_order ?? target.id
+
+    await Promise.all([
+      supabase.from('recurring_templates').update({ sort_order: targetOrder }).eq('id', current.id),
+      supabase.from('recurring_templates').update({ sort_order: currentOrder }).eq('id', target.id),
+    ])
+
+    setTemplates((prev) => {
+      const next = [...prev]
+      next[index] = { ...current, sort_order: targetOrder }
+      next[targetIndex] = { ...target, sort_order: currentOrder }
+      next.sort((a, b) => (a.sort_order ?? a.id) - (b.sort_order ?? b.id))
+      return next
+    })
   }
 
   function startEdit(t) {
@@ -252,6 +281,42 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
           </div>
         ) : (
           <div className="tx-item" key={t.id}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 4 }}>
+              <button
+                onClick={() => handleMove(t.id, -1)}
+                disabled={templates.findIndex((x) => x.id === t.id) === 0}
+                title="위로"
+                style={{
+                  fontSize: 11,
+                  padding: '2px 4px',
+                  lineHeight: 1,
+                  border: 'none',
+                  borderRadius: 6,
+                  background: '#f1eefb',
+                  color: '#9b8fc0',
+                  cursor: 'pointer',
+                }}
+              >
+                ▲
+              </button>
+              <button
+                onClick={() => handleMove(t.id, 1)}
+                disabled={templates.findIndex((x) => x.id === t.id) === templates.length - 1}
+                title="아래로"
+                style={{
+                  fontSize: 11,
+                  padding: '2px 4px',
+                  lineHeight: 1,
+                  border: 'none',
+                  borderRadius: 6,
+                  background: '#f1eefb',
+                  color: '#9b8fc0',
+                  cursor: 'pointer',
+                }}
+              >
+                ▼
+              </button>
+            </div>
             <div className="tx-info">
               <span className="category">{t.name}</span>
               <span className="meta">
