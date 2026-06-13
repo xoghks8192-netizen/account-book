@@ -33,6 +33,13 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
     setEditCategory(CATEGORIES[newType][0])
   }
 
+  function handleEditOwnerChange(newOwner) {
+    setEditOwner(newOwner)
+    setEditLinkedAssetId('')
+  }
+
+  const editOwnerAssets = assets.filter((a) => a.owner === editOwner)
+
   async function handleSave(id) {
     if (!editAmount || Number(editAmount) <= 0) return
     setSaving(true)
@@ -100,7 +107,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
             </div>
             <div className="form-row">
               <label>구분</label>
-              <select value={editOwner} onChange={(e) => setEditOwner(e.target.value)}>
+              <select value={editOwner} onChange={(e) => handleEditOwnerChange(e.target.value)}>
                 {OWNERS.map((o) => (
                   <option key={o} value={o}>
                     {o}
@@ -112,7 +119,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
               <label>연동될 자산 (선택)</label>
               <select value={editLinkedAssetId} onChange={(e) => setEditLinkedAssetId(e.target.value)}>
                 <option value="">선택 안함</option>
-                {assets.map((a) => (
+                {editOwnerAssets.map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.name} ({a.category} · {a.owner})
                   </option>

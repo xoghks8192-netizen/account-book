@@ -22,6 +22,13 @@ export default function TransactionForm({ onAdd, currentUser, assets = [] }) {
     setCategory(CATEGORIES[newType][0])
   }
 
+  function handleOwnerChange(newOwner) {
+    setOwner(newOwner)
+    setLinkedAssetId('')
+  }
+
+  const ownerAssets = assets.filter((a) => a.owner === owner)
+
   async function handleSubmit(e) {
     e.preventDefault()
     if (!amount || Number(amount) <= 0) return
@@ -95,7 +102,7 @@ export default function TransactionForm({ onAdd, currentUser, assets = [] }) {
 
       <div className="form-row">
         <label>구분</label>
-        <select value={owner} onChange={(e) => setOwner(e.target.value)}>
+        <select value={owner} onChange={(e) => handleOwnerChange(e.target.value)}>
           {OWNERS.map((o) => (
             <option key={o} value={o}>
               {o}
@@ -108,7 +115,7 @@ export default function TransactionForm({ onAdd, currentUser, assets = [] }) {
         <label>연동될 자산 (선택)</label>
         <select value={linkedAssetId} onChange={(e) => setLinkedAssetId(e.target.value)}>
           <option value="">선택 안함</option>
-          {assets.map((a) => (
+          {ownerAssets.map((a) => (
             <option key={a.id} value={a.id}>
               {a.name} ({a.category} · {a.owner})
             </option>

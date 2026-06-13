@@ -43,9 +43,6 @@ export default function App() {
   const [showPasswordForm, setShowPasswordForm] = useState(false)
   const [linkableAssets, setLinkableAssets] = useState([])
   const [exporting, setExporting] = useState(false)
-  const [hideAmounts, setHideAmounts] = useState(false)
-
-  const displayAmount = (n) => (hideAmounts ? '****' : formatAmount(n))
 
   const { start, end } = useMemo(() => monthRange(cursor.year, cursor.month), [cursor])
   const { start: prevStart, end: prevEnd } = useMemo(
@@ -69,7 +66,7 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [page])
 
   useEffect(() => {
     let cancelled = false
@@ -300,12 +297,6 @@ export default function App() {
         <span>{user}님 반가워요 🌸</span>
         <div style={{ display: 'flex', gap: 12 }}>
           <button
-            onClick={() => setHideAmounts((prev) => !prev)}
-            style={{ border: 'none', background: 'none', color: '#9b8fc0', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
-          >
-            {hideAmounts ? '금액 보기' : '금액 가리기'}
-          </button>
-          <button
             onClick={handleExportAll}
             disabled={exporting}
             style={{ border: 'none', background: 'none', color: '#7ec8a0', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
@@ -339,7 +330,7 @@ export default function App() {
       </div>
 
       {page === 'assets' ? (
-        <AssetsPage currentUser={user} hideAmounts={hideAmounts} />
+        <AssetsPage currentUser={user} />
       ) : (
         <>
           <div className="month-nav">
@@ -361,15 +352,15 @@ export default function App() {
           <div className="summary">
             <div className="summary-item income">
               <div className="label">수입</div>
-              <div className="value">{displayAmount(totalIncome)}</div>
+              <div className="value">{formatAmount(totalIncome)}</div>
             </div>
             <div className="summary-item expense">
               <div className="label">지출</div>
-              <div className="value">{displayAmount(totalExpense)}</div>
+              <div className="value">{formatAmount(totalExpense)}</div>
             </div>
             <div className="summary-item balance">
               <div className="label">합계</div>
-              <div className="value">{displayAmount(balance)}</div>
+              <div className="value">{formatAmount(balance)}</div>
             </div>
           </div>
 

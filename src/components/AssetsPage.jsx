@@ -10,8 +10,7 @@ function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-export default function AssetsPage({ currentUser, hideAmounts }) {
-  const displayAmount = (n) => (hideAmounts ? '****' : formatAmount(n))
+export default function AssetsPage({ currentUser }) {
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -104,22 +103,22 @@ export default function AssetsPage({ currentUser, hideAmounts }) {
       <div className="summary">
         <div className="summary-item balance">
           <div className="label">총 자산</div>
-          <div className="value">{displayAmount(total)}</div>
+          <div className="value">{formatAmount(total)}</div>
         </div>
         <div className="summary-item income">
           <div className="label">비상금</div>
-          <div className="value">{displayAmount(emergencyTotal)}</div>
+          <div className="value">{formatAmount(emergencyTotal)}</div>
         </div>
       </div>
 
       <div className="summary">
         <div className="summary-item income">
           <div className="label">유동자산</div>
-          <div className="value">{displayAmount(liquidTotal)}</div>
+          <div className="value">{formatAmount(liquidTotal)}</div>
         </div>
         <div className="summary-item expense">
           <div className="label">비유동자산</div>
-          <div className="value">{displayAmount(nonLiquidTotal)}</div>
+          <div className="value">{formatAmount(nonLiquidTotal)}</div>
         </div>
       </div>
 

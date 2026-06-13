@@ -54,6 +54,13 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
     setCategory(CATEGORIES[newType][0])
   }
 
+  function handleAuthorChange(newAuthor) {
+    setAuthor(newAuthor)
+    setLinkedAssetId('')
+  }
+
+  const authorAssets = assets.filter((a) => a.owner === author)
+
   async function handleCreate(e) {
     e.preventDefault()
     if (!name.trim() || !amount) return
@@ -125,6 +132,13 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
     setEditType(newType)
     setEditCategory(CATEGORIES[newType][0])
   }
+
+  function handleEditAuthorChange(newAuthor) {
+    setEditAuthor(newAuthor)
+    setEditLinkedAssetId('')
+  }
+
+  const editAuthorAssets = assets.filter((a) => a.owner === editAuthor)
 
   async function handleUpdate(id) {
     if (!editName.trim() || !editAmount) return
@@ -235,7 +249,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
             </div>
             <div className="form-row">
               <label>구분</label>
-              <select value={editAuthor} onChange={(e) => setEditAuthor(e.target.value)}>
+              <select value={editAuthor} onChange={(e) => handleEditAuthorChange(e.target.value)}>
                 {OWNERS.map((o) => (
                   <option key={o} value={o}>
                     {o}
@@ -247,7 +261,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
               <label>연동될 자산 (선택)</label>
               <select value={editLinkedAssetId} onChange={(e) => setEditLinkedAssetId(e.target.value)}>
                 <option value="">선택 안함</option>
-                {assets.map((a) => (
+                {editAuthorAssets.map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.name} ({a.category} · {a.owner})
                   </option>
@@ -415,7 +429,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
           </div>
           <div className="form-row">
             <label>구분</label>
-            <select value={author} onChange={(e) => setAuthor(e.target.value)}>
+            <select value={author} onChange={(e) => handleAuthorChange(e.target.value)}>
               {OWNERS.map((o) => (
                 <option key={o} value={o}>
                   {o}
@@ -427,7 +441,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
             <label>연동될 자산 (선택)</label>
             <select value={linkedAssetId} onChange={(e) => setLinkedAssetId(e.target.value)}>
               <option value="">선택 안함</option>
-              {assets.map((a) => (
+              {authorAssets.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.name} ({a.category} · {a.owner})
                 </option>
