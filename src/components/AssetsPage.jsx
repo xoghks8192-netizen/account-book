@@ -9,7 +9,7 @@ function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-export default function AssetsPage() {
+export default function AssetsPage({ currentUser }) {
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -67,9 +67,12 @@ export default function AssetsPage() {
     setAssets((prev) => prev.filter((a) => a.id !== id))
   }
 
-  const visible = ownerFilter === '전체' ? assets : assets.filter((a) => a.owner === ownerFilter)
+  const myAssets = assets.filter(
+    (a) => a.category !== '비상금' || a.owner === currentUser || a.owner === '공동',
+  )
+  const visible = ownerFilter === '전체' ? myAssets : myAssets.filter((a) => a.owner === ownerFilter)
   const total = visible.reduce((s, a) => s + Number(a.amount), 0)
-  const emergencyTotal = assets
+  const emergencyTotal = myAssets
     .filter((a) => a.category === '비상금' && (ownerFilter === '전체' || a.owner === ownerFilter))
     .reduce((s, a) => s + Number(a.amount), 0)
 

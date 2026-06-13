@@ -196,7 +196,7 @@ export default function App() {
       </div>
 
       {page === 'assets' ? (
-        <AssetsPage />
+        <AssetsPage currentUser={user} />
       ) : (
         <>
           <div className="month-nav">
