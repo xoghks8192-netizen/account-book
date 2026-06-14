@@ -247,7 +247,12 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
         <button onClick={() => setEditing(true)} title="수정">
           ✎
         </button>
-        <button onClick={() => onDelete(asset.id)} title="삭제">
+        <button
+          onClick={() => {
+            if (window.confirm('이 자산을 삭제할까요?')) onDelete(asset.id)
+          }}
+          title="삭제"
+        >
           ✕
         </button>
       </div>
