@@ -22,6 +22,10 @@ function formatAmount(n) {
   return n.toLocaleString('ko-KR')
 }
 
+function shortName(name) {
+  return name.length >= 3 ? name.slice(1) : name
+}
+
 function monthRange(year, month) {
   const start = new Date(year, month, 1)
   const end = new Date(year, month + 1, 1)
@@ -327,7 +331,7 @@ export default function App() {
   return (
     <div>
       <div className="brand-header">
-        <h1>{user.members.length === 2 ? `${user.members[0]} ❤️ ${user.members[1]}` : user.members[0]}</h1>
+        <h1>{user.members.length === 2 ? `${shortName(user.members[0])} ❤️ ${shortName(user.members[1])}` : shortName(user.members[0])}</h1>
         <span>가계부</span>
       </div>
 
