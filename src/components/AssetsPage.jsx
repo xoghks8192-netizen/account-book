@@ -81,6 +81,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
   }
 
   async function handleRestore(id) {
+    if (!window.confirm('이 자산을 복구할까요?')) return
     const { data, error } = await supabase
       .from('assets')
       .update({ deleted_at: null })
@@ -92,6 +93,16 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       return
     }
     setAssets((prev) => prev.map((a) => (a.id === id ? data : a)))
+  }
+
+  async function handlePermanentDelete(id) {
+    if (!window.confirm('이 자산을 완전히 삭제할까요? 복구할 수 없습니다.')) return
+    const { error } = await supabase.from('assets').delete().eq('id', id)
+    if (error) {
+      setError(error.message)
+      return
+    }
+    setAssets((prev) => prev.filter((a) => a.id !== id))
   }
 
   const activeAssets = assets.filter((a) => !a.deleted_at)
@@ -224,7 +235,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
                     {asset.category} · {asset.owner} · {formatAmount(asset.amount)}원
                   </span>
                 </div>
-                <div className="tx-amount">
+                <div className="tx-amount" style={{ display: 'flex', gap: 6 }}>
                   <button
                     type="button"
                     onClick={() => handleRestore(asset.id)}
@@ -241,6 +252,23 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
                     }}
                   >
                     복구
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handlePermanentDelete(asset.id)}
+                    style={{
+                      border: 'none',
+                      borderRadius: 999,
+                      background: '#ffe3e3',
+                      color: '#e0524c',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      fontFamily: '"Jua", sans-serif',
+                      padding: '6px 14px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    삭제
                   </button>
                 </div>
               </div>
