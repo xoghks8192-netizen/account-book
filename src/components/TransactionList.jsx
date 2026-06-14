@@ -1,18 +1,18 @@
 import { useState } from 'react'
-import { CATEGORIES } from '../categories'
-import { OWNERS } from '../assetMeta'
+import { DEFAULT_CATEGORIES } from '../categories'
+import CategorySelect from './CategorySelect'
 
 function formatAmount(n) {
   return n.toLocaleString('ko-KR')
 }
 
-export default function TransactionList({ transactions, onDelete, onUpdate, assets = [] }) {
+export default function TransactionList({ transactions, onDelete, onUpdate, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory }) {
   const [editingId, setEditingId] = useState(null)
   const [editDate, setEditDate] = useState('')
   const [editType, setEditType] = useState('expense')
-  const [editCategory, setEditCategory] = useState(CATEGORIES.expense[0])
+  const [editCategory, setEditCategory] = useState(categories.expense[0])
   const [editAmount, setEditAmount] = useState('')
-  const [editOwner, setEditOwner] = useState(OWNERS[0])
+  const [editOwner, setEditOwner] = useState(owners[0])
   const [editMemo, setEditMemo] = useState('')
   const [editLinkedAssetId, setEditLinkedAssetId] = useState('')
   const [saving, setSaving] = useState(false)
@@ -23,14 +23,14 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
     setEditType(tx.type)
     setEditCategory(tx.category)
     setEditAmount(tx.amount)
-    setEditOwner(tx.owner || OWNERS[0])
+    setEditOwner(tx.owner || owners[0])
     setEditMemo(tx.memo ?? '')
     setEditLinkedAssetId(tx.linked_asset_id ? String(tx.linked_asset_id) : '')
   }
 
   function handleEditTypeChange(newType) {
     setEditType(newType)
-    setEditCategory(CATEGORIES[newType][0])
+    setEditCategory(categories[newType][0])
   }
 
   function handleEditOwnerChange(newOwner) {
@@ -87,13 +87,13 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
             </div>
             <div className="form-row">
               <label>카테고리</label>
-              <select value={editCategory} onChange={(e) => setEditCategory(e.target.value)}>
-                {CATEGORIES[editType].map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+              <CategorySelect
+                value={editCategory}
+                onChange={setEditCategory}
+                options={categories[editType]}
+                onAdd={(name) => onAddCategory(editType, name)}
+                onRemove={(name) => onRemoveCategory(editType, name)}
+              />
             </div>
             <div className="form-row">
               <label>금액</label>
@@ -108,7 +108,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
             <div className="form-row">
               <label>구분</label>
               <select value={editOwner} onChange={(e) => handleEditOwnerChange(e.target.value)}>
-                {OWNERS.map((o) => (
+                {owners.map((o) => (
                   <option key={o} value={o}>
                     {o}
                   </option>

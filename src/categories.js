@@ -1,4 +1,5 @@
-export const CATEGORIES = {
+// 새로 가입하는 가구의 기본 카테고리 (적금(...) 등 커스텀 카테고리는 직접 추가)
+export const DEFAULT_CATEGORIES = {
   income: ['월급', '용돈', '부수입', '기타수입'],
   expense: [
     '식비',
@@ -11,12 +12,10 @@ export const CATEGORIES = {
     '문화/여가',
     '교육',
     '카드값',
-    '적금(주택청약)',
-    '적금(연금저축)',
-    '적금(ISA계좌)',
     '비상금',
     '기타지출',
   ],
+  asset: ['현금', '예적금', '주택청약', '주식', 'ISA계좌', '연금저축', '퇴직금', '전세자금', '비상금', '기타'],
 }
 
 export const EXPENSE_CATEGORY_COLORS = {

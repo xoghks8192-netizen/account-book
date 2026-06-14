@@ -12,8 +12,9 @@ import ChangePassword from './components/ChangePassword'
 import Collapsible from './components/Collapsible'
 import TransactionInsight from './components/TransactionInsight'
 import { toCSV, downloadCSV } from './lib/csv'
-import { AUTH_KEY } from './users'
-import { OWNERS, STOCK_CATEGORIES } from './assetMeta'
+import { loadSession, saveSession, clearSession } from './users'
+import { STOCK_CATEGORIES } from './assetMeta'
+import { DEFAULT_CATEGORIES } from './categories'
 
 const PAGE_KEY = 'household-budget-page'
 
@@ -29,7 +30,7 @@ function monthRange(year, month) {
 }
 
 export default function App() {
-  const [user, setUser] = useState(() => sessionStorage.getItem(AUTH_KEY))
+  const [user, setUser] = useState(() => loadSession())
   const [page, setPage] = useState(() => localStorage.getItem(PAGE_KEY) || 'transactions')
   const [cursor, setCursor] = useState(() => {
     const now = new Date()
@@ -45,6 +46,11 @@ export default function App() {
   const [linkableAssets, setLinkableAssets] = useState([])
   const [exporting, setExporting] = useState(false)
 
+  const householdId = user?.householdId
+  const myName = user?.displayName
+  const owners = [...(user?.members ?? []), '공동']
+  const categories = { ...DEFAULT_CATEGORIES, ...(user?.categories ?? {}) }
+
   const { start, end } = useMemo(() => monthRange(cursor.year, cursor.month), [cursor])
   const { start: prevStart, end: prevEnd } = useMemo(
     () => monthRange(cursor.year, cursor.month - 1),
@@ -56,9 +62,14 @@ export default function App() {
   }, [page])
 
   useEffect(() => {
+    if (!householdId) return
     let cancelled = false
     async function load() {
-      const { data, error } = await supabase.from('assets').select('*').order('id', { ascending: true })
+      const { data, error } = await supabase
+        .from('assets')
+        .select('*')
+        .eq('household_id', householdId)
+        .order('id', { ascending: true })
       if (!cancelled && !error) {
         setLinkableAssets(data.filter((a) => !STOCK_CATEGORIES.includes(a.category)))
       }
@@ -67,9 +78,10 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [page])
+  }, [page, householdId])
 
   useEffect(() => {
+    if (!householdId) return
     let cancelled = false
     async function load() {
       setLoading(true)
@@ -77,6 +89,7 @@ export default function App() {
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
+        .eq('household_id', householdId)
         .gte('date', start)
         .lt('date', end)
         .order('date', { ascending: false })
@@ -93,14 +106,16 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [start, end])
+  }, [start, end, householdId])
 
   useEffect(() => {
+    if (!householdId) return
     let cancelled = false
     async function load() {
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
+        .eq('household_id', householdId)
         .gte('date', prevStart)
         .lt('date', prevEnd)
       if (cancelled) return
@@ -110,7 +125,7 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [prevStart, prevEnd])
+  }, [prevStart, prevEnd, householdId])
 
   async function adjustAssetAmount(assetId, delta) {
     if (!assetId || !delta) return
@@ -125,7 +140,7 @@ export default function App() {
   async function handleAdd(tx) {
     const { data, error } = await supabase
       .from('transactions')
-      .insert({ ...tx, author: tx.author || user })
+      .insert({ ...tx, author: tx.author || myName, household_id: householdId })
       .select()
       .single()
     if (error) {
@@ -213,6 +228,7 @@ export default function App() {
       const { data: txData } = await supabase
         .from('transactions')
         .select('*')
+        .eq('household_id', householdId)
         .order('date', { ascending: false })
         .order('id', { ascending: false })
       if (txData) {
@@ -235,6 +251,7 @@ export default function App() {
       const { data: assetData } = await supabase
         .from('assets')
         .select('*')
+        .eq('household_id', householdId)
         .order('category', { ascending: true })
         .order('id', { ascending: true })
       if (assetData) {
@@ -254,6 +271,7 @@ export default function App() {
       const { data: recurringData } = await supabase
         .from('recurring_templates')
         .select('*')
+        .eq('household_id', householdId)
         .order('sort_order', { ascending: true, nullsFirst: false })
         .order('id', { ascending: true })
       if (recurringData) {
@@ -281,21 +299,42 @@ export default function App() {
   }
 
   function handleLogout() {
-    sessionStorage.removeItem(AUTH_KEY)
+    clearSession()
     setUser(null)
+  }
+
+  async function updateCategoryList(type, nextList) {
+    const nextCategories = { ...categories, [type]: nextList }
+    const { error } = await supabase.from('households').update({ categories: nextCategories }).eq('id', householdId)
+    if (error) {
+      setError(error.message)
+      return
+    }
+    const next = { ...user, categories: nextCategories }
+    saveSession(next)
+    setUser(next)
+  }
+
+  function handleAddCategory(type, name) {
+    if (categories[type].includes(name)) return
+    updateCategoryList(type, [...categories[type], name])
+  }
+
+  function handleRemoveCategory(type, name) {
+    updateCategoryList(type, categories[type].filter((c) => c !== name))
   }
 
   return (
     <div>
       <div className="brand-header">
-        <h1>태환 ❤️ 진주</h1>
+        <h1>{user.members.length === 2 ? `${user.members[0]} ❤️ ${user.members[1]}` : user.members[0]}</h1>
         <span>가계부</span>
       </div>
 
-      <AnniversaryBanner />
+      <AnniversaryBanner datingStart={user.datingStart} weddingDate={user.weddingDate} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', fontSize: 13, color: '#c0a3b0' }}>
-        <span>{user}님 반가워요 🌸</span>
+        <span>{myName}님 반가워요 🌸</span>
         <div style={{ display: 'flex', gap: 12 }}>
           <button
             onClick={handleExportAll}
@@ -308,7 +347,7 @@ export default function App() {
             onClick={() => setShowPasswordForm((prev) => !prev)}
             style={{ border: 'none', background: 'none', color: '#b896ff', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
           >
-            비밀번호 변경
+            내 정보 변경
           </button>
           <button
             onClick={handleLogout}
@@ -319,7 +358,17 @@ export default function App() {
         </div>
       </div>
 
-      {showPasswordForm && <ChangePassword user={user} onClose={() => setShowPasswordForm(false)} />}
+      {showPasswordForm && (
+        <ChangePassword
+          user={user}
+          onClose={() => setShowPasswordForm(false)}
+          onUpdateSession={(fields) => {
+            const next = { ...user, ...fields }
+            saveSession(next)
+            setUser(next)
+          }}
+        />
+      )}
 
       <div className="page-tabs">
         <button className={page === 'transactions' ? 'active' : ''} onClick={() => setPage('transactions')}>
@@ -331,7 +380,14 @@ export default function App() {
       </div>
 
       {page === 'assets' ? (
-        <AssetsPage currentUser={user} />
+        <AssetsPage
+          currentUser={myName}
+          owners={owners}
+          householdId={householdId}
+          categories={categories.asset}
+          onAddCategory={(name) => handleAddCategory('asset', name)}
+          onRemoveCategory={(name) => handleRemoveCategory('asset', name)}
+        />
       ) : (
         <>
           <div className="month-nav">
@@ -343,7 +399,7 @@ export default function App() {
           </div>
 
           <div className="owner-tabs">
-            {['전체', ...OWNERS].map((o) => (
+            {['전체', ...owners].map((o) => (
               <button key={o} className={ownerFilter === o ? 'active' : ''} onClick={() => setOwnerFilter(o)}>
                 {o}
               </button>
@@ -373,8 +429,13 @@ export default function App() {
           <ExpenseChart transactions={ownedTransactions} />
 
           <RecurringTemplates
-            currentUser={user}
+            currentUser={myName}
+            owners={owners}
+            householdId={householdId}
             assets={linkableAssets}
+            categories={categories}
+            onAddCategory={handleAddCategory}
+            onRemoveCategory={handleRemoveCategory}
             onUndo={handleDelete}
             onQuickAdd={(t) =>
               handleAdd({
@@ -390,9 +451,17 @@ export default function App() {
             }
           />
 
-          {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === user ? (
+          {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
             <Collapsible title="내역 추가">
-              <TransactionForm onAdd={handleAdd} currentUser={user} assets={linkableAssets} />
+              <TransactionForm
+                onAdd={handleAdd}
+                currentUser={myName}
+                owners={owners}
+                assets={linkableAssets}
+                categories={categories}
+                onAddCategory={handleAddCategory}
+                onRemoveCategory={handleRemoveCategory}
+              />
             </Collapsible>
           ) : null}
 
@@ -416,6 +485,10 @@ export default function App() {
                 onDelete={handleDelete}
                 onUpdate={handleUpdateTransaction}
                 assets={linkableAssets}
+                owners={owners}
+                categories={categories}
+                onAddCategory={handleAddCategory}
+                onRemoveCategory={handleRemoveCategory}
               />
             </Collapsible>
           )}

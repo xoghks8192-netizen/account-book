@@ -1,25 +1,25 @@
 import { useState } from 'react'
-import { CATEGORIES } from '../categories'
-import { OWNERS } from '../assetMeta'
+import { DEFAULT_CATEGORIES } from '../categories'
+import CategorySelect from './CategorySelect'
 
 function todayStr() {
   const d = new Date()
   return d.toISOString().slice(0, 10)
 }
 
-export default function TransactionForm({ onAdd, currentUser, assets = [] }) {
+export default function TransactionForm({ onAdd, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory }) {
   const [type, setType] = useState('expense')
   const [date, setDate] = useState(todayStr())
-  const [category, setCategory] = useState(CATEGORIES.expense[0])
+  const [category, setCategory] = useState(categories.expense[0])
   const [amount, setAmount] = useState('')
   const [memo, setMemo] = useState('')
-  const [owner, setOwner] = useState(currentUser || OWNERS[0])
+  const [owner, setOwner] = useState(currentUser || owners[0])
   const [saving, setSaving] = useState(false)
   const [linkedAssetId, setLinkedAssetId] = useState('')
 
   function handleTypeChange(newType) {
     setType(newType)
-    setCategory(CATEGORIES[newType][0])
+    setCategory(categories[newType][0])
   }
 
   function handleOwnerChange(newOwner) {
@@ -78,13 +78,13 @@ export default function TransactionForm({ onAdd, currentUser, assets = [] }) {
 
       <div className="form-row">
         <label>카테고리</label>
-        <select value={category} onChange={(e) => setCategory(e.target.value)}>
-          {CATEGORIES[type].map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+        <CategorySelect
+          value={category}
+          onChange={setCategory}
+          options={categories[type]}
+          onAdd={(name) => onAddCategory(type, name)}
+          onRemove={(name) => onRemoveCategory(type, name)}
+        />
       </div>
 
       <div className="form-row">
@@ -103,7 +103,7 @@ export default function TransactionForm({ onAdd, currentUser, assets = [] }) {
       <div className="form-row">
         <label>구분</label>
         <select value={owner} onChange={(e) => handleOwnerChange(e.target.value)}>
-          {OWNERS.map((o) => (
+          {owners.map((o) => (
             <option key={o} value={o}>
               {o}
             </option>

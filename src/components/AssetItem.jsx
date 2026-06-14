@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { STOCK_CATEGORIES, OWNERS, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
+import { STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-export default function AssetItem({ asset, onUpdate, onDelete }) {
+export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(asset.name)
   const [owner, setOwner] = useState(asset.owner)
@@ -81,7 +81,7 @@ export default function AssetItem({ asset, onUpdate, onDelete }) {
         <div className="form-row">
           <label>소유자</label>
           <select value={owner} onChange={(e) => setOwner(e.target.value)}>
-            {OWNERS.map((o) => (
+            {owners.map((o) => (
               <option key={o} value={o}>
                 {o}
               </option>

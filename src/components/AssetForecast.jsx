@@ -7,7 +7,7 @@ function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-export default function AssetForecast({ total, liquidTotal, nonLiquidTotal, chartData }) {
+export default function AssetForecast({ total, liquidTotal, nonLiquidTotal, chartData, householdId }) {
   const [months, setMonths] = useState(6)
   const [result, setResult] = useState('')
   const [loading, setLoading] = useState(false)
@@ -22,6 +22,7 @@ export default function AssetForecast({ total, liquidTotal, nonLiquidTotal, char
       const { data: templates, error: tplError } = await supabase
         .from('recurring_templates')
         .select('*')
+        .eq('household_id', householdId)
       if (tplError) throw new Error(tplError.message)
 
       const monthlyIncome = templates

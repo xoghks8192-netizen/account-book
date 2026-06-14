@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { CATEGORIES } from '../categories'
-import { OWNERS } from '../assetMeta'
+import { DEFAULT_CATEGORIES } from '../categories'
 import Collapsible from './Collapsible'
+import CategorySelect from './CategorySelect'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
@@ -10,41 +10,43 @@ function formatAmount(n) {
 
 const UNDO_TIMEOUT = 8000
 
-export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, assets = [] }) {
+export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, owners, householdId, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory }) {
   const [templates, setTemplates] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
   const [type, setType] = useState('expense')
-  const [category, setCategory] = useState(CATEGORIES.expense[0])
+  const [category, setCategory] = useState(categories.expense[0])
   const [amount, setAmount] = useState('')
   const [memo, setMemo] = useState('')
-  const [author, setAuthor] = useState(currentUser || OWNERS[0])
+  const [author, setAuthor] = useState(currentUser || owners[0])
   const [adding, setAdding] = useState(null)
   const [lastAdded, setLastAdded] = useState({})
   const [ownerFilter, setOwnerFilter] = useState('전체')
   const [editingId, setEditingId] = useState(null)
   const [editName, setEditName] = useState('')
   const [editType, setEditType] = useState('expense')
-  const [editCategory, setEditCategory] = useState(CATEGORIES.expense[0])
+  const [editCategory, setEditCategory] = useState(categories.expense[0])
   const [editAmount, setEditAmount] = useState('')
   const [editMemo, setEditMemo] = useState('')
-  const [editAuthor, setEditAuthor] = useState(currentUser || OWNERS[0])
+  const [editAuthor, setEditAuthor] = useState(currentUser || owners[0])
   const [linkedAssetId, setLinkedAssetId] = useState('')
   const [editLinkedAssetId, setEditLinkedAssetId] = useState('')
 
   useEffect(() => {
-    if (ownerFilter === '박태환' || ownerFilter === '류진주' || ownerFilter === '공동') {
+    if (ownerFilter !== '전체') {
       setAuthor(ownerFilter)
       setLinkedAssetId('')
     }
   }, [ownerFilter])
 
   useEffect(() => {
+    if (!householdId) return
     let cancelled = false
     async function load() {
       const { data, error } = await supabase
         .from('recurring_templates')
         .select('*')
+        .eq('household_id', householdId)
         .order('sort_order', { ascending: true, nullsFirst: false })
         .order('id', { ascending: true })
       if (cancelled) return
@@ -54,11 +56,11 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [householdId])
 
   function handleTypeChange(newType) {
     setType(newType)
-    setCategory(CATEGORIES[newType][0])
+    setCategory(categories[newType][0])
   }
 
   function handleAuthorChange(newAuthor) {
@@ -83,6 +85,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
         author,
         linked_asset_id: linkedAssetId || null,
         sort_order: maxOrder + 1,
+        household_id: householdId,
       })
       .select()
       .single()
@@ -131,13 +134,13 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
     setEditCategory(t.category)
     setEditAmount(t.amount)
     setEditMemo(t.memo ?? '')
-    setEditAuthor(t.author || OWNERS[0])
+    setEditAuthor(t.author || owners[0])
     setEditLinkedAssetId(t.linked_asset_id ? String(t.linked_asset_id) : '')
   }
 
   function handleEditTypeChange(newType) {
     setEditType(newType)
-    setEditCategory(CATEGORIES[newType][0])
+    setEditCategory(categories[newType][0])
   }
 
   function handleEditAuthorChange(newAuthor) {
@@ -202,7 +205,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
   return (
     <Collapsible title="고정 지출/수입">
       <div className="owner-tabs" style={{ padding: '0 0 12px', margin: 0 }}>
-        {['전체', ...OWNERS].map((o) => (
+        {['전체', ...owners].map((o) => (
           <button key={o} className={ownerFilter === o ? 'active' : ''} onClick={() => setOwnerFilter(o)}>
             {o}
           </button>
@@ -236,13 +239,13 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
             </div>
             <div className="form-row">
               <label>카테고리</label>
-              <select value={editCategory} onChange={(e) => setEditCategory(e.target.value)}>
-                {CATEGORIES[editType].map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+              <CategorySelect
+                value={editCategory}
+                onChange={setEditCategory}
+                options={categories[editType]}
+                onAdd={(name) => onAddCategory(editType, name)}
+                onRemove={(name) => onRemoveCategory(editType, name)}
+              />
             </div>
             <div className="form-row">
               <label>금액</label>
@@ -257,7 +260,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
             <div className="form-row">
               <label>구분</label>
               <select value={editAuthor} onChange={(e) => handleEditAuthorChange(e.target.value)}>
-                {OWNERS.map((o) => (
+                {owners.map((o) => (
                   <option key={o} value={o}>
                     {o}
                   </option>
@@ -415,13 +418,13 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
           </div>
           <div className="form-row">
             <label>카테고리</label>
-            <select value={category} onChange={(e) => setCategory(e.target.value)}>
-              {CATEGORIES[type].map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+            <CategorySelect
+              value={category}
+              onChange={setCategory}
+              options={categories[type]}
+              onAdd={(name) => onAddCategory(type, name)}
+              onRemove={(name) => onRemoveCategory(type, name)}
+            />
           </div>
           <div className="form-row">
             <label>금액</label>
@@ -437,7 +440,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, as
           <div className="form-row">
             <label>구분</label>
             <select value={author} onChange={(e) => handleAuthorChange(e.target.value)}>
-              {OWNERS.map((o) => (
+              {owners.map((o) => (
                 <option key={o} value={o}>
                   {o}
                 </option>

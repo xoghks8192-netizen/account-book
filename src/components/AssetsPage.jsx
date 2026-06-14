@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { OWNERS, defaultLiquidity } from '../assetMeta'
+import { defaultLiquidity } from '../assetMeta'
 import AssetForm from './AssetForm'
 import AssetItem from './AssetItem'
 import AssetChart from './AssetChart'
@@ -11,19 +11,21 @@ function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-export default function AssetsPage({ currentUser }) {
+export default function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory }) {
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [ownerFilter, setOwnerFilter] = useState('전체')
 
   useEffect(() => {
+    if (!householdId) return
     let cancelled = false
     async function load() {
       setLoading(true)
       const { data, error } = await supabase
         .from('assets')
         .select('*')
+        .eq('household_id', householdId)
         .order('category', { ascending: true })
         .order('id', { ascending: true })
       if (cancelled) return
@@ -35,10 +37,14 @@ export default function AssetsPage({ currentUser }) {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [householdId])
 
   async function handleAdd(asset) {
-    const { data, error } = await supabase.from('assets').insert(asset).select().single()
+    const { data, error } = await supabase
+      .from('assets')
+      .insert({ ...asset, household_id: householdId })
+      .select()
+      .single()
     if (error) {
       setError(error.message)
       return
@@ -124,7 +130,7 @@ export default function AssetsPage({ currentUser }) {
       </div>
 
       <div className="owner-tabs">
-        {['전체', ...OWNERS].map((o) => (
+        {['전체', ...owners].map((o) => (
           <button
             key={o}
             className={ownerFilter === o ? 'active' : ''}
@@ -139,7 +145,7 @@ export default function AssetsPage({ currentUser }) {
 
       {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === currentUser ? (
         <Collapsible title="자산 항목 추가">
-          <AssetForm onAdd={handleAdd} />
+          <AssetForm onAdd={handleAdd} owners={owners} categories={categories} onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory} />
         </Collapsible>
       ) : null}
 
@@ -161,7 +167,7 @@ export default function AssetsPage({ currentUser }) {
                     {category} · {formatAmount(items.reduce((s, a) => s + Number(a.amount), 0))}원
                   </h3>
                   {items.map((asset) => (
-                    <AssetItem key={asset.id} asset={asset} onUpdate={handleUpdate} onDelete={handleDelete} />
+                    <AssetItem key={asset.id} asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
                   ))}
                 </div>
               ))}
@@ -176,7 +182,7 @@ export default function AssetsPage({ currentUser }) {
                     {category} · {formatAmount(items.reduce((s, a) => s + Number(a.amount), 0))}원
                   </h3>
                   {items.map((asset) => (
-                    <AssetItem key={asset.id} asset={asset} onUpdate={handleUpdate} onDelete={handleDelete} />
+                    <AssetItem key={asset.id} asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
                   ))}
                 </div>
               ))}
@@ -185,7 +191,13 @@ export default function AssetsPage({ currentUser }) {
         </div>
       )}
 
-      <AssetForecast total={total} liquidTotal={liquidTotal} nonLiquidTotal={nonLiquidTotal} chartData={chartData} />
+      <AssetForecast
+        total={total}
+        liquidTotal={liquidTotal}
+        nonLiquidTotal={nonLiquidTotal}
+        chartData={chartData}
+        householdId={householdId}
+      />
     </div>
   )
 }

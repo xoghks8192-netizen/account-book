@@ -34,7 +34,7 @@ export default async function handler(req, res) {
 
     const { data } = await supabase
       .from('app_users')
-      .select('username, password')
+      .select('username, password, household_id, display_name')
       .eq('username', username)
       .maybeSingle()
 
@@ -51,7 +51,43 @@ export default async function handler(req, res) {
       await supabase.from('app_users').update({ password: hash }).eq('username', username)
     }
 
-    return res.status(200).json({ username })
+    let members = [data.display_name]
+    let datingStart = null
+    let weddingDate = null
+    let categories = null
+
+    if (data.household_id) {
+      const [{ data: partners }, { data: household }] = await Promise.all([
+        supabase
+          .from('app_users')
+          .select('display_name')
+          .eq('household_id', data.household_id)
+          .neq('username', username),
+        supabase
+          .from('households')
+          .select('dating_start, wedding_date, categories')
+          .eq('id', data.household_id)
+          .maybeSingle(),
+      ])
+      if (partners && partners.length > 0) {
+        members = [data.display_name, ...partners.map((p) => p.display_name)]
+      }
+      if (household) {
+        datingStart = household.dating_start
+        weddingDate = household.wedding_date
+        categories = household.categories
+      }
+    }
+
+    return res.status(200).json({
+      username: data.username,
+      displayName: data.display_name,
+      householdId: data.household_id,
+      members,
+      datingStart,
+      weddingDate,
+      categories,
+    })
   } catch (e) {
     return res.status(500).json({ error: e.message })
   }

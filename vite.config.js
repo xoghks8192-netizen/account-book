@@ -4,6 +4,8 @@ import { fetchStockPrice } from './api/lib/fetchPrice.js'
 import loginHandler from './api/login.js'
 import changePwHandler from './api/change-pw.js'
 import aiInsightHandler from './api/ai-insight.js'
+import signupHandler from './api/signup.js'
+import updateHouseholdHandler from './api/update-household.js'
 
 function stockPriceApi() {
   return {
@@ -71,6 +73,8 @@ export default defineConfig(({ mode }) => {
       jsonApi('/api/login', loginHandler),
       jsonApi('/api/change-pw', changePwHandler),
       jsonApi('/api/ai-insight', aiInsightHandler),
+      jsonApi('/api/signup', signupHandler),
+      jsonApi('/api/update-household', updateHouseholdHandler),
     ],
     server: {
       host: true,

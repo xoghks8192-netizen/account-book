@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { ASSET_CATEGORIES, OWNERS, STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
+import { ASSET_CATEGORIES, STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
+import CategorySelect from './CategorySelect'
 
-export default function AssetForm({ onAdd }) {
+export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES, onAddCategory, onRemoveCategory }) {
   const [name, setName] = useState('')
-  const [category, setCategory] = useState(ASSET_CATEGORIES[0])
-  const [owner, setOwner] = useState(OWNERS[0])
-  const [liquidity, setLiquidity] = useState(defaultLiquidity(ASSET_CATEGORIES[0]))
+  const [category, setCategory] = useState(categories[0])
+  const [owner, setOwner] = useState(owners[0])
+  const [liquidity, setLiquidity] = useState(defaultLiquidity(categories[0]))
   const [amount, setAmount] = useState('')
   const [shares, setShares] = useState('')
   const [avgPrice, setAvgPrice] = useState('')
@@ -76,13 +77,13 @@ export default function AssetForm({ onAdd }) {
 
       <div className="form-row">
         <label>분류</label>
-        <select value={category} onChange={(e) => handleCategoryChange(e.target.value)}>
-          {ASSET_CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+        <CategorySelect
+          value={category}
+          onChange={handleCategoryChange}
+          options={categories}
+          onAdd={onAddCategory}
+          onRemove={onRemoveCategory}
+        />
       </div>
 
       <div className="form-row">
@@ -99,7 +100,7 @@ export default function AssetForm({ onAdd }) {
       <div className="form-row">
         <label>소유자</label>
         <select value={owner} onChange={(e) => setOwner(e.target.value)}>
-          {OWNERS.map((o) => (
+          {owners.map((o) => (
             <option key={o} value={o}>
               {o}
             </option>

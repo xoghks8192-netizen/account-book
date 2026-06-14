@@ -1,6 +1,3 @@
-export const DATING_START = '2024-08-07'
-export const WEDDING_DATE = '2025-11-09'
-
 export function daysSince(dateStr) {
   const start = new Date(dateStr + 'T00:00:00')
   const now = new Date()

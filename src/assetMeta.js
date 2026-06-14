@@ -21,8 +21,6 @@ export function defaultLiquidity(category) {
   return NON_LIQUID_CATEGORIES.includes(category) ? '비유동' : '유동'
 }
 
-export const OWNERS = ['박태환', '류진주', '공동']
-
 export const CATEGORY_COLORS = {
   현금: '#ffb3c6',
   예적금: '#ffd6a5',
