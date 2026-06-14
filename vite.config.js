@@ -6,6 +6,7 @@ import changePwHandler from './api/change-pw.js'
 import aiInsightHandler from './api/ai-insight.js'
 import signupHandler from './api/signup.js'
 import updateHouseholdHandler from './api/update-household.js'
+import resetPasswordHandler from './api/reset-password.js'
 
 function stockPriceApi() {
   return {
@@ -75,6 +76,7 @@ export default defineConfig(({ mode }) => {
       jsonApi('/api/ai-insight', aiInsightHandler),
       jsonApi('/api/signup', signupHandler),
       jsonApi('/api/update-household', updateHouseholdHandler),
+      jsonApi('/api/reset-password', resetPasswordHandler),
     ],
     server: {
       host: true,

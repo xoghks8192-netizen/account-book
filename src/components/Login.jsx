@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { saveSession } from '../users'
 import Signup from './Signup'
+import ResetPassword from './ResetPassword'
 
 export default function Login({ onLogin }) {
   const [id, setId] = useState('')
@@ -8,6 +9,7 @@ export default function Login({ onLogin }) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showSignup, setShowSignup] = useState(false)
+  const [showReset, setShowReset] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -35,6 +37,10 @@ export default function Login({ onLogin }) {
 
   if (showSignup) {
     return <Signup onDone={() => setShowSignup(false)} />
+  }
+
+  if (showReset) {
+    return <ResetPassword onDone={() => setShowReset(false)} />
   }
 
   return (
@@ -72,6 +78,22 @@ export default function Login({ onLogin }) {
             }}
           >
             계정이 없으신가요? 회원가입
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowReset(true)}
+            style={{
+              marginTop: 6,
+              width: '100%',
+              border: 'none',
+              background: 'none',
+              color: '#c0a3b0',
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 600,
+            }}
+          >
+            비밀번호를 잊으셨나요?
           </button>
         </form>
       </div>
