@@ -303,6 +303,7 @@ export default function App() {
   }
 
   function handleLogout() {
+    if (!window.confirm('로그아웃 하시겠습니까?')) return
     clearSession()
     setUser(null)
   }
@@ -343,19 +344,19 @@ export default function App() {
           <button
             onClick={handleExportAll}
             disabled={exporting}
-            style={{ border: 'none', background: 'none', color: '#7ec8a0', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+            style={{ border: 'none', background: 'none', color: '#7ec8a0', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
           >
             {exporting ? '내보내는 중...' : '데이터 백업'}
           </button>
           <button
             onClick={() => setShowPasswordForm((prev) => !prev)}
-            style={{ border: 'none', background: 'none', color: '#b896ff', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+            style={{ border: 'none', background: 'none', color: '#b896ff', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
           >
             내 정보 변경
           </button>
           <button
             onClick={handleLogout}
-            style={{ border: 'none', background: 'none', color: '#ff8fab', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+            style={{ border: 'none', background: 'none', color: '#ff8fab', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
           >
             로그아웃
           </button>
