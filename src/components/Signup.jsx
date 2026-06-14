@@ -82,7 +82,7 @@ export default function Signup({ onDone }) {
             <label>기념일 날짜</label>
             <input type="date" value={anniversaryDate} onChange={(e) => setAnniversaryDate(e.target.value)} required />
             <div style={{ marginTop: 6, fontSize: 12, color: '#a89cc4' }}>
-              ⓘ 상대방과 입력한 정보가 정확히 일치해야 자동으로 연결됩니다.
+              ⓘ 상대방과 입력한 정보가 정확히 일치하면 자동으로 연결됩니다.
             </div>
           </div>
 
@@ -98,11 +98,14 @@ export default function Signup({ onDone }) {
               onClick={onDone}
               style={{
                 flex: 1,
+                padding: 13,
                 border: 'none',
                 borderRadius: 999,
                 background: '#fdeef3',
                 color: '#b88a9c',
-                fontWeight: 600,
+                fontSize: 15,
+                fontWeight: 700,
+                fontFamily: '"Jua", sans-serif',
                 cursor: 'pointer',
               }}
             >
