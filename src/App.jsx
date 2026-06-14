@@ -338,9 +338,12 @@ export default function App() {
 
       <AnniversaryBanner datingStart={user.datingStart} weddingDate={user.weddingDate} />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', fontSize: 13, color: '#c0a3b0' }}>
-        <span>{myName}님 반가워요 🌸</span>
-        <div style={{ display: 'flex', gap: 12 }}>
+      <div style={{ textAlign: 'center', padding: '8px 16px 0', fontSize: 13, color: '#c0a3b0' }}>
+        {myName}님 반가워요 🌸
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '8px 16px', fontSize: 13, color: '#c0a3b0' }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
           <button
             onClick={() => window.location.reload()}
             style={{ border: 'none', background: 'none', color: '#a89cc4', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
