@@ -11,6 +11,7 @@ export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES
   const [shares, setShares] = useState('')
   const [avgPrice, setAvgPrice] = useState('')
   const [currentPrice, setCurrentPrice] = useState('')
+  const [ticker, setTicker] = useState('')
   const [memo, setMemo] = useState('')
   const [saving, setSaving] = useState(false)
   const [showCategoryManager, setShowCategoryManager] = useState(false)
@@ -38,6 +39,7 @@ export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES
         shares: Number(shares),
         avg_price: Number(avgPrice),
         current_price: Number(currentPrice),
+        ticker: ticker.trim() || null,
         memo: memo.trim() || null,
       }
     } else {
@@ -59,6 +61,7 @@ export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES
     setShares('')
     setAvgPrice('')
     setCurrentPrice('')
+    setTicker('')
     setMemo('')
     setSaving(false)
   }
@@ -177,6 +180,18 @@ export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES
               onChange={(e) => setCurrentPrice(e.target.value)}
               required
             />
+          </div>
+          <div className="form-row">
+            <label>종목코드 (선택)</label>
+            <input
+              type="text"
+              value={ticker}
+              onChange={(e) => setTicker(e.target.value)}
+              placeholder="예: 069500"
+            />
+            <div style={{ marginTop: 6, fontSize: 12, color: '#a89cc4' }}>
+              ⓘ 종목코드를 입력하면 네이버증권과 자동 연동되어 현재가를 새로고침할 수 있어요.
+            </div>
           </div>
         </>
       ) : (
