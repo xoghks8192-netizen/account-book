@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ASSET_CATEGORIES, STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
-import CategorySelect from './CategorySelect'
+import CategoryManager from './CategoryManager'
 
 export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES, onAddCategory, onRemoveCategory }) {
   const [name, setName] = useState('')
@@ -13,6 +13,7 @@ export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES
   const [currentPrice, setCurrentPrice] = useState('')
   const [memo, setMemo] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showCategoryManager, setShowCategoryManager] = useState(false)
 
   const isStock = STOCK_CATEGORIES.includes(category)
 
@@ -77,13 +78,44 @@ export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES
 
       <div className="form-row">
         <label>분류</label>
-        <CategorySelect
-          value={category}
-          onChange={handleCategoryChange}
-          options={categories}
-          onAdd={onAddCategory}
-          onRemove={onRemoveCategory}
-        />
+        <div style={{ display: 'flex', gap: 6 }}>
+          <select value={category} onChange={(e) => handleCategoryChange(e.target.value)} style={{ flex: 1 }}>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => setShowCategoryManager((prev) => !prev)}
+            style={{
+              flexShrink: 0,
+              border: '1.5px solid #e8e3f7',
+              borderRadius: 12,
+              background: showCategoryManager ? '#b896ff' : '#fdeef3',
+              color: showCategoryManager ? '#fff' : '#b88a9c',
+              fontWeight: 600,
+              fontSize: 13,
+              padding: '0 12px',
+              cursor: 'pointer',
+            }}
+          >
+            수정
+          </button>
+        </div>
+        {showCategoryManager && (
+          <CategoryManager
+            options={categories}
+            onAdd={onAddCategory}
+            onRemove={(name) => {
+              onRemoveCategory(name)
+              if (name === category) {
+                handleCategoryChange(categories.find((c) => c !== name))
+              }
+            }}
+          />
+        )}
       </div>
 
       <div className="form-row">
