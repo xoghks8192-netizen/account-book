@@ -444,6 +444,22 @@ body {
   background: var(--card-bg);
 }
 
+.tx-item.dragging {
+  opacity: 0.5;
+}
+
+.drag-handle {
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--icon-muted);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  padding: 4px 6px;
+  margin-right: 2px;
+}
+
 .tx-item.asset-edit {
   display: block;
 }

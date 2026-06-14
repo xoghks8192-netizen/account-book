@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { DEFAULT_CATEGORIES } from '../categories'
 import Collapsible from './Collapsible'
@@ -31,6 +31,8 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   const [editAuthor, setEditAuthor] = useState(currentUser || owners[0])
   const [linkedAssetId, setLinkedAssetId] = useState('')
   const [editLinkedAssetId, setEditLinkedAssetId] = useState('')
+  const [draggingId, setDraggingId] = useState(null)
+  const itemRefs = useRef({})
 
   useEffect(() => {
     if (ownerFilter !== '전체') {
@@ -104,27 +106,50 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
     setTemplates((prev) => prev.filter((t) => t.id !== id))
   }
 
-  async function handleMove(id, direction) {
-    const index = templates.findIndex((t) => t.id === id)
-    const targetIndex = index + direction
-    if (index === -1 || targetIndex < 0 || targetIndex >= templates.length) return
-    const current = templates[index]
-    const target = templates[targetIndex]
-    const currentOrder = current.sort_order ?? current.id
-    const targetOrder = target.sort_order ?? target.id
+  function handleDragStart(e, id) {
+    e.preventDefault()
+    setDraggingId(id)
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
 
-    await Promise.all([
-      supabase.from('recurring_templates').update({ sort_order: targetOrder }).eq('id', current.id),
-      supabase.from('recurring_templates').update({ sort_order: currentOrder }).eq('id', target.id),
-    ])
+  function handleDragMove(e) {
+    if (!draggingId) return
+    const y = e.clientY
+    for (const [idStr, el] of Object.entries(itemRefs.current)) {
+      const id = Number(idStr)
+      if (id === draggingId || !el) continue
+      const rect = el.getBoundingClientRect()
+      if (y >= rect.top && y <= rect.bottom) {
+        setTemplates((prev) => {
+          const indexA = prev.findIndex((t) => t.id === draggingId)
+          const indexB = prev.findIndex((t) => t.id === id)
+          if (indexA === -1 || indexB === -1) return prev
+          const next = [...prev]
+          const [moved] = next.splice(indexA, 1)
+          next.splice(indexB, 0, moved)
+          return next
+        })
+        break
+      }
+    }
+  }
 
-    setTemplates((prev) => {
-      const next = [...prev]
-      next[index] = { ...current, sort_order: targetOrder }
-      next[targetIndex] = { ...target, sort_order: currentOrder }
-      next.sort((a, b) => (a.sort_order ?? a.id) - (b.sort_order ?? b.id))
-      return next
+  async function handleDragEnd() {
+    if (!draggingId) return
+    setDraggingId(null)
+    const updates = []
+    const next = templates.map((t, i) => {
+      const newOrder = i + 1
+      if ((t.sort_order ?? null) !== newOrder) {
+        updates.push(supabase.from('recurring_templates').update({ sort_order: newOrder }).eq('id', t.id))
+        return { ...t, sort_order: newOrder }
+      }
+      return t
     })
+    if (updates.length) {
+      await Promise.all(updates)
+      setTemplates(next)
+    }
   }
 
   function startEdit(t) {
@@ -306,42 +331,23 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
             </div>
           </div>
         ) : (
-          <div className="tx-item" key={t.id}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 4 }}>
-              <button
-                onClick={() => handleMove(t.id, -1)}
-                disabled={templates.findIndex((x) => x.id === t.id) === 0}
-                title="위로"
-                style={{
-                  fontSize: 11,
-                  padding: '2px 4px',
-                  lineHeight: 1,
-                  border: 'none',
-                  borderRadius: 6,
-                  background: '#f1eefb',
-                  color: '#9b8fc0',
-                  cursor: 'pointer',
-                }}
-              >
-                ▲
-              </button>
-              <button
-                onClick={() => handleMove(t.id, 1)}
-                disabled={templates.findIndex((x) => x.id === t.id) === templates.length - 1}
-                title="아래로"
-                style={{
-                  fontSize: 11,
-                  padding: '2px 4px',
-                  lineHeight: 1,
-                  border: 'none',
-                  borderRadius: 6,
-                  background: '#f1eefb',
-                  color: '#9b8fc0',
-                  cursor: 'pointer',
-                }}
-              >
-                ▼
-              </button>
+          <div
+            className={`tx-item${draggingId === t.id ? ' dragging' : ''}`}
+            key={t.id}
+            ref={(el) => {
+              if (el) itemRefs.current[t.id] = el
+              else delete itemRefs.current[t.id]
+            }}
+          >
+            <div
+              className="drag-handle"
+              title="드래그해서 순서 변경"
+              onPointerDown={(e) => handleDragStart(e, t.id)}
+              onPointerMove={handleDragMove}
+              onPointerUp={handleDragEnd}
+              onPointerCancel={handleDragEnd}
+            >
+              ⠿
             </div>
             <div className="tx-info">
               <span className="category">{t.name}</span>
