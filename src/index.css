@@ -50,9 +50,10 @@ body {
 
 .anniversary-item {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 6px;
   font-size: 13px;
+  line-height: 1;
   color: #9089a8;
   background: #f4f1ff;
   border-radius: 999px;
@@ -68,6 +69,7 @@ body {
   font-weight: 700;
   color: #8b6cf0;
   font-family: "Jua", sans-serif;
+  line-height: 1;
 }
 
 .page-tabs,
