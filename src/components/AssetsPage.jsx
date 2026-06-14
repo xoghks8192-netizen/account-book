@@ -67,15 +67,37 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
   }
 
   async function handleDelete(id) {
-    const { error } = await supabase.from('assets').delete().eq('id', id)
+    const { data, error } = await supabase
+      .from('assets')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single()
     if (error) {
       setError(error.message)
       return
     }
-    setAssets((prev) => prev.filter((a) => a.id !== id))
+    setAssets((prev) => prev.map((a) => (a.id === id ? data : a)))
   }
 
-  const myAssets = assets.filter(
+  async function handleRestore(id) {
+    const { data, error } = await supabase
+      .from('assets')
+      .update({ deleted_at: null })
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) {
+      setError(error.message)
+      return
+    }
+    setAssets((prev) => prev.map((a) => (a.id === id ? data : a)))
+  }
+
+  const activeAssets = assets.filter((a) => !a.deleted_at)
+  const deletedAssets = assets.filter((a) => a.deleted_at)
+
+  const myAssets = activeAssets.filter(
     (a) => a.category !== '비상금' || a.owner === currentUser || a.owner === '공동',
   )
   const visible = ownerFilter === '전체' ? myAssets : myAssets.filter((a) => a.owner === ownerFilter)
@@ -188,6 +210,42 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
               ))}
             </Collapsible>
           )}
+        </div>
+      )}
+
+      {!loading && deletedAssets.length > 0 && (
+        <div className="list">
+          <Collapsible title={`🗑 삭제된 자산 (${deletedAssets.length})`} className="section-collapsible">
+            {deletedAssets.map((asset) => (
+              <div key={asset.id} className="tx-item">
+                <div className="tx-info">
+                  <span className="category">{asset.name}</span>
+                  <span className="meta">
+                    {asset.category} · {asset.owner} · {formatAmount(asset.amount)}원
+                  </span>
+                </div>
+                <div className="tx-amount">
+                  <button
+                    type="button"
+                    onClick={() => handleRestore(asset.id)}
+                    style={{
+                      border: 'none',
+                      borderRadius: 999,
+                      background: '#fdeef3',
+                      color: '#b88a9c',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      fontFamily: '"Jua", sans-serif',
+                      padding: '6px 14px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    복구
+                  </button>
+                </div>
+              </div>
+            ))}
+          </Collapsible>
         </div>
       )}
 
