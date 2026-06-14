@@ -1,12 +1,17 @@
 import { useState } from 'react'
 
+function todayStr() {
+  const d = new Date()
+  return d.toISOString().slice(0, 10)
+}
+
 export default function Signup({ onDone }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [partnerName, setPartnerName] = useState('')
   const [anniversaryType, setAnniversaryType] = useState('dating')
-  const [anniversaryDate, setAnniversaryDate] = useState('')
+  const [anniversaryDate, setAnniversaryDate] = useState(todayStr())
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
@@ -39,7 +44,7 @@ export default function Signup({ onDone }) {
       setPassword('')
       setDisplayName('')
       setPartnerName('')
-      setAnniversaryDate('')
+      setAnniversaryDate(todayStr())
     } catch {
       setError('회원가입 중 오류가 발생했습니다.')
     } finally {
