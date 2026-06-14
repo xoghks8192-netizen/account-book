@@ -11,6 +11,7 @@ import MonthComparison from './components/MonthComparison'
 import ChangePassword from './components/ChangePassword'
 import Collapsible from './components/Collapsible'
 import TransactionInsight from './components/TransactionInsight'
+import TransactionCalendar from './components/TransactionCalendar'
 import { toCSV, downloadCSV } from './lib/csv'
 import { loadSession, saveSession, clearSession } from './users'
 import { STOCK_CATEGORIES } from './assetMeta'
@@ -454,6 +455,15 @@ export default function App() {
           />
 
           <ExpenseChart transactions={ownedTransactions} />
+
+          <Collapsible title="거래 캘린더" className="section-collapsible">
+            <TransactionCalendar
+              transactions={ownedTransactions}
+              year={cursor.year}
+              month={cursor.month}
+              onDeleteDate={handleDelete}
+            />
+          </Collapsible>
 
           <RecurringTemplates
             currentUser={myName}

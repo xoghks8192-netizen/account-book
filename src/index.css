@@ -729,3 +729,88 @@ body {
   outline: none;
   border-color: var(--focus-border);
 }
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--label-text);
+  padding: 4px 0;
+}
+
+.calendar-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  min-height: 48px;
+  padding: 4px 2px;
+  border: none;
+  border-radius: 10px;
+  background: var(--card-bg);
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text-main);
+}
+
+.calendar-cell.empty-cell {
+  background: none;
+  cursor: default;
+}
+
+.calendar-cell.has-tx {
+  background: var(--anniversary-bg);
+}
+
+.calendar-cell.selected {
+  background: var(--active-gradient);
+  color: #fff;
+}
+
+.calendar-cell.selected .calendar-date {
+  color: #fff;
+}
+
+.calendar-date {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.calendar-amounts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+.calendar-income {
+  color: var(--income-color);
+}
+
+.calendar-expense {
+  color: var(--expense-color);
+}
+
+.calendar-cell.selected .calendar-income,
+.calendar-cell.selected .calendar-expense {
+  color: #fff;
+}
+
+.calendar-detail {
+  margin-top: 12px;
+}
+
+.calendar-detail-title {
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  color: var(--text-heading);
+  margin-bottom: 8px;
+}
