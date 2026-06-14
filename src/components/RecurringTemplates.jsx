@@ -290,11 +290,14 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
                 onClick={() => setEditingId(null)}
                 style={{
                   flex: 1,
+                  padding: 13,
                   border: 'none',
                   borderRadius: 999,
                   background: '#fdeef3',
                   color: '#b88a9c',
-                  fontWeight: 600,
+                  fontSize: 15,
+                  fontWeight: 700,
+                  fontFamily: '"Jua", sans-serif',
                   cursor: 'pointer',
                 }}
               >
@@ -470,11 +473,14 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
               onClick={() => setShowForm(false)}
               style={{
                 flex: 1,
+                padding: 13,
                 border: 'none',
                 borderRadius: 999,
                 background: '#fdeef3',
                 color: '#b88a9c',
-                fontWeight: 600,
+                fontSize: 15,
+                fontWeight: 700,
+                fontFamily: '"Jua", sans-serif',
                 cursor: 'pointer',
               }}
             >

@@ -132,9 +132,11 @@ export default function ChangePassword({ user, onClose, onUpdateSession }) {
           borderRadius: 999,
           background: '#fdeef3',
           color: '#b88a9c',
-          fontWeight: 600,
+          fontSize: 15,
+          fontWeight: 700,
+          fontFamily: '"Jua", sans-serif',
           cursor: 'pointer',
-          padding: '10px 0',
+          padding: 13,
         }}
       >
         닫기
