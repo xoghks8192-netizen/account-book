@@ -47,7 +47,7 @@ export default function Login({ onLogin }) {
         <form className="form" onSubmit={handleSubmit}>
           <div className="form-row">
             <label>아이디</label>
-            <input type="text" value={id} onChange={(e) => setId(e.target.value)} required autoFocus />
+            <input type="text" value={id} onChange={(e) => setId(e.target.value)} required />
           </div>
           <div className="form-row">
             <label>비밀번호</label>
