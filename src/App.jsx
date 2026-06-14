@@ -456,7 +456,7 @@ export default function App() {
 
           <ExpenseChart transactions={ownedTransactions} />
 
-          <Collapsible title="거래 캘린더" className="section-collapsible">
+          <Collapsible title="거래 캘린더">
             <TransactionCalendar
               transactions={ownedTransactions}
               year={cursor.year}
