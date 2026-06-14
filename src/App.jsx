@@ -17,6 +17,7 @@ import { STOCK_CATEGORIES } from './assetMeta'
 import { DEFAULT_CATEGORIES } from './categories'
 
 const PAGE_KEY = 'household-budget-page'
+const THEME_KEY = 'household-budget-theme'
 
 function formatAmount(n) {
   return n.toLocaleString('ko-KR')
@@ -49,6 +50,7 @@ export default function App() {
   const [showPasswordForm, setShowPasswordForm] = useState(false)
   const [linkableAssets, setLinkableAssets] = useState([])
   const [exporting, setExporting] = useState(false)
+  const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'light')
 
   const householdId = user?.householdId
   const myName = user?.displayName
@@ -64,6 +66,11 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(PAGE_KEY, page)
   }, [page])
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem(THEME_KEY, theme)
+  }, [theme])
 
   useEffect(() => {
     if (!householdId) return
@@ -349,6 +356,12 @@ export default function App() {
             style={{ border: 'none', background: 'none', color: '#a89cc4', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
           >
             🔄 새로고침
+          </button>
+          <button
+            onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+            style={{ border: 'none', background: 'none', color: '#a89cc4', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
+          >
+            {theme === 'dark' ? '☀️ 라이트모드' : '🌙 다크모드'}
           </button>
           <button
             onClick={handleExportAll}

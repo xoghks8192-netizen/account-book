@@ -27,7 +27,7 @@ export default function CategoryManager({ options, onAdd, onRemove }) {
   }
 
   return (
-    <div style={{ marginTop: 8, padding: 12, borderRadius: 12, background: '#fbfaff', border: '1.5px solid #e8e3f7' }}>
+    <div style={{ marginTop: 8, padding: 12, borderRadius: 12, background: 'var(--input-bg)', border: '1.5px solid var(--input-border)' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
         {options.map((c) => (
           <span
