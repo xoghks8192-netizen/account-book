@@ -34,7 +34,7 @@ export default function Signup({ onDone }) {
         setError(data.error || '회원가입에 실패했습니다.')
         return
       }
-      setSuccess('가입이 완료되었습니다. 로그인해주세요. 상대방도 같은 이름/기념일로 가입하면 자동으로 연결됩니다.')
+      setSuccess('가입이 완료되었습니다. 로그인해주세요.')
       setUsername('')
       setPassword('')
       setDisplayName('')
@@ -81,6 +81,9 @@ export default function Signup({ onDone }) {
           <div className="form-row">
             <label>기념일 날짜</label>
             <input type="date" value={anniversaryDate} onChange={(e) => setAnniversaryDate(e.target.value)} required />
+            <div style={{ marginTop: 6, fontSize: 12, color: '#a89cc4' }}>
+              ⓘ 상대방과 입력한 정보가 정확히 일치해야 자동으로 연결됩니다.
+            </div>
           </div>
 
           {error && <div style={{ color: '#ff8fab', fontSize: 13, marginBottom: 10 }}>{error}</div>}

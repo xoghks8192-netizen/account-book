@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { DEFAULT_CATEGORIES } from '../categories'
-import CategorySelect from './CategorySelect'
+import CategoryManager from './CategoryManager'
 
 function todayStr() {
   const d = new Date()
@@ -16,6 +16,7 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
   const [owner, setOwner] = useState(currentUser || owners[0])
   const [saving, setSaving] = useState(false)
   const [linkedAssetId, setLinkedAssetId] = useState('')
+  const [showCategoryManager, setShowCategoryManager] = useState(false)
 
   function handleTypeChange(newType) {
     setType(newType)
@@ -78,13 +79,44 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
 
       <div className="form-row">
         <label>카테고리</label>
-        <CategorySelect
-          value={category}
-          onChange={setCategory}
-          options={categories[type]}
-          onAdd={(name) => onAddCategory(type, name)}
-          onRemove={(name) => onRemoveCategory(type, name)}
-        />
+        <div style={{ display: 'flex', gap: 6 }}>
+          <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ flex: 1 }}>
+            {categories[type].map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => setShowCategoryManager((prev) => !prev)}
+            style={{
+              flexShrink: 0,
+              border: '1.5px solid #e8e3f7',
+              borderRadius: 12,
+              background: showCategoryManager ? '#b896ff' : '#fdeef3',
+              color: showCategoryManager ? '#fff' : '#b88a9c',
+              fontWeight: 600,
+              fontSize: 13,
+              padding: '0 12px',
+              cursor: 'pointer',
+            }}
+          >
+            수정
+          </button>
+        </div>
+        {showCategoryManager && (
+          <CategoryManager
+            options={categories[type]}
+            onAdd={(name) => onAddCategory(type, name)}
+            onRemove={(name) => {
+              onRemoveCategory(type, name)
+              if (name === category) {
+                setCategory(categories[type].find((c) => c !== name))
+              }
+            }}
+          />
+        )}
       </div>
 
       <div className="form-row">
