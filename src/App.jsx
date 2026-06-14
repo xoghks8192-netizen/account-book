@@ -342,6 +342,12 @@ export default function App() {
         <span>{myName}님 반가워요 🌸</span>
         <div style={{ display: 'flex', gap: 12 }}>
           <button
+            onClick={() => window.location.reload()}
+            style={{ border: 'none', background: 'none', color: '#a89cc4', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
+          >
+            🔄 새로고침
+          </button>
+          <button
             onClick={handleExportAll}
             disabled={exporting}
             style={{ border: 'none', background: 'none', color: '#7ec8a0', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
