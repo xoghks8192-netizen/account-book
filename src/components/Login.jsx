@@ -79,6 +79,7 @@ export default function Login({ onLogin }) {
           >
             계정이 없으신가요? 회원가입
           </button>
+          {/* 비밀번호 찾기 기능은 필요할 때 다시 활성화
           <button
             type="button"
             onClick={() => setShowReset(true)}
@@ -95,6 +96,7 @@ export default function Login({ onLogin }) {
           >
             비밀번호를 잊으셨나요?
           </button>
+          */}
         </form>
       </div>
     </div>
