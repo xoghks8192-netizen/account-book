@@ -272,10 +272,6 @@ body {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
   font-family: inherit;
   text-align: left;
 }
@@ -284,15 +280,24 @@ body {
   margin: 0;
 }
 
+.collapsible-extra {
+  flex: 1;
+  min-width: 0;
+  margin: 0 8px;
+}
+
 .collapsible-toggle {
   flex-shrink: 0;
   font-size: 12px;
   font-weight: 700;
   color: var(--tab-text);
   background: var(--tab-bg);
+  border: none;
   border-radius: 999px;
   padding: 5px 12px;
   margin-left: 8px;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .collapsible-body {
@@ -705,6 +710,22 @@ body {
 }
 
 .search-bar input:focus {
+  outline: none;
+  border-color: var(--focus-border);
+}
+
+.inline-search {
+  width: 100%;
+  padding: 6px 12px;
+  border: 1.5px solid var(--input-border);
+  border-radius: 999px;
+  font-size: 13px;
+  background: var(--input-bg);
+  font-family: inherit;
+  color: var(--input-text);
+}
+
+.inline-search:focus {
   outline: none;
   border-color: var(--focus-border);
 }

@@ -492,21 +492,24 @@ export default function App() {
             </Collapsible>
           ) : null}
 
-          <div className="search-bar">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="카테고리 또는 메모 검색"
-            />
-          </div>
-
           {error && <div className="container" style={{ color: '#e0524c' }}>오류: {error}</div>}
 
           {loading ? (
             <div className="container">불러오는 중...</div>
           ) : (
-            <Collapsible title="내역" className="list">
+            <Collapsible
+              title="내역"
+              className="list"
+              headerExtra={
+                <input
+                  type="text"
+                  className="inline-search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="카테고리 또는 메모 검색"
+                />
+              }
+            >
               <TransactionList
                 transactions={filteredTransactions}
                 onDelete={handleDelete}
