@@ -482,6 +482,7 @@ export default function App() {
               year={cursor.year}
               month={cursor.month}
               onDeleteDate={handleDelete}
+              onChangeMonth={changeMonth}
             />
           </Collapsible>
 

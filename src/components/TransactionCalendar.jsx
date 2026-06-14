@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -10,8 +10,12 @@ function pad(n) {
   return String(n).padStart(2, '0')
 }
 
-export default function TransactionCalendar({ transactions, year, month, onDeleteDate }) {
+export default function TransactionCalendar({ transactions, year, month, onDeleteDate, onChangeMonth }) {
   const [selectedDate, setSelectedDate] = useState(null)
+
+  useEffect(() => {
+    setSelectedDate(null)
+  }, [year, month])
 
   const byDate = useMemo(() => {
     const map = {}
@@ -35,6 +39,15 @@ export default function TransactionCalendar({ transactions, year, month, onDelet
 
   return (
     <div>
+      {onChangeMonth && (
+        <div className="month-nav" style={{ padding: '0 0 12px' }}>
+          <button onClick={() => onChangeMonth(-1)}>‹</button>
+          <h2>
+            {year}년 {month + 1}월
+          </h2>
+          <button onClick={() => onChangeMonth(1)}>›</button>
+        </div>
+      )}
       <div className="calendar">
         {WEEKDAYS.map((w) => (
           <div key={w} className="calendar-weekday">
