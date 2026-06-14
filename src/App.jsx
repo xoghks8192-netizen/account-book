@@ -47,6 +47,11 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+  const [amountMin, setAmountMin] = useState('')
+  const [amountMax, setAmountMax] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
   const [ownerFilter, setOwnerFilter] = useState('전체')
   const [showPasswordForm, setShowPasswordForm] = useState(false)
   const [linkableAssets, setLinkableAssets] = useState([])
@@ -226,11 +231,26 @@ export default function App() {
 
   const filteredTransactions = useMemo(() => {
     const q = search.trim().toLowerCase()
-    if (!q) return ownedTransactions
-    return ownedTransactions.filter(
-      (t) => t.category.toLowerCase().includes(q) || (t.memo && t.memo.toLowerCase().includes(q)),
-    )
-  }, [ownedTransactions, search])
+    const min = amountMin ? Number(amountMin) : null
+    const max = amountMax ? Number(amountMax) : null
+    return ownedTransactions.filter((t) => {
+      if (q && !(t.category.toLowerCase().includes(q) || (t.memo && t.memo.toLowerCase().includes(q)))) return false
+      if (min !== null && Number(t.amount) < min) return false
+      if (max !== null && Number(t.amount) > max) return false
+      if (dateFrom && t.date < dateFrom) return false
+      if (dateTo && t.date > dateTo) return false
+      return true
+    })
+  }, [ownedTransactions, search, amountMin, amountMax, dateFrom, dateTo])
+
+  const hasActiveFilters = amountMin || amountMax || dateFrom || dateTo
+
+  function clearFilters() {
+    setAmountMin('')
+    setAmountMax('')
+    setDateFrom('')
+    setDateTo('')
+  }
 
   async function handleExportAll() {
     setExporting(true)
@@ -511,15 +531,69 @@ export default function App() {
               title="내역"
               className="list"
               headerExtra={
-                <input
-                  type="text"
-                  className="inline-search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="카테고리 또는 메모 검색"
-                />
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    className="inline-search"
+                    style={{ flex: 1 }}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="카테고리 또는 메모 검색"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowFilters((prev) => !prev)}
+                    className="filter-toggle-btn"
+                    style={hasActiveFilters ? { background: 'var(--active-gradient)', color: '#fff' } : undefined}
+                  >
+                    필터
+                  </button>
+                </div>
               }
             >
+              {showFilters && (
+                <div className="filter-panel">
+                  <div className="filter-row">
+                    <input
+                      type="date"
+                      className="inline-search"
+                      value={dateFrom}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                    />
+                    <span className="filter-sep">~</span>
+                    <input
+                      type="date"
+                      className="inline-search"
+                      value={dateTo}
+                      onChange={(e) => setDateTo(e.target.value)}
+                    />
+                  </div>
+                  <div className="filter-row">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      className="inline-search"
+                      placeholder="최소 금액"
+                      value={amountMin}
+                      onChange={(e) => setAmountMin(e.target.value)}
+                    />
+                    <span className="filter-sep">~</span>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      className="inline-search"
+                      placeholder="최대 금액"
+                      value={amountMax}
+                      onChange={(e) => setAmountMax(e.target.value)}
+                    />
+                  </div>
+                  {hasActiveFilters && (
+                    <button type="button" className="filter-clear-btn" onClick={clearFilters}>
+                      필터 초기화
+                    </button>
+                  )}
+                </div>
+              )}
               <TransactionList
                 transactions={filteredTransactions}
                 onDelete={handleDelete}

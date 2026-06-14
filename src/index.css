@@ -730,6 +730,54 @@ body {
   border-color: var(--focus-border);
 }
 
+.filter-toggle-btn {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--tab-bg);
+  color: var(--tab-text);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.filter-panel {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--form-border);
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.filter-row .inline-search {
+  flex: 1;
+}
+
+.filter-sep {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--label-text);
+}
+
+.filter-clear-btn {
+  border: none;
+  border-radius: 999px;
+  background: var(--card-bg);
+  color: var(--label-text);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
