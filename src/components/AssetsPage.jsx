@@ -6,6 +6,7 @@ import AssetItem from './AssetItem'
 import AssetChart from './AssetChart'
 import Collapsible from './Collapsible'
 import AssetForecast from './AssetForecast'
+import NetWorthChart from './NetWorthChart'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
@@ -138,6 +139,31 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
     .filter(([, amount]) => amount > 0)
     .sort((a, b) => b[1] - a[1])
 
+  const householdTotal = myAssets.reduce((s, a) => s + Number(a.amount), 0)
+  const householdLiquidTotal = myAssets
+    .filter((a) => (a.liquidity ?? defaultLiquidity(a.category)) === '유동')
+    .reduce((s, a) => s + Number(a.amount), 0)
+  const householdNonLiquidTotal = myAssets
+    .filter((a) => (a.liquidity ?? defaultLiquidity(a.category)) === '비유동')
+    .reduce((s, a) => s + Number(a.amount), 0)
+
+  useEffect(() => {
+    if (!householdId || loading) return
+    const today = new Date().toISOString().slice(0, 10)
+    supabase
+      .from('net_worth_snapshots')
+      .upsert(
+        {
+          household_id: householdId,
+          snapshot_date: today,
+          total: householdTotal,
+          liquid_total: householdLiquidTotal,
+          non_liquid_total: householdNonLiquidTotal,
+        },
+        { onConflict: 'household_id,snapshot_date' },
+      )
+  }, [householdId, loading, householdTotal, householdLiquidTotal, householdNonLiquidTotal])
+
   return (
     <div>
       <div className="summary">
@@ -175,6 +201,8 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       </div>
 
       <AssetChart data={chartData} total={total} />
+
+      <NetWorthChart householdId={householdId} />
 
       {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === currentUser ? (
         <Collapsible title="자산 항목 추가">
