@@ -1,11 +1,11 @@
 export const AUTH_KEY = 'household-budget-user'
 
 export function saveSession(session) {
-  sessionStorage.setItem(AUTH_KEY, JSON.stringify(session))
+  localStorage.setItem(AUTH_KEY, JSON.stringify(session))
 }
 
 export function loadSession() {
-  const raw = sessionStorage.getItem(AUTH_KEY)
+  const raw = localStorage.getItem(AUTH_KEY)
   if (!raw) return null
   try {
     return JSON.parse(raw)
@@ -15,5 +15,5 @@ export function loadSession() {
 }
 
 export function clearSession() {
-  sessionStorage.removeItem(AUTH_KEY)
+  localStorage.removeItem(AUTH_KEY)
 }
