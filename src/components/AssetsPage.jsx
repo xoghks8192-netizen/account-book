@@ -259,13 +259,13 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       {loading ? (
         <div className="container">불러오는 중...</div>
       ) : visible.length === 0 ? (
-        <div className="list">
+        <div className="form">
           <div className="empty">자산 항목이 없습니다.</div>
         </div>
       ) : (
-        <div className="list">
+        <>
           {liquidAssets.length > 0 && (
-            <Collapsible title={`💧 유동자산 · ${formatAmount(liquidTotal)}원`} className="section-collapsible">
+            <Collapsible title={`💧 유동자산 · ${formatAmount(liquidTotal)}원`}>
               {Object.entries(liquidGrouped).map(([category, items]) => (
                 <div key={category}>
                   <h3>
@@ -280,7 +280,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
           )}
 
           {nonLiquidAssets.length > 0 && (
-            <Collapsible title={`🔒 비유동자산 · ${formatAmount(nonLiquidTotal)}원`} className="section-collapsible">
+            <Collapsible title={`🔒 비유동자산 · ${formatAmount(nonLiquidTotal)}원`}>
               {Object.entries(nonLiquidGrouped).map(([category, items]) => (
                 <div key={category}>
                   <h3>
@@ -293,7 +293,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
               ))}
             </Collapsible>
           )}
-        </div>
+        </>
       )}
 
       {!loading && deletedAssets.length > 0 && (

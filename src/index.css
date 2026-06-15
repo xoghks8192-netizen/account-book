@@ -39,7 +39,7 @@
 
 [data-theme="dark"] {
   --bg-gradient: linear-gradient(135deg, #1a1825 0%, #1f1b2e 45%, #181c28 100%);
-  --bg-root: #201d2c;
+  --bg-root: #181c28;
   --shadow-root: rgba(0, 0, 0, 0.5);
   --text-main: #d8d3e8;
   --text-heading: #f0ecff;
