@@ -516,13 +516,16 @@ export default function App() {
               <div className="label">합계</div>
               <div className="value">{formatAmount(balance)}</div>
             </div>
-            {transferReceived > 0 && (
+          </div>
+
+          {transferReceived > 0 && (
+            <div className="summary">
               <div className="summary-item income">
                 <div className="label">💸 받은 이체</div>
                 <div className="value">{formatAmount(transferReceived)}</div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <MonthComparison
             current={{ income: totalIncome, expense: totalExpense, balance }}
@@ -553,7 +556,6 @@ export default function App() {
           ) : (
             <Collapsible
               title="내역"
-              className="list"
               headerExtra={
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   <input

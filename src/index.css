@@ -213,7 +213,6 @@ body {
 
 .summary {
   display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
   padding: 8px 16px 16px;
   gap: 8px;
@@ -221,7 +220,6 @@ body {
 
 .summary-item {
   flex: 1;
-  min-width: 70px;
   text-align: center;
   padding: 14px 4px;
   border-radius: 16px;
