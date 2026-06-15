@@ -655,13 +655,14 @@ export default function App() {
               {showFilters && (
                 <div className="filter-panel">
                   <div className="filter-row">
+                    <span className="filter-sep">시작일</span>
                     <input
                       type="date"
                       className="inline-search"
                       value={dateFrom}
                       onChange={(e) => setDateFrom(e.target.value)}
                     />
-                    <span className="filter-sep">~</span>
+                    <span className="filter-sep">~ 종료일</span>
                     <input
                       type="date"
                       className="inline-search"
