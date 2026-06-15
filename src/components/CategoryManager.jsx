@@ -3,6 +3,7 @@ import { useState } from 'react'
 export default function CategoryManager({ options, onAdd, onRemove, onMove }) {
   const [newCategory, setNewCategory] = useState('')
   const [error, setError] = useState('')
+  const [reordering, setReordering] = useState(false)
 
   function handleAdd() {
     const name = newCategory.trim()
@@ -44,7 +45,7 @@ export default function CategoryManager({ options, onAdd, onRemove, onMove }) {
               fontWeight: 600,
             }}
           >
-            {onMove && (
+            {onMove && reordering && (
               <button
                 type="button"
                 onClick={() => onMove(c, -1)}
@@ -55,7 +56,7 @@ export default function CategoryManager({ options, onAdd, onRemove, onMove }) {
               </button>
             )}
             {c}
-            {onMove && (
+            {onMove && reordering && (
               <button
                 type="button"
                 onClick={() => onMove(c, 1)}
@@ -65,13 +66,15 @@ export default function CategoryManager({ options, onAdd, onRemove, onMove }) {
                 ▶
               </button>
             )}
-            <button
-              type="button"
-              onClick={() => handleRemove(c)}
-              style={{ border: 'none', background: 'none', color: '#ff8fab', cursor: 'pointer', fontSize: 13, padding: 0, lineHeight: 1 }}
-            >
-              ✕
-            </button>
+            {!reordering && (
+              <button
+                type="button"
+                onClick={() => handleRemove(c)}
+                style={{ border: 'none', background: 'none', color: '#ff8fab', cursor: 'pointer', fontSize: 13, padding: 0, lineHeight: 1 }}
+              >
+                ✕
+              </button>
+            )}
           </span>
         ))}
       </div>
@@ -86,6 +89,25 @@ export default function CategoryManager({ options, onAdd, onRemove, onMove }) {
         <button type="button" onClick={handleAdd} className="submit-btn" style={{ width: 'auto', margin: 0, padding: '0 16px' }}>
           추가
         </button>
+        {onMove && (
+          <button
+            type="button"
+            onClick={() => setReordering((prev) => !prev)}
+            style={{
+              flexShrink: 0,
+              border: '1.5px solid #e8e3f7',
+              borderRadius: 12,
+              background: reordering ? '#b896ff' : '#fdeef3',
+              color: reordering ? '#fff' : '#b88a9c',
+              fontWeight: 600,
+              fontSize: 13,
+              padding: '0 12px',
+              cursor: 'pointer',
+            }}
+          >
+            {reordering ? '완료' : '순서 변경'}
+          </button>
+        )}
       </div>
       {error && <div style={{ color: '#ff8fab', fontSize: 13, marginTop: 6 }}>{error}</div>}
     </div>

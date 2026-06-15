@@ -17,6 +17,7 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
   const [saving, setSaving] = useState(false)
   const [linkedAssetId, setLinkedAssetId] = useState('')
   const [showCategoryManager, setShowCategoryManager] = useState(false)
+  const [showMore, setShowMore] = useState(false)
   const [transferToSpouse, setTransferToSpouse] = useState(false)
 
   const partner = owners.find((o) => o !== '공동' && o !== owner)
@@ -176,22 +177,35 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
         </div>
       )}
 
-      <div className="form-row">
-        <label>연동될 자산 (선택)</label>
-        <select value={linkedAssetId} onChange={(e) => setLinkedAssetId(e.target.value)}>
-          <option value="">선택 안함</option>
-          {ownerAssets.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name} ({a.category} · {a.owner})
-            </option>
-          ))}
-        </select>
-      </div>
+      <button
+        type="button"
+        className="collapsible-toggle"
+        style={{ marginBottom: 12 }}
+        onClick={() => setShowMore((prev) => !prev)}
+      >
+        {showMore ? '추가 옵션 접기 ▲' : '연동 자산 · 메모 ▼'}
+      </button>
 
-      <div className="form-row">
-        <label>메모 (선택)</label>
-        <input type="text" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="메모" />
-      </div>
+      {showMore && (
+        <>
+          <div className="form-row">
+            <label>연동될 자산 (선택)</label>
+            <select value={linkedAssetId} onChange={(e) => setLinkedAssetId(e.target.value)}>
+              <option value="">선택 안함</option>
+              {ownerAssets.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} ({a.category} · {a.owner})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-row">
+            <label>메모 (선택)</label>
+            <input type="text" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="메모" />
+          </div>
+        </>
+      )}
 
       <button type="submit" className="submit-btn" disabled={saving}>
         {saving ? '저장 중...' : '추가하기'}
