@@ -7,6 +7,7 @@ import AssetChart from './AssetChart'
 import Collapsible from './Collapsible'
 import AssetForecast from './AssetForecast'
 import NetWorthChart from './NetWorthChart'
+import Modal from './Modal'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
@@ -17,6 +18,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [ownerFilter, setOwnerFilter] = useState('전체')
+  const [summaryModal, setSummaryModal] = useState(null)
 
   useEffect(() => {
     if (!householdId) return
@@ -164,29 +166,71 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       )
   }, [householdId, loading, householdTotal, householdLiquidTotal, householdNonLiquidTotal])
 
+  const summaryModalConfigs = {
+    총자산: { title: '총 자산', items: visible, total },
+    비상금: {
+      title: '비상금',
+      items: myAssets.filter((a) => a.category === '비상금' && (ownerFilter === '전체' || a.owner === ownerFilter)),
+      total: emergencyTotal,
+    },
+    유동자산: { title: '💧 유동자산', items: liquidAssets, total: liquidTotal },
+    비유동자산: { title: '🔒 비유동자산', items: nonLiquidAssets, total: nonLiquidTotal },
+  }
+
+  const activeModal = summaryModal ? summaryModalConfigs[summaryModal] : null
+
   return (
     <div>
       <div className="summary">
-        <div className="summary-item balance">
+        <div className="summary-item balance clickable" onClick={() => setSummaryModal('총자산')}>
           <div className="label">총 자산</div>
           <div className="value">{formatAmount(total)}</div>
         </div>
-        <div className="summary-item income">
+        <div className="summary-item income clickable" onClick={() => setSummaryModal('비상금')}>
           <div className="label">비상금</div>
           <div className="value">{formatAmount(emergencyTotal)}</div>
         </div>
       </div>
 
       <div className="summary">
-        <div className="summary-item income">
+        <div className="summary-item income clickable" onClick={() => setSummaryModal('유동자산')}>
           <div className="label">유동자산</div>
           <div className="value">{formatAmount(liquidTotal)}</div>
         </div>
-        <div className="summary-item expense">
+        <div className="summary-item expense clickable" onClick={() => setSummaryModal('비유동자산')}>
           <div className="label">비유동자산</div>
           <div className="value">{formatAmount(nonLiquidTotal)}</div>
         </div>
       </div>
+
+      {activeModal && (
+        <Modal title={activeModal.title} onClose={() => setSummaryModal(null)}>
+          {activeModal.items.length === 0 ? (
+            <div className="empty">자산 항목이 없습니다.</div>
+          ) : (
+            Object.entries(groupByCategory(activeModal.items)).map(([category, items]) => (
+              <div key={category}>
+                <div className="modal-section-title">
+                  {category} · {formatAmount(items.reduce((s, a) => s + Number(a.amount), 0))}원
+                </div>
+                {items.map((a) => (
+                  <div key={a.id} className="modal-row">
+                    <span className="modal-row-name">
+                      {a.name}
+                      <span className="modal-row-meta">{a.owner}</span>
+                    </span>
+                    <span className="modal-row-amount">{formatAmount(a.amount)}원</span>
+                  </div>
+                ))}
+              </div>
+            ))
+          )}
+          <div className="modal-total-row">
+            <span>합계</span>
+            <span className="modal-row-amount">{formatAmount(activeModal.total)}원</span>
+          </div>
+        </Modal>
+      )}
 
       <div className="owner-tabs">
         {['전체', ...owners].map((o) => (
