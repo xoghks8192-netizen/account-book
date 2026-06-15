@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ASSET_CATEGORIES, STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
 import CategoryManager from './CategoryManager'
 
-export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES, onAddCategory, onRemoveCategory }) {
+export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory }) {
   const [name, setName] = useState('')
   const [category, setCategory] = useState(categories[0])
   const [owner, setOwner] = useState(owners[0])
@@ -117,6 +117,7 @@ export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES
                 handleCategoryChange(categories.find((c) => c !== name))
               }
             }}
+            onMove={onMoveCategory}
           />
         )}
       </div>

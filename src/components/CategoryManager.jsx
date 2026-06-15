@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function CategoryManager({ options, onAdd, onRemove }) {
+export default function CategoryManager({ options, onAdd, onRemove, onMove }) {
   const [newCategory, setNewCategory] = useState('')
   const [error, setError] = useState('')
 
@@ -29,7 +29,7 @@ export default function CategoryManager({ options, onAdd, onRemove }) {
   return (
     <div style={{ marginTop: 8, padding: 12, borderRadius: 12, background: 'var(--input-bg)', border: '1.5px solid var(--input-border)' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-        {options.map((c) => (
+        {options.map((c, i) => (
           <span
             key={c}
             style={{
@@ -44,7 +44,27 @@ export default function CategoryManager({ options, onAdd, onRemove }) {
               fontWeight: 600,
             }}
           >
+            {onMove && (
+              <button
+                type="button"
+                onClick={() => onMove(c, -1)}
+                disabled={i === 0}
+                style={{ border: 'none', background: 'none', color: i === 0 ? '#e8c7d2' : '#b88a9c', cursor: i === 0 ? 'default' : 'pointer', fontSize: 13, padding: 0, lineHeight: 1 }}
+              >
+                ◀
+              </button>
+            )}
             {c}
+            {onMove && (
+              <button
+                type="button"
+                onClick={() => onMove(c, 1)}
+                disabled={i === options.length - 1}
+                style={{ border: 'none', background: 'none', color: i === options.length - 1 ? '#e8c7d2' : '#b88a9c', cursor: i === options.length - 1 ? 'default' : 'pointer', fontSize: 13, padding: 0, lineHeight: 1 }}
+              >
+                ▶
+              </button>
+            )}
             <button
               type="button"
               onClick={() => handleRemove(c)}

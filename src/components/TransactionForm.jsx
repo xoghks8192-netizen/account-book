@@ -7,7 +7,7 @@ function todayStr() {
   return d.toISOString().slice(0, 10)
 }
 
-export default function TransactionForm({ onAdd, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory }) {
+export default function TransactionForm({ onAdd, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory }) {
   const [type, setType] = useState('expense')
   const [date, setDate] = useState(todayStr())
   const [category, setCategory] = useState(categories.expense[0])
@@ -133,6 +133,7 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
                 setCategory(categories[type].find((c) => c !== name))
               }
             }}
+            onMove={(name, direction) => onMoveCategory(type, name, direction)}
           />
         )}
       </div>

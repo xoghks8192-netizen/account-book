@@ -12,7 +12,7 @@ function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-export default function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory }) {
+export default function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory }) {
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -206,7 +206,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
 
       {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === currentUser ? (
         <Collapsible title="자산 항목 추가">
-          <AssetForm onAdd={handleAdd} owners={owners} categories={categories} onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory} />
+          <AssetForm onAdd={handleAdd} owners={owners} categories={categories} onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory} onMoveCategory={onMoveCategory} />
         </Collapsible>
       ) : null}
 

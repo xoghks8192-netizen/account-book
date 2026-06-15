@@ -357,6 +357,16 @@ export default function App() {
     updateCategoryList(type, categories[type].filter((c) => c !== name))
   }
 
+  function handleMoveCategory(type, name, direction) {
+    const list = categories[type]
+    const index = list.indexOf(name)
+    const targetIndex = index + direction
+    if (index < 0 || targetIndex < 0 || targetIndex >= list.length) return
+    const next = [...list]
+    ;[next[index], next[targetIndex]] = [next[targetIndex], next[index]]
+    updateCategoryList(type, next)
+  }
+
   return (
     <div>
       <div className="brand-header">
@@ -435,6 +445,7 @@ export default function App() {
           categories={categories.asset}
           onAddCategory={(name) => handleAddCategory('asset', name)}
           onRemoveCategory={(name) => handleRemoveCategory('asset', name)}
+          onMoveCategory={(name, direction) => handleMoveCategory('asset', name, direction)}
         />
       ) : (
         <>
@@ -519,6 +530,7 @@ export default function App() {
                 categories={categories}
                 onAddCategory={handleAddCategory}
                 onRemoveCategory={handleRemoveCategory}
+                onMoveCategory={handleMoveCategory}
               />
             </Collapsible>
           ) : null}
