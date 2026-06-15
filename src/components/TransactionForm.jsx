@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { DEFAULT_CATEGORIES } from '../categories'
+import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from '../categories'
 import CategoryManager from './CategoryManager'
 
 function todayStr() {
@@ -52,7 +52,7 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
       await onAdd({
         type: 'income',
         date,
-        category: '배우자 이체',
+        category: TRANSFER_CATEGORY,
         amount: Number(amount),
         memo: memo.trim() || `${owner}님이 보낸 돈`,
         owner: partner,

@@ -1,3 +1,6 @@
+// 배우자 이체 시 상대방에게 자동 등록되는 수입 카테고리 (수입 통계에서 제외)
+export const TRANSFER_CATEGORY = '배우자 이체'
+
 // 새로 가입하는 가구의 기본 카테고리 (적금(...) 등 커스텀 카테고리는 직접 추가)
 export const DEFAULT_CATEGORIES = {
   income: ['월급', '용돈', '부수입', '기타수입'],

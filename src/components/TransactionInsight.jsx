@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Collapsible from './Collapsible'
 import { requestAiInsight } from '../lib/aiInsight'
+import { TRANSFER_CATEGORY } from '../categories'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
@@ -9,7 +10,7 @@ function formatAmount(n) {
 function categoryBreakdown(transactions, type) {
   const map = {}
   transactions.forEach((t) => {
-    if (t.type === type) map[t.category] = (map[t.category] || 0) + Number(t.amount)
+    if (t.type === type && t.category !== TRANSFER_CATEGORY) map[t.category] = (map[t.category] || 0) + Number(t.amount)
   })
   return Object.entries(map).sort((a, b) => b[1] - a[1])
 }

@@ -15,7 +15,7 @@ import TransactionCalendar from './components/TransactionCalendar'
 import { toCSV, downloadCSV } from './lib/csv'
 import { loadSession, saveSession, clearSession } from './users'
 import { STOCK_CATEGORIES } from './assetMeta'
-import { DEFAULT_CATEGORIES } from './categories'
+import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from './categories'
 
 const PAGE_KEY = 'household-budget-page'
 const THEME_KEY = 'household-budget-theme'
@@ -221,11 +221,15 @@ export default function App() {
   const ownedPrevTransactions =
     ownerFilter === '전체' ? prevTransactions : prevTransactions.filter((t) => t.owner === ownerFilter)
 
-  const totalIncome = ownedTransactions.filter((t) => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0)
+  const totalIncome = ownedTransactions
+    .filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY)
+    .reduce((s, t) => s + Number(t.amount), 0)
   const totalExpense = ownedTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
   const balance = totalIncome - totalExpense
 
-  const prevIncome = ownedPrevTransactions.filter((t) => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0)
+  const prevIncome = ownedPrevTransactions
+    .filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY)
+    .reduce((s, t) => s + Number(t.amount), 0)
   const prevExpense = ownedPrevTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
   const prevBalance = prevIncome - prevExpense
 
