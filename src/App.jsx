@@ -529,10 +529,12 @@ export default function App() {
 
           <ExpenseChart transactions={ownedTransactions} />
 
-          <MonthComparison
-            current={{ income: totalIncome, expense: totalExpense, balance }}
-            previous={{ income: prevIncome, expense: prevExpense, balance: prevBalance }}
-          />
+          <Collapsible title="전월 대비">
+            <MonthComparison
+              current={{ income: totalIncome, expense: totalExpense, balance }}
+              previous={{ income: prevIncome, expense: prevExpense, balance: prevBalance }}
+            />
+          </Collapsible>
 
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
             <Collapsible title="내역 추가">

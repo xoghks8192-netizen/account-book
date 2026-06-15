@@ -662,6 +662,10 @@ body {
   padding: 0 16px 16px;
 }
 
+.collapsible-body .comparison {
+  padding: 0;
+}
+
 .comparison-item {
   flex: 1;
   text-align: center;
