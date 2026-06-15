@@ -31,6 +31,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   const [editAuthor, setEditAuthor] = useState(currentUser || owners[0])
   const [linkedAssetId, setLinkedAssetId] = useState('')
   const [editLinkedAssetId, setEditLinkedAssetId] = useState('')
+  const [reordering, setReordering] = useState(false)
 
   useEffect(() => {
     if (ownerFilter !== '전체') {
@@ -204,12 +205,32 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
 
   return (
     <Collapsible title="고정 지출/수입">
-      <div className="owner-tabs" style={{ padding: '0 0 12px', margin: 0 }}>
+      <div className="owner-tabs" style={{ padding: '0 0 12px', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
         {['전체', ...owners].map((o) => (
           <button key={o} className={ownerFilter === o ? 'active' : ''} onClick={() => setOwnerFilter(o)}>
             {o}
           </button>
         ))}
+        {visibleTemplates.length > 1 && (
+          <button
+            type="button"
+            onClick={() => setReordering((prev) => !prev)}
+            style={{
+              marginLeft: 'auto',
+              flexShrink: 0,
+              border: '1.5px solid #e8e3f7',
+              borderRadius: 12,
+              background: reordering ? '#b896ff' : '#fdeef3',
+              color: reordering ? '#fff' : '#b88a9c',
+              fontWeight: 600,
+              fontSize: 13,
+              padding: '4px 12px',
+              cursor: 'pointer',
+            }}
+          >
+            {reordering ? '완료' : '순서 변경'}
+          </button>
+        )}
       </div>
 
       {visibleTemplates.length === 0 && !showForm && <div className="empty">등록된 항목이 없습니다.</div>}
@@ -307,42 +328,44 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
           </div>
         ) : (
           <div className="tx-item" key={t.id}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 4 }}>
-              <button
-                onClick={() => handleMove(t.id, -1)}
-                disabled={templates.findIndex((x) => x.id === t.id) === 0}
-                title="위로"
-                style={{
-                  fontSize: 11,
-                  padding: '2px 4px',
-                  lineHeight: 1,
-                  border: 'none',
-                  borderRadius: 6,
-                  background: '#f1eefb',
-                  color: '#9b8fc0',
-                  cursor: 'pointer',
-                }}
-              >
-                ▲
-              </button>
-              <button
-                onClick={() => handleMove(t.id, 1)}
-                disabled={templates.findIndex((x) => x.id === t.id) === templates.length - 1}
-                title="아래로"
-                style={{
-                  fontSize: 11,
-                  padding: '2px 4px',
-                  lineHeight: 1,
-                  border: 'none',
-                  borderRadius: 6,
-                  background: '#f1eefb',
-                  color: '#9b8fc0',
-                  cursor: 'pointer',
-                }}
-              >
-                ▼
-              </button>
-            </div>
+            {reordering && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 4 }}>
+                <button
+                  onClick={() => handleMove(t.id, -1)}
+                  disabled={templates.findIndex((x) => x.id === t.id) === 0}
+                  title="위로"
+                  style={{
+                    fontSize: 11,
+                    padding: '2px 4px',
+                    lineHeight: 1,
+                    border: 'none',
+                    borderRadius: 6,
+                    background: '#f1eefb',
+                    color: '#9b8fc0',
+                    cursor: 'pointer',
+                  }}
+                >
+                  ▲
+                </button>
+                <button
+                  onClick={() => handleMove(t.id, 1)}
+                  disabled={templates.findIndex((x) => x.id === t.id) === templates.length - 1}
+                  title="아래로"
+                  style={{
+                    fontSize: 11,
+                    padding: '2px 4px',
+                    lineHeight: 1,
+                    border: 'none',
+                    borderRadius: 6,
+                    background: '#f1eefb',
+                    color: '#9b8fc0',
+                    cursor: 'pointer',
+                  }}
+                >
+                  ▼
+                </button>
+              </div>
+            )}
             <div className="tx-info">
               <span className="category">{t.name}</span>
               <span className="meta">

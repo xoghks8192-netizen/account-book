@@ -16,6 +16,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
   const [editMemo, setEditMemo] = useState('')
   const [editLinkedAssetId, setEditLinkedAssetId] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showMore, setShowMore] = useState(false)
 
   function startEdit(tx) {
     setEditingId(tx.id)
@@ -26,6 +27,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
     setEditOwner(tx.owner || owners[0])
     setEditMemo(tx.memo ?? '')
     setEditLinkedAssetId(tx.linked_asset_id ? String(tx.linked_asset_id) : '')
+    setShowMore(false)
   }
 
   function handleEditTypeChange(newType) {
@@ -115,21 +117,35 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
                 ))}
               </select>
             </div>
-            <div className="form-row">
-              <label>연동될 자산 (선택)</label>
-              <select value={editLinkedAssetId} onChange={(e) => setEditLinkedAssetId(e.target.value)}>
-                <option value="">선택 안함</option>
-                {editOwnerAssets.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name} ({a.category} · {a.owner})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-row">
-              <label>메모 (선택)</label>
-              <input type="text" value={editMemo} onChange={(e) => setEditMemo(e.target.value)} placeholder="메모" />
-            </div>
+            <button
+              type="button"
+              className="collapsible-toggle"
+              style={{ marginBottom: 12 }}
+              onClick={() => setShowMore((prev) => !prev)}
+            >
+              {showMore ? '추가 옵션 접기 ▲' : '연동 자산 · 메모 ▼'}
+            </button>
+
+            {showMore && (
+              <>
+                <div className="form-row">
+                  <label>연동될 자산 (선택)</label>
+                  <select value={editLinkedAssetId} onChange={(e) => setEditLinkedAssetId(e.target.value)}>
+                    <option value="">선택 안함</option>
+                    {editOwnerAssets.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name} ({a.category} · {a.owner})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-row">
+                  <label>메모 (선택)</label>
+                  <input type="text" value={editMemo} onChange={(e) => setEditMemo(e.target.value)} placeholder="메모" />
+                </div>
+              </>
+            )}
+
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={() => handleSave(tx.id)} disabled={saving} className="submit-btn" style={{ flex: 1 }}>
                 저장
