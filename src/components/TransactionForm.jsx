@@ -162,13 +162,14 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
 
       {type === 'expense' && partner && (
         <div className="form-row">
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontWeight: 600 }}>
             <input
               type="checkbox"
               checked={transferToSpouse}
               onChange={(e) => setTransferToSpouse(e.target.checked)}
+              style={{ width: 'auto', flexShrink: 0, padding: 0 }}
             />
-            💸 {partner}에게 보낸 돈 (상대방 수입으로 자동 등록)
+            <span>💸 {partner}에게 보낸 돈 (상대방 수입으로 자동 등록)</span>
           </label>
         </div>
       )}
