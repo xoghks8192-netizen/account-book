@@ -57,6 +57,7 @@ export default function App() {
   const [linkableAssets, setLinkableAssets] = useState([])
   const [exporting, setExporting] = useState(false)
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'light')
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
 
   const householdId = user?.householdId
   const myName = user?.displayName
@@ -387,7 +388,7 @@ export default function App() {
         {myName}님 반가워요 🌸
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '8px 16px', fontSize: 13, color: '#c0a3b0' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '8px 16px', fontSize: 13, color: '#c0a3b0', position: 'relative' }}>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
           <button
             onClick={() => window.location.reload()}
@@ -402,25 +403,55 @@ export default function App() {
             {theme === 'dark' ? '☀️ 라이트모드' : '🌙 다크모드'}
           </button>
           <button
-            onClick={handleExportAll}
-            disabled={exporting}
-            style={{ border: 'none', background: 'none', color: '#7ec8a0', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
+            onClick={() => setShowMoreMenu((prev) => !prev)}
+            style={{ border: 'none', background: 'none', color: '#a89cc4', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
           >
-            {exporting ? '내보내는 중...' : '데이터 백업'}
-          </button>
-          <button
-            onClick={() => setShowPasswordForm((prev) => !prev)}
-            style={{ border: 'none', background: 'none', color: '#b896ff', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
-          >
-            내 정보 변경
-          </button>
-          <button
-            onClick={handleLogout}
-            style={{ border: 'none', background: 'none', color: '#ff8fab', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
-          >
-            로그아웃
+            ⋯ 더보기
           </button>
         </div>
+        {showMoreMenu && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '100%',
+              marginTop: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4,
+              background: 'var(--card-bg)',
+              borderRadius: 12,
+              boxShadow: '0 2px 8px var(--card-shadow)',
+              padding: 8,
+              zIndex: 10,
+            }}
+          >
+            <button
+              onClick={() => {
+                setShowMoreMenu(false)
+                handleExportAll()
+              }}
+              disabled={exporting}
+              style={{ border: 'none', background: 'none', color: '#7ec8a0', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif', padding: '4px 12px', textAlign: 'left' }}
+            >
+              {exporting ? '내보내는 중...' : '데이터 백업'}
+            </button>
+            <button
+              onClick={() => {
+                setShowMoreMenu(false)
+                setShowPasswordForm((prev) => !prev)
+              }}
+              style={{ border: 'none', background: 'none', color: '#b896ff', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif', padding: '4px 12px', textAlign: 'left' }}
+            >
+              내 정보 변경
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{ border: 'none', background: 'none', color: '#ff8fab', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif', padding: '4px 12px', textAlign: 'left' }}
+            >
+              로그아웃
+            </button>
+          </div>
+        )}
       </div>
 
       {showPasswordForm && (
@@ -485,16 +516,13 @@ export default function App() {
               <div className="label">합계</div>
               <div className="value">{formatAmount(balance)}</div>
             </div>
-          </div>
-
-          {transferReceived > 0 && (
-            <div className="summary">
+            {transferReceived > 0 && (
               <div className="summary-item income">
                 <div className="label">💸 받은 이체</div>
                 <div className="value">{formatAmount(transferReceived)}</div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           <MonthComparison
             current={{ income: totalIncome, expense: totalExpense, balance }}
@@ -502,39 +530,6 @@ export default function App() {
           />
 
           <ExpenseChart transactions={ownedTransactions} />
-
-          <Collapsible title="거래 캘린더">
-            <TransactionCalendar
-              transactions={ownedTransactions}
-              year={cursor.year}
-              month={cursor.month}
-              onDeleteDate={handleDelete}
-              onChangeMonth={changeMonth}
-            />
-          </Collapsible>
-
-          <RecurringTemplates
-            currentUser={myName}
-            owners={owners}
-            householdId={householdId}
-            assets={linkableAssets}
-            categories={categories}
-            onAddCategory={handleAddCategory}
-            onRemoveCategory={handleRemoveCategory}
-            onUndo={handleDelete}
-            onQuickAdd={(t) =>
-              handleAdd({
-                type: t.type,
-                category: t.category,
-                amount: t.amount,
-                memo: t.memo,
-                author: t.author,
-                owner: t.author,
-                date: new Date().toISOString().slice(0, 10),
-                linked_asset_id: t.linked_asset_id ?? null,
-              })
-            }
-          />
 
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
             <Collapsible title="내역 추가">
@@ -635,6 +630,39 @@ export default function App() {
               />
             </Collapsible>
           )}
+
+          <RecurringTemplates
+            currentUser={myName}
+            owners={owners}
+            householdId={householdId}
+            assets={linkableAssets}
+            categories={categories}
+            onAddCategory={handleAddCategory}
+            onRemoveCategory={handleRemoveCategory}
+            onUndo={handleDelete}
+            onQuickAdd={(t) =>
+              handleAdd({
+                type: t.type,
+                category: t.category,
+                amount: t.amount,
+                memo: t.memo,
+                author: t.author,
+                owner: t.author,
+                date: new Date().toISOString().slice(0, 10),
+                linked_asset_id: t.linked_asset_id ?? null,
+              })
+            }
+          />
+
+          <Collapsible title="거래 캘린더">
+            <TransactionCalendar
+              transactions={ownedTransactions}
+              year={cursor.year}
+              month={cursor.month}
+              onDeleteDate={handleDelete}
+              onChangeMonth={changeMonth}
+            />
+          </Collapsible>
 
           <TransactionInsight
             transactions={ownedTransactions}
