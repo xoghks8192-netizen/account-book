@@ -38,3 +38,18 @@ export const EXPENSE_CATEGORY_COLORS = {
   비상금: '#ffc6ff',
   기타지출: '#e0c3cf',
 }
+
+// 위 목록에 없는 새 카테고리(직접 추가한 카테고리)에 자동으로 배정되는 색상
+const FALLBACK_CATEGORY_COLORS = [
+  '#ffafcc', '#a2d2ff', '#cdb4db', '#ffd6a5', '#b9fbc0',
+  '#90dbf4', '#fbc4ab', '#d0bdf4', '#a3c4f3', '#ffc8dd',
+]
+
+export function getCategoryColor(category) {
+  if (EXPENSE_CATEGORY_COLORS[category]) return EXPENSE_CATEGORY_COLORS[category]
+  let hash = 0
+  for (let i = 0; i < category.length; i++) {
+    hash = (hash * 31 + category.charCodeAt(i)) % FALLBACK_CATEGORY_COLORS.length
+  }
+  return FALLBACK_CATEGORY_COLORS[hash]
+}

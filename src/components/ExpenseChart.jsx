@@ -1,10 +1,14 @@
-import { EXPENSE_CATEGORY_COLORS } from '../categories'
+import { useState } from 'react'
+import { getCategoryColor } from '../categories'
+
+const VISIBLE_COUNT = 5
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
 export default function ExpenseChart({ transactions }) {
+  const [showAll, setShowAll] = useState(false)
   const expenseByCategory = transactions
     .filter((t) => t.type === 'expense')
     .reduce((acc, t) => {
@@ -22,9 +26,11 @@ export default function ExpenseChart({ transactions }) {
     const from = (acc / total) * 360
     acc += amount
     const to = (acc / total) * 360
-    const color = EXPENSE_CATEGORY_COLORS[category] || '#e0c3cf'
-    return `${color} ${from}deg ${to}deg`
+    return `${getCategoryColor(category)} ${from}deg ${to}deg`
   })
+
+  const visibleData = showAll ? data : data.slice(0, VISIBLE_COUNT)
+  const hiddenCount = data.length - visibleData.length
 
   return (
     <div className="asset-chart">
@@ -35,13 +41,23 @@ export default function ExpenseChart({ transactions }) {
         </div>
       </div>
       <div className="legend">
-        {data.map(([category, amount]) => (
+        {visibleData.map(([category, amount]) => (
           <div className="legend-item" key={category}>
-            <span className="dot" style={{ background: EXPENSE_CATEGORY_COLORS[category] || '#e0c3cf' }} />
+            <span className="dot" style={{ background: getCategoryColor(category) }} />
             <span className="legend-category">{category}</span>
             <span className="legend-percent">{((amount / total) * 100).toFixed(1)}%</span>
           </div>
         ))}
+        {hiddenCount > 0 && (
+          <button type="button" className="collapsible-toggle" style={{ alignSelf: 'flex-start' }} onClick={() => setShowAll(true)}>
+            +{hiddenCount}개 더보기 ▼
+          </button>
+        )}
+        {showAll && data.length > VISIBLE_COUNT && (
+          <button type="button" className="collapsible-toggle" style={{ alignSelf: 'flex-start' }} onClick={() => setShowAll(false)}>
+            접기 ▲
+          </button>
+        )}
       </div>
     </div>
   )

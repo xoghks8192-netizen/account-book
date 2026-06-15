@@ -527,12 +527,12 @@ export default function App() {
             </div>
           )}
 
+          <ExpenseChart transactions={ownedTransactions} />
+
           <MonthComparison
             current={{ income: totalIncome, expense: totalExpense, balance }}
             previous={{ income: prevIncome, expense: prevExpense, balance: prevBalance }}
           />
-
-          <ExpenseChart transactions={ownedTransactions} />
 
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
             <Collapsible title="내역 추가">
