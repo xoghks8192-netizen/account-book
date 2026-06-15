@@ -64,7 +64,7 @@ ${categoryLines}
   }
 
   return (
-    <Collapsible title="AI 자산 예측" className="list">
+    <Collapsible title="AI 자산 예측">
       <div className="form-row">
         <label>몇 개월 후</label>
         <input
