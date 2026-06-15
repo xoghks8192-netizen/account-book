@@ -17,10 +17,14 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
   const [saving, setSaving] = useState(false)
   const [linkedAssetId, setLinkedAssetId] = useState('')
   const [showCategoryManager, setShowCategoryManager] = useState(false)
+  const [transferToSpouse, setTransferToSpouse] = useState(false)
+
+  const partner = owners.find((o) => o !== '공동' && o !== owner)
 
   function handleTypeChange(newType) {
     setType(newType)
     setCategory(categories[newType][0])
+    if (newType !== 'expense') setTransferToSpouse(false)
   }
 
   function handleOwnerChange(newOwner) {
@@ -43,9 +47,22 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
       owner,
       linked_asset_id: linkedAssetId || null,
     })
+    if (result && type === 'expense' && transferToSpouse && partner) {
+      await onAdd({
+        type: 'income',
+        date,
+        category: '배우자 이체',
+        amount: Number(amount),
+        memo: memo.trim() || `${owner}님이 보낸 돈`,
+        owner: partner,
+        author: partner,
+        linked_asset_id: null,
+      })
+    }
     setAmount('')
     setMemo('')
     setLinkedAssetId('')
+    setTransferToSpouse(false)
     setSaving(false)
     if (result) {
       alert('추가 완료되었습니다.')
@@ -142,6 +159,19 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
           ))}
         </select>
       </div>
+
+      {type === 'expense' && partner && (
+        <div className="form-row">
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={transferToSpouse}
+              onChange={(e) => setTransferToSpouse(e.target.checked)}
+            />
+            💸 {partner}에게 보낸 돈 (상대방 수입으로 자동 등록)
+          </label>
+        </div>
+      )}
 
       <div className="form-row">
         <label>연동될 자산 (선택)</label>
