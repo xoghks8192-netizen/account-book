@@ -226,6 +226,9 @@ export default function App() {
     .reduce((s, t) => s + Number(t.amount), 0)
   const totalExpense = ownedTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
   const balance = totalIncome - totalExpense
+  const transferReceived = ownedTransactions
+    .filter((t) => t.type === 'income' && t.category === TRANSFER_CATEGORY)
+    .reduce((s, t) => s + Number(t.amount), 0)
 
   const prevIncome = ownedPrevTransactions
     .filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY)
@@ -483,6 +486,15 @@ export default function App() {
               <div className="value">{formatAmount(balance)}</div>
             </div>
           </div>
+
+          {transferReceived > 0 && (
+            <div className="summary">
+              <div className="summary-item income">
+                <div className="label">💸 받은 이체</div>
+                <div className="value">{formatAmount(transferReceived)}</div>
+              </div>
+            </div>
+          )}
 
           <MonthComparison
             current={{ income: totalIncome, expense: totalExpense, balance }}
