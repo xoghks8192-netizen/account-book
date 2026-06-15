@@ -205,19 +205,22 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
 
   return (
     <Collapsible title="고정 지출/수입">
-      <div className="owner-tabs" style={{ padding: '0 0 12px', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div className="owner-tabs" style={{ padding: '0 0 12px', margin: 0 }}>
         {['전체', ...owners].map((o) => (
           <button key={o} className={ownerFilter === o ? 'active' : ''} onClick={() => setOwnerFilter(o)}>
             {o}
           </button>
         ))}
-        {visibleTemplates.length > 1 && (
+      </div>
+
+      {visibleTemplates.length > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
           <button
             type="button"
             onClick={() => setReordering((prev) => !prev)}
             style={{
-              marginLeft: 'auto',
               flexShrink: 0,
+              whiteSpace: 'nowrap',
               border: '1.5px solid #e8e3f7',
               borderRadius: 12,
               background: reordering ? '#b896ff' : '#fdeef3',
@@ -230,8 +233,8 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
           >
             {reordering ? '완료' : '순서 변경'}
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {visibleTemplates.length === 0 && !showForm && <div className="empty">등록된 항목이 없습니다.</div>}
 
