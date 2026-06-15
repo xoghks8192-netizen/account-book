@@ -12,6 +12,7 @@ import ChangePassword from './components/ChangePassword'
 import Collapsible from './components/Collapsible'
 import TransactionInsight from './components/TransactionInsight'
 import TransactionCalendar from './components/TransactionCalendar'
+import Modal from './components/Modal'
 import { toCSV, downloadCSV } from './lib/csv'
 import { loadSession, saveSession, clearSession } from './users'
 import { STOCK_CATEGORIES } from './assetMeta'
@@ -58,6 +59,7 @@ export default function App() {
   const [exporting, setExporting] = useState(false)
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'light')
   const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [summaryModal, setSummaryModal] = useState(null)
 
   const householdId = user?.householdId
   const myName = user?.displayName
@@ -230,6 +232,18 @@ export default function App() {
   const transferReceived = ownedTransactions
     .filter((t) => t.type === 'income' && t.category === TRANSFER_CATEGORY)
     .reduce((s, t) => s + Number(t.amount), 0)
+
+  function groupByCategory(items) {
+    return items.reduce((acc, t) => {
+      acc[t.category] = (acc[t.category] || 0) + Number(t.amount)
+      return acc
+    }, {})
+  }
+
+  const incomeByCategory = groupByCategory(
+    ownedTransactions.filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY),
+  )
+  const expenseByCategory = groupByCategory(ownedTransactions.filter((t) => t.type === 'expense'))
 
   const prevIncome = ownedPrevTransactions
     .filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY)
@@ -504,15 +518,15 @@ export default function App() {
           </div>
 
           <div className="summary">
-            <div className="summary-item income">
+            <div className="summary-item income clickable" onClick={() => setSummaryModal('수입')}>
               <div className="label">수입</div>
               <div className="value">{formatAmount(totalIncome)}</div>
             </div>
-            <div className="summary-item expense">
+            <div className="summary-item expense clickable" onClick={() => setSummaryModal('지출')}>
               <div className="label">지출</div>
               <div className="value">{formatAmount(totalExpense)}</div>
             </div>
-            <div className="summary-item balance">
+            <div className="summary-item balance clickable" onClick={() => setSummaryModal('합계')}>
               <div className="label">합계</div>
               <div className="value">{formatAmount(balance)}</div>
             </div>
@@ -525,6 +539,65 @@ export default function App() {
                 <div className="value">{formatAmount(transferReceived)}</div>
               </div>
             </div>
+          )}
+
+          {summaryModal === '수입' && (
+            <Modal title="수입" onClose={() => setSummaryModal(null)}>
+              {Object.keys(incomeByCategory).length === 0 ? (
+                <div className="empty">수입 내역이 없습니다.</div>
+              ) : (
+                Object.entries(incomeByCategory)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([category, amount]) => (
+                    <div key={category} className="modal-row">
+                      <span className="modal-row-name">{category}</span>
+                      <span className="modal-row-amount">{formatAmount(amount)}원</span>
+                    </div>
+                  ))
+              )}
+              <div className="modal-total-row">
+                <span>합계</span>
+                <span className="modal-row-amount">{formatAmount(totalIncome)}원</span>
+              </div>
+            </Modal>
+          )}
+
+          {summaryModal === '지출' && (
+            <Modal title="지출" onClose={() => setSummaryModal(null)}>
+              {Object.keys(expenseByCategory).length === 0 ? (
+                <div className="empty">지출 내역이 없습니다.</div>
+              ) : (
+                Object.entries(expenseByCategory)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([category, amount]) => (
+                    <div key={category} className="modal-row">
+                      <span className="modal-row-name">{category}</span>
+                      <span className="modal-row-amount">{formatAmount(amount)}원</span>
+                    </div>
+                  ))
+              )}
+              <div className="modal-total-row">
+                <span>합계</span>
+                <span className="modal-row-amount">{formatAmount(totalExpense)}원</span>
+              </div>
+            </Modal>
+          )}
+
+          {summaryModal === '합계' && (
+            <Modal title="합계" onClose={() => setSummaryModal(null)}>
+              <div className="modal-row">
+                <span className="modal-row-name">수입</span>
+                <span className="modal-row-amount">{formatAmount(totalIncome)}원</span>
+              </div>
+              <div className="modal-row">
+                <span className="modal-row-name">지출</span>
+                <span className="modal-row-amount">{formatAmount(totalExpense)}원</span>
+              </div>
+              <div className="modal-total-row">
+                <span>합계</span>
+                <span className="modal-row-amount">{formatAmount(balance)}원</span>
+              </div>
+            </Modal>
           )}
 
           <ExpenseChart transactions={ownedTransactions} />

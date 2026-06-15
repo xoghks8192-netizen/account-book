@@ -219,6 +219,10 @@ body {
   gap: 8px;
 }
 
+.summary + .summary {
+  padding-top: 0;
+}
+
 .summary-item {
   flex: 1;
   text-align: center;
