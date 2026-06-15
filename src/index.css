@@ -92,6 +92,7 @@ body {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
+  padding-bottom: 24px;
   background: var(--bg-root);
   box-shadow: 0 0 30px var(--shadow-root);
   transition: background 0.2s ease;
