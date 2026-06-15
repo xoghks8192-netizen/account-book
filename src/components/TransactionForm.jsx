@@ -165,7 +165,7 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
 
       {type === 'expense' && partner && (
         <div className="form-row">
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontWeight: 600 }}>
+          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, cursor: 'pointer', fontWeight: 600 }}>
             <input
               type="checkbox"
               checked={transferToSpouse}
