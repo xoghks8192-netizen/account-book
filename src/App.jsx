@@ -487,22 +487,20 @@ export default function App() {
         />
       ) : (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px 4px' }}>
-            <div className="month-nav" style={{ padding: 0, gap: 4, flexShrink: 0 }}>
-              <button onClick={() => changeMonth(-1)}>‹</button>
-              <h2 style={{ fontSize: 15, whiteSpace: 'nowrap' }}>
-                {cursor.year}년 {cursor.month + 1}월
-              </h2>
-              <button onClick={() => changeMonth(1)}>›</button>
-            </div>
+          <div className="month-nav">
+            <button onClick={() => changeMonth(-1)}>‹</button>
+            <h2>
+              {cursor.year}년 {cursor.month + 1}월
+            </h2>
+            <button onClick={() => changeMonth(1)}>›</button>
+          </div>
 
-              <div className="owner-tabs" style={{ flex: 1, padding: 0 }}>
-                {['전체', ...owners].map((o) => (
-                  <button key={o} className={ownerFilter === o ? 'active' : ''} onClick={() => setOwnerFilter(o)}>
-                    {o}
-                  </button>
-                ))}
-              </div>
+          <div className="owner-tabs">
+            {['전체', ...owners].map((o) => (
+              <button key={o} className={ownerFilter === o ? 'active' : ''} onClick={() => setOwnerFilter(o)}>
+                {o}
+              </button>
+            ))}
           </div>
 
           <div className="summary">
