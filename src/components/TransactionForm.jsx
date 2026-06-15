@@ -170,7 +170,7 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
               onChange={(e) => setTransferToSpouse(e.target.checked)}
               style={{ width: 'auto', flexShrink: 0, padding: 0 }}
             />
-            <span>💸 {partner}에게 보낸 돈 (상대방 수입으로 자동 등록)</span>
+            <span>💸 {partner}님에게 보낸 돈 (상대방 수입으로 자동 등록)</span>
           </label>
         </div>
       )}
