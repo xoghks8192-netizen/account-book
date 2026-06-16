@@ -205,7 +205,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
                   {tx.type === 'income' ? '+' : '-'}
                   {formatAmount(tx.amount)}원
                 </span>
-                <span className="swipe-hint">⋮</span>
+                <span className="swipe-hint"><span/><span/><span/></span>
               </div>
             </div>
             <div className="tx-swipe-actions">
