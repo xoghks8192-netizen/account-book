@@ -39,7 +39,7 @@ export default function TransactionForm({ onAdd, onSuccess, currentUser, owners,
     e.preventDefault()
     if (!amount || Number(amount) <= 0) return
     setSaving(true)
-    const isTransfer = type === 'expense' && transferToSpouse && partner
+    const isTransfer = type === 'expense' && (transferToSpouse || category === TRANSFER_CATEGORY) && partner
     const result = await onAdd({
       type,
       date,
