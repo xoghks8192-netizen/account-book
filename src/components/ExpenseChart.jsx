@@ -10,6 +10,7 @@ function formatAmount(n) {
 
 export default function ExpenseChart({ transactions }) {
   const [showAll, setShowAll] = useState(false)
+  const [showModal, setShowModal] = useState(false)
 
   const expenseByCategory = transactions
     .filter((t) => t.type === 'expense')
@@ -33,8 +34,6 @@ export default function ExpenseChart({ transactions }) {
 
   const visibleData = showAll ? data : data.slice(0, VISIBLE_COUNT)
   const hiddenCount = data.length - visibleData.length
-
-  const [showModal, setShowModal] = useState(false)
 
   return (
     <div className="asset-chart clickable" onClick={() => setShowModal(true)} style={{ cursor: 'pointer' }}>
