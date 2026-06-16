@@ -487,6 +487,20 @@ body {
   transform: translateX(0);
 }
 
+@media (pointer: fine) {
+  .tx-swipe-actions {
+    transform: translateX(0);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .tx-item:hover .tx-swipe-actions {
+    opacity: 1;
+  }
+  .tx-item.swiped .tx-swipe-actions {
+    opacity: 1;
+  }
+}
+
 .swipe-btn {
   width: 56px;
   height: 100%;
