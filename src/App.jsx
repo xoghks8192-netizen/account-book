@@ -246,6 +246,13 @@ export default function App() {
     .filter((t) => t.type === 'income' && t.category === TRANSFER_CATEGORY)
     .reduce((s, t) => s + Number(t.amount), 0)
 
+  const transferSent =
+    ownerFilter !== '전체' && ownerFilter !== '공동'
+      ? transactions
+          .filter((t) => t.type === 'income' && t.category === TRANSFER_CATEGORY && t.owner !== ownerFilter)
+          .reduce((s, t) => s + Number(t.amount), 0)
+      : 0
+
   function groupByCategory(items) {
     return items.reduce((acc, t) => {
       acc[t.category] = (acc[t.category] || 0) + Number(t.amount)
@@ -541,6 +548,9 @@ export default function App() {
             <div className="summary-item expense clickable" onClick={() => setSummaryModal('지출')}>
               <div className="label">지출</div>
               <div className="value">{formatAmount(totalExpense)}</div>
+              {transferSent > 0 && (
+                <div className="sub-label">💸 이체 -{formatAmount(transferSent)}</div>
+              )}
             </div>
             <div className="summary-item balance">
               <div className="label">합계</div>

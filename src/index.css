@@ -715,6 +715,47 @@ body {
 .trend-legend-item.income::before { background: var(--income-color); opacity: 0.7; }
 .trend-legend-item.expense::before { background: var(--expense-color); opacity: 0.85; }
 
+.trend-col {
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.trend-col-active {
+  background: var(--form-border);
+}
+
+.trend-tooltip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 22px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.trend-tooltip.visible {
+  opacity: 1;
+}
+
+.trend-tooltip-month {
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.trend-tooltip-income {
+  color: var(--income-color);
+  font-weight: 600;
+}
+
+.trend-tooltip-expense {
+  color: var(--expense-color);
+  font-weight: 600;
+}
+
 .toast {
   position: fixed;
   bottom: 80px;

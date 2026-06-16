@@ -8,6 +8,7 @@ function formatAmount(n) {
 
 export default function MonthlyTrendChart({ householdId, ownerFilter, owners }) {
   const [data, setData] = useState([])
+  const [hovered, setHovered] = useState(null)
 
   useEffect(() => {
     if (!householdId) return
@@ -47,28 +48,39 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners }) 
 
   if (!data.length) return null
   const maxVal = Math.max(...data.map((d) => Math.max(d.expense, d.income)), 1)
+  const h = hovered !== null ? data[hovered] : null
 
   return (
     <Collapsible title="월별 추이">
       <div className="trend-chart">
-        {data.map(({ label, expense, income }) => (
-          <div key={label} className="trend-col">
+        {data.map(({ label, expense, income }, i) => (
+          <div
+            key={label}
+            className={`trend-col${hovered === i ? ' trend-col-active' : ''}`}
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+            onTouchStart={() => setHovered(i)}
+            onTouchEnd={() => setTimeout(() => setHovered(null), 1500)}
+          >
             <div className="trend-bars">
-              <div
-                className="trend-bar income"
-                style={{ height: `${(income / maxVal) * 100}%` }}
-                title={`수입 ${formatAmount(income)}원`}
-              />
-              <div
-                className="trend-bar expense"
-                style={{ height: `${(expense / maxVal) * 100}%` }}
-                title={`지출 ${formatAmount(expense)}원`}
-              />
+              <div className="trend-bar income" style={{ height: `${(income / maxVal) * 100}%` }} />
+              <div className="trend-bar expense" style={{ height: `${(expense / maxVal) * 100}%` }} />
             </div>
             <div className="trend-label">{label}</div>
           </div>
         ))}
       </div>
+
+      <div className={`trend-tooltip${h ? ' visible' : ''}`}>
+        {h ? (
+          <>
+            <span className="trend-tooltip-month">{h.label}</span>
+            <span className="trend-tooltip-income">수입 {formatAmount(h.income)}원</span>
+            <span className="trend-tooltip-expense">지출 {formatAmount(h.expense)}원</span>
+          </>
+        ) : <span>&nbsp;</span>}
+      </div>
+
       <div className="trend-legend">
         <span className="trend-legend-item income">수입</span>
         <span className="trend-legend-item expense">지출</span>
