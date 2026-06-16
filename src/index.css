@@ -806,6 +806,17 @@ body {
   flex: 1;
 }
 
+.legend-item.clickable {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 2px 4px;
+  margin: 0 -4px;
+  transition: background 0.15s;
+}
+.legend-item.clickable:hover {
+  background: var(--tab-bg);
+}
+
 .empty {
   text-align: center;
   color: var(--empty-text);

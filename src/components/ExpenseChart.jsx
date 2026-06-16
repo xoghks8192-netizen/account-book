@@ -1,14 +1,25 @@
 import { useState } from 'react'
 import { getCategoryColor } from '../categories'
+import Modal from './Modal'
 
 const VISIBLE_COUNT = 5
+const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토']
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${mm}.${dd} (${DAY_NAMES[d.getDay()]})`
+}
+
 export default function ExpenseChart({ transactions }) {
   const [showAll, setShowAll] = useState(false)
+  const [detailCategory, setDetailCategory] = useState(null)
+
   const expenseByCategory = transactions
     .filter((t) => t.type === 'expense')
     .reduce((acc, t) => {
@@ -32,8 +43,29 @@ export default function ExpenseChart({ transactions }) {
   const visibleData = showAll ? data : data.slice(0, VISIBLE_COUNT)
   const hiddenCount = data.length - visibleData.length
 
+  const detailTxs = detailCategory
+    ? transactions.filter((t) => t.type === 'expense' && t.category === detailCategory).sort((a, b) => b.date.localeCompare(a.date))
+    : []
+  const detailTotal = detailTxs.reduce((s, t) => s + Number(t.amount), 0)
+
   return (
     <div className="asset-chart">
+      {detailCategory && (
+        <Modal title={`${detailCategory} 상세`} onClose={() => setDetailCategory(null)}>
+          <div className="modal-section-title" style={{ marginBottom: 8 }}>
+            총 {formatAmount(detailTotal)}원 · {((detailTotal / total) * 100).toFixed(1)}%
+          </div>
+          {detailTxs.map((t) => (
+            <div key={t.id} className="modal-row">
+              <span className="modal-row-name">
+                {t.memo || t.category}
+                <span className="modal-row-meta">{formatDate(t.date)}{t.owner ? ` · ${t.owner}` : ''}</span>
+              </span>
+              <span className="modal-row-amount">-{formatAmount(t.amount)}원</span>
+            </div>
+          ))}
+        </Modal>
+      )}
       <div className="donut" style={{ background: `conic-gradient(${stops.join(', ')})` }}>
         <div className="donut-hole">
           <span className="donut-label">이번 달 지출</span>
@@ -42,13 +74,10 @@ export default function ExpenseChart({ transactions }) {
       </div>
       <div className="legend">
         {visibleData.map(([category, amount]) => (
-          <div className="legend-item" key={category}>
+          <div className="legend-item clickable" key={category} onClick={() => setDetailCategory(category)}>
             <span className="dot" style={{ background: getCategoryColor(category) }} />
             <span className="legend-category">{category}</span>
-            <span className="legend-right">
-              <span className="legend-amount">{formatAmount(amount)}원</span>
-              <span className="legend-percent">{((amount / total) * 100).toFixed(1)}%</span>
-            </span>
+            <span className="legend-percent">{((amount / total) * 100).toFixed(1)}%</span>
           </div>
         ))}
         {hiddenCount > 0 && (

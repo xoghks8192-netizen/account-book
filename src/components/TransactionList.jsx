@@ -87,7 +87,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
       <div className="empty-state">
         <div className="empty-state-icon">📭</div>
         <div className="empty-state-title">이번 달 내역이 없어요</div>
-        <div className="empty-state-desc">아래 내역 추가 버튼으로 첫 번째 내역을 추가해보세요</div>
+        <div className="empty-state-desc">내역 추가 버튼으로 첫 번째 내역을 추가해보세요</div>
       </div>
     )
   }

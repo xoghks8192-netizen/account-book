@@ -597,11 +597,6 @@ export default function App() {
             <div className="summary-item income clickable" onClick={() => setSummaryModal('수입')}>
               <div className="label">수입</div>
               <div className="value">{formatAmount(totalIncome)}</div>
-              {prevIncome > 0 && (
-                <div className={`trend-badge ${totalIncome >= prevIncome ? 'up' : 'down'}`}>
-                  {totalIncome >= prevIncome ? '▲' : '▼'} {Math.abs(Math.round((totalIncome - prevIncome) / prevIncome * 100))}%
-                </div>
-              )}
               {transferReceived > 0 && ownerFilter !== '전체' && (
                 <div className="sub-label">💸 이체 +{formatAmount(transferReceived)}</div>
               )}
@@ -609,11 +604,6 @@ export default function App() {
             <div className="summary-item expense clickable" onClick={() => setSummaryModal('지출')}>
               <div className="label">지출</div>
               <div className="value">{formatAmount(totalExpense)}</div>
-              {prevExpense > 0 && (
-                <div className={`trend-badge ${totalExpense <= prevExpense ? 'up' : 'down'}`}>
-                  {totalExpense <= prevExpense ? '▼' : '▲'} {Math.abs(Math.round((totalExpense - prevExpense) / prevExpense * 100))}%
-                </div>
-              )}
               {transferSent > 0 && (
                 <div className="sub-label">💸 이체 -{formatAmount(transferSent)}</div>
               )}
