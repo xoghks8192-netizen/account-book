@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { ASSET_CATEGORIES, STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
 import CategoryManager from './CategoryManager'
 
-export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory }) {
+export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory, defaultOwner }) {
   const [name, setName] = useState('')
   const [category, setCategory] = useState(categories[0])
-  const [owner, setOwner] = useState(owners[0])
+  const [owner, setOwner] = useState(defaultOwner || owners[0])
   const [liquidity, setLiquidity] = useState(defaultLiquidity(categories[0]))
   const [amount, setAmount] = useState('')
   const [shares, setShares] = useState('')

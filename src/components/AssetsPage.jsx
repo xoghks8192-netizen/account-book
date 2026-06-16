@@ -255,7 +255,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
 
       {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === currentUser ? (
         <Collapsible title="자산 항목 추가">
-          <AssetForm onAdd={handleAdd} owners={owners} categories={categories} onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory} onMoveCategory={onMoveCategory} />
+          <AssetForm key={ownerFilter} onAdd={handleAdd} owners={owners} categories={categories} onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory} onMoveCategory={onMoveCategory} defaultOwner={ownerFilter === '전체' ? owners[0] : ownerFilter} />
         </Collapsible>
       ) : null}
 
