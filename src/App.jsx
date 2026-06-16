@@ -82,7 +82,13 @@ export default function App() {
   const householdId = user?.householdId
   const myName = user?.displayName
   const owners = [...(user?.members ?? []), '공동']
-  const categories = { ...DEFAULT_CATEGORIES, ...(user?.categories ?? {}) }
+  const rawCategories = { ...DEFAULT_CATEGORIES, ...(user?.categories ?? {}) }
+  const categories = {
+    ...rawCategories,
+    income: rawCategories.income.includes(TRANSFER_CATEGORY)
+      ? rawCategories.income
+      : [...rawCategories.income, TRANSFER_CATEGORY],
+  }
 
   const { start, end } = useMemo(() => monthRange(cursor.year, cursor.month), [cursor])
   const { start: prevStart, end: prevEnd } = useMemo(
