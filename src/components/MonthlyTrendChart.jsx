@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import Collapsible from './Collapsible'
+import { TRANSFER_CATEGORY } from '../categories'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
@@ -38,7 +39,7 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners }) 
           return true
         })
         const expense = filtered.filter((r) => r.type === 'expense').reduce((s, r) => s + Number(r.amount), 0)
-        const income = filtered.filter((r) => r.type === 'income').reduce((s, r) => s + Number(r.amount), 0)
+        const income = filtered.filter((r) => r.type === 'income' && r.category !== TRANSFER_CATEGORY).reduce((s, r) => s + Number(r.amount), 0)
         return { label, expense, income }
       })
       setData(result)
