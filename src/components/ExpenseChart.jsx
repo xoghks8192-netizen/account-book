@@ -7,7 +7,7 @@ function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-export default function ExpenseChart({ transactions, onOpen }) {
+export default function ExpenseChart({ transactions }) {
   const [showAll, setShowAll] = useState(false)
 
   const expenseByCategory = transactions
@@ -34,7 +34,7 @@ export default function ExpenseChart({ transactions, onOpen }) {
   const hiddenCount = data.length - visibleData.length
 
   return (
-    <div className="asset-chart clickable" onClick={onOpen} style={{ cursor: onOpen ? 'pointer' : 'default' }}>
+    <div className="asset-chart">
       <div className="donut" style={{ background: `conic-gradient(${stops.join(', ')})` }}>
         <div className="donut-hole">
           <span className="donut-label">이번 달 지출</span>

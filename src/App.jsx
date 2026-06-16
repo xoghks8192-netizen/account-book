@@ -601,7 +601,7 @@ export default function App() {
                 <div className="sub-label">💸 이체 +{formatAmount(transferReceived)}</div>
               )}
             </div>
-            <div className="summary-item expense">
+            <div className="summary-item expense clickable" onClick={() => setSummaryModal('지출')}>
               <div className="label">지출</div>
               <div className="value">{formatAmount(totalExpense)}</div>
               {transferSent > 0 && (
@@ -665,7 +665,7 @@ export default function App() {
             )
           })()}
 
-          <ExpenseChart transactions={ownedTransactions} onOpen={() => setSummaryModal('지출')} />
+          <ExpenseChart transactions={ownedTransactions} />
 
           <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} />
 
