@@ -513,7 +513,7 @@ body {
   height: 32px;
   border-radius: 50%;
   border: none;
-  background: var(--active-gradient);
+  background: linear-gradient(135deg, #56c97a, #2eaf6a);
   color: #fff;
   font-size: 20px;
   font-weight: 300;
