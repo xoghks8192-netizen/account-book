@@ -521,25 +521,19 @@ export default function App() {
             <div className="summary-item income clickable" onClick={() => setSummaryModal('수입')}>
               <div className="label">수입</div>
               <div className="value">{formatAmount(totalIncome)}</div>
+              {transferReceived > 0 && (
+                <div className="sub-label">💸 이체 +{formatAmount(transferReceived)}</div>
+              )}
             </div>
             <div className="summary-item expense clickable" onClick={() => setSummaryModal('지출')}>
               <div className="label">지출</div>
               <div className="value">{formatAmount(totalExpense)}</div>
             </div>
-            <div className="summary-item balance clickable" onClick={() => setSummaryModal('합계')}>
+            <div className="summary-item balance">
               <div className="label">합계</div>
               <div className="value">{formatAmount(balance)}</div>
             </div>
           </div>
-
-          {transferReceived > 0 && (
-            <div className="summary">
-              <div className="summary-item income">
-                <div className="label">💸 받은 이체</div>
-                <div className="value">{formatAmount(transferReceived)}</div>
-              </div>
-            </div>
-          )}
 
           {summaryModal === '수입' && (
             <Modal title="수입" onClose={() => setSummaryModal(null)}>
@@ -579,23 +573,6 @@ export default function App() {
               <div className="modal-total-row">
                 <span>합계</span>
                 <span className="modal-row-amount">{formatAmount(totalExpense)}원</span>
-              </div>
-            </Modal>
-          )}
-
-          {summaryModal === '합계' && (
-            <Modal title="합계" onClose={() => setSummaryModal(null)}>
-              <div className="modal-row">
-                <span className="modal-row-name">수입</span>
-                <span className="modal-row-amount">{formatAmount(totalIncome)}원</span>
-              </div>
-              <div className="modal-row">
-                <span className="modal-row-name">지출</span>
-                <span className="modal-row-amount">{formatAmount(totalExpense)}원</span>
-              </div>
-              <div className="modal-total-row">
-                <span>합계</span>
-                <span className="modal-row-amount">{formatAmount(balance)}원</span>
               </div>
             </Modal>
           )}

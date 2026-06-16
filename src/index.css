@@ -238,6 +238,13 @@ body {
   margin-bottom: 4px;
 }
 
+.summary-item .sub-label {
+  font-size: 11px;
+  color: var(--label-text);
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
 .summary-item .value {
   font-size: 16px;
   font-weight: 700;

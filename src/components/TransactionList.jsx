@@ -6,6 +6,14 @@ function formatAmount(n) {
   return n.toLocaleString('ko-KR')
 }
 
+const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토']
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${mm}.${dd} (${DAY_NAMES[d.getDay()]})`
+}
+
 export default function TransactionList({ transactions, onDelete, onUpdate, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory }) {
   const [editingId, setEditingId] = useState(null)
   const [editDate, setEditDate] = useState('')
@@ -174,7 +182,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
             <div className="tx-info">
               <span className="category">{tx.category}</span>
               <span className="meta">
-                {tx.date}
+                {formatDate(tx.date)}
                 {tx.owner ? ` · ${tx.owner}` : ''}
                 {tx.memo ? ` · ${tx.memo}` : ''}
               </span>
