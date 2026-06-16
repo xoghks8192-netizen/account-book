@@ -503,6 +503,18 @@ body {
   border-radius: 0 14px 14px 0;
 }
 
+.swipe-hint {
+  font-size: 16px;
+  color: var(--icon-muted);
+  line-height: 1;
+  user-select: none;
+  opacity: 0.5;
+}
+
+.tx-item.swiped .swipe-hint {
+  opacity: 0;
+}
+
 .tx-item.asset-edit {
   display: block;
   overflow: visible;

@@ -25,7 +25,7 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners }) 
 
       const { data: rows } = await supabase
         .from('transactions')
-        .select('date, type, amount, owner')
+        .select('date, type, amount, owner, category')
         .eq('household_id', householdId)
         .gte('date', months[0].start)
         .lt('date', months[months.length - 1].end)
