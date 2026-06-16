@@ -210,6 +210,31 @@ export default function App() {
       await adjustAssetAmount(data.linked_asset_id, Number(data.amount))
     }
 
+    if (data.category === TRANSFER_CATEGORY && data.type === 'expense') {
+      const partner = owners.find((o) => o !== '공동' && o !== data.owner)
+      if (partner) {
+        const { data: counterData } = await supabase
+          .from('transactions')
+          .insert({
+            date: data.date,
+            type: 'income',
+            category: TRANSFER_CATEGORY,
+            amount: data.amount,
+            owner: partner,
+            memo: data.memo,
+            author: data.author,
+            household_id: householdId,
+          })
+          .select()
+          .single()
+        if (counterData && counterData.date >= start && counterData.date < end) {
+          setTransactions((prev) =>
+            [...prev, counterData].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id)),
+          )
+        }
+      }
+    }
+
     return data
   }
 

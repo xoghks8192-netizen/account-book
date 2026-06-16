@@ -39,28 +39,15 @@ export default function TransactionForm({ onAdd, onSuccess, currentUser, owners,
     e.preventDefault()
     if (!amount || Number(amount) <= 0) return
     setSaving(true)
-    const isTransfer = type === 'expense' && (transferToSpouse || category === TRANSFER_CATEGORY) && partner
     const result = await onAdd({
       type,
       date,
       category,
       amount: Number(amount),
-      memo: memo.trim() || (isTransfer ? `${partner}님께 보낸 돈` : null),
+      memo: memo.trim() || null,
       owner,
       linked_asset_id: linkedAssetId || null,
     })
-    if (result && isTransfer) {
-      await onAdd({
-        type: 'income',
-        date,
-        category: TRANSFER_CATEGORY,
-        amount: Number(amount),
-        memo: memo.trim() || `${owner}님이 보낸 돈`,
-        owner: partner,
-        author: partner,
-        linked_asset_id: null,
-      })
-    }
     setAmount('')
     setMemo('')
     setLinkedAssetId('')
