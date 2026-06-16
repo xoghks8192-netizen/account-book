@@ -7,7 +7,7 @@ function todayStr() {
   return d.toISOString().slice(0, 10)
 }
 
-export default function TransactionForm({ onAdd, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory }) {
+export default function TransactionForm({ onAdd, onSuccess, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory }) {
   const [type, setType] = useState('expense')
   const [date, setDate] = useState(todayStr())
   const [category, setCategory] = useState(categories.expense[0])
@@ -67,8 +67,7 @@ export default function TransactionForm({ onAdd, currentUser, owners, assets = [
     setTransferToSpouse(false)
     setSaving(false)
     if (result) {
-      alert('추가 완료되었습니다.')
-      window.location.reload()
+      onSuccess?.()
     }
   }
 

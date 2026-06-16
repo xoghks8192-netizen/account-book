@@ -16,6 +16,8 @@ function formatDate(dateStr) {
 
 export default function TransactionList({ transactions, onDelete, onUpdate, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory }) {
   const [editingId, setEditingId] = useState(null)
+  const [swipedId, setSwipedId] = useState(null)
+  const touchStartX = { current: 0 }
   const [editDate, setEditDate] = useState('')
   const [editType, setEditType] = useState('expense')
   const [editCategory, setEditCategory] = useState(categories.expense[0])
@@ -178,31 +180,36 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
             </div>
           </div>
         ) : (
-          <div className="tx-item" key={tx.id}>
-            <div className="tx-info">
-              <span className="category">{tx.category}</span>
-              <span className="meta">
-                {formatDate(tx.date)}
-                {tx.owner ? ` · ${tx.owner}` : ''}
-                {tx.memo ? ` · ${tx.memo}` : ''}
-              </span>
+          <div
+            className={`tx-item${swipedId === tx.id ? ' swiped' : ''}`}
+            key={tx.id}
+            onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX }}
+            onTouchEnd={(e) => {
+              const delta = e.changedTouches[0].clientX - touchStartX.current
+              if (delta < -60) setSwipedId(tx.id)
+              else if (delta > 20) setSwipedId(null)
+            }}
+            onClick={() => { if (swipedId === tx.id) setSwipedId(null) }}
+          >
+            <div className="tx-inner">
+              <div className="tx-info">
+                <span className="category">{tx.category}</span>
+                <span className="meta">
+                  {formatDate(tx.date)}
+                  {tx.owner ? ` · ${tx.owner}` : ''}
+                  {tx.memo ? ` · ${tx.memo}` : ''}
+                </span>
+              </div>
+              <div className="tx-amount">
+                <span className={`amount ${tx.type}`}>
+                  {tx.type === 'income' ? '+' : '-'}
+                  {formatAmount(tx.amount)}원
+                </span>
+              </div>
             </div>
-            <div className="tx-amount">
-              <span className={`amount ${tx.type}`}>
-                {tx.type === 'income' ? '+' : '-'}
-                {formatAmount(tx.amount)}원
-              </span>
-              <button onClick={() => startEdit(tx)} title="수정">
-                ✎
-              </button>
-              <button
-                onClick={() => {
-                  if (window.confirm('이 내역을 삭제할까요?')) onDelete(tx.id)
-                }}
-                title="삭제"
-              >
-                ✕
-              </button>
+            <div className="tx-swipe-actions">
+              <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(tx) }}>✎</button>
+              <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); setSwipedId(null); if (window.confirm('이 내역을 삭제할까요?')) onDelete(tx.id) }}>✕</button>
             </div>
           </div>
         ),

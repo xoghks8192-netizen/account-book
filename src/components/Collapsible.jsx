@@ -1,7 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-export default function Collapsible({ title, children, defaultOpen = false, className = 'form', headerExtra }) {
+export default function Collapsible({ title, children, defaultOpen = false, className = 'form', headerExtra, forceClose }) {
   const [open, setOpen] = useState(defaultOpen)
+
+  useEffect(() => {
+    if (forceClose) setOpen(false)
+  }, [forceClose])
 
   return (
     <div className={className}>

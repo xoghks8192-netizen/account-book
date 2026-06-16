@@ -13,6 +13,7 @@ import Collapsible from './components/Collapsible'
 import TransactionInsight from './components/TransactionInsight'
 import TransactionCalendar from './components/TransactionCalendar'
 import Modal from './components/Modal'
+import MonthlyTrendChart from './components/MonthlyTrendChart'
 import { toCSV, downloadCSV } from './lib/csv'
 import { loadSession, saveSession, clearSession } from './users'
 import { STOCK_CATEGORIES } from './assetMeta'
@@ -60,6 +61,18 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'light')
   const [showMoreMenu, setShowMoreMenu] = useState(false)
   const [summaryModal, setSummaryModal] = useState(null)
+  const [toast, setToast] = useState('')
+  const [formCloseToken, setFormCloseToken] = useState(0)
+
+  function showToast(msg) {
+    setToast(msg)
+    setTimeout(() => setToast(''), 2500)
+  }
+
+  function handleAddSuccess() {
+    setFormCloseToken((n) => n + 1)
+    showToast('✓ 내역이 추가되었습니다')
+  }
 
   const householdId = user?.householdId
   const myName = user?.displayName
@@ -579,6 +592,8 @@ export default function App() {
 
           <ExpenseChart transactions={ownedTransactions} />
 
+          <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} />
+
           <Collapsible title="전월 대비">
             <MonthComparison
               current={{ income: totalIncome, expense: totalExpense, balance }}
@@ -587,9 +602,10 @@ export default function App() {
           </Collapsible>
 
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
-            <Collapsible title="내역 추가">
+            <Collapsible title="내역 추가" forceClose={formCloseToken}>
               <TransactionForm
                 onAdd={handleAdd}
+                onSuccess={handleAddSuccess}
                 currentUser={myName}
                 owners={owners}
                 assets={linkableAssets}
@@ -733,6 +749,8 @@ export default function App() {
           />
         </>
       )}
+
+      {toast && <div className="toast">{toast}</div>}
     </div>
   )
 }
