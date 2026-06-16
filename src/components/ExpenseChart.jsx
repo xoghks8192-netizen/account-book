@@ -3,22 +3,13 @@ import { getCategoryColor } from '../categories'
 import Modal from './Modal'
 
 const VISIBLE_COUNT = 5
-const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토']
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00')
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  return `${mm}.${dd} (${DAY_NAMES[d.getDay()]})`
-}
-
 export default function ExpenseChart({ transactions }) {
   const [showAll, setShowAll] = useState(false)
-  const [detailCategory, setDetailCategory] = useState(null)
 
   const expenseByCategory = transactions
     .filter((t) => t.type === 'expense')
@@ -43,27 +34,28 @@ export default function ExpenseChart({ transactions }) {
   const visibleData = showAll ? data : data.slice(0, VISIBLE_COUNT)
   const hiddenCount = data.length - visibleData.length
 
-  const detailTxs = detailCategory
-    ? transactions.filter((t) => t.type === 'expense' && t.category === detailCategory).sort((a, b) => b.date.localeCompare(a.date))
-    : []
-  const detailTotal = detailTxs.reduce((s, t) => s + Number(t.amount), 0)
+  const [showModal, setShowModal] = useState(false)
 
   return (
-    <div className="asset-chart">
-      {detailCategory && (
-        <Modal title={`${detailCategory} 상세`} onClose={() => setDetailCategory(null)}>
-          <div className="modal-section-title" style={{ marginBottom: 8 }}>
-            총 {formatAmount(detailTotal)}원 · {((detailTotal / total) * 100).toFixed(1)}%
-          </div>
-          {detailTxs.map((t) => (
-            <div key={t.id} className="modal-row">
-              <span className="modal-row-name">
-                {t.memo || t.category}
-                <span className="modal-row-meta">{formatDate(t.date)}{t.owner ? ` · ${t.owner}` : ''}</span>
+    <div className="asset-chart clickable" onClick={() => setShowModal(true)} style={{ cursor: 'pointer' }}>
+      {showModal && (
+        <Modal title="이번 달 지출 요약" onClose={(e) => { e?.stopPropagation?.(); setShowModal(false) }}>
+          {data.map(([category, amount]) => (
+            <div key={category} className="modal-row">
+              <span className="modal-row-name" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 10, height: 10, borderRadius: '50%', background: getCategoryColor(category), flexShrink: 0, display: 'inline-block' }} />
+                {category}
               </span>
-              <span className="modal-row-amount">-{formatAmount(t.amount)}원</span>
+              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
+                <span className="modal-row-amount">-{formatAmount(amount)}원</span>
+                <span style={{ fontSize: 11, color: 'var(--icon-muted)' }}>{((amount / total) * 100).toFixed(1)}%</span>
+              </span>
             </div>
           ))}
+          <div className="modal-total-row">
+            <span>합계</span>
+            <span className="modal-row-amount">-{formatAmount(total)}원</span>
+          </div>
         </Modal>
       )}
       <div className="donut" style={{ background: `conic-gradient(${stops.join(', ')})` }}>
@@ -74,7 +66,7 @@ export default function ExpenseChart({ transactions }) {
       </div>
       <div className="legend">
         {visibleData.map(([category, amount]) => (
-          <div className="legend-item clickable" key={category} onClick={() => setDetailCategory(category)}>
+          <div className="legend-item" key={category}>
             <span className="dot" style={{ background: getCategoryColor(category) }} />
             <span className="legend-category">{category}</span>
             <span className="legend-percent">{((amount / total) * 100).toFixed(1)}%</span>
