@@ -776,6 +776,27 @@ body {
   flex: 1;
 }
 
+.date-input-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+
+.date-input-wrapper .inline-search {
+  width: 100%;
+}
+
+.date-placeholder {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: var(--label-text);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 .filter-sep {
   flex-shrink: 0;
   font-size: 12px;

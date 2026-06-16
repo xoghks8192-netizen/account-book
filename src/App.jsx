@@ -632,20 +632,25 @@ export default function App() {
               {showFilters && (
                 <div className="filter-panel">
                   <div className="filter-row">
-                    <span className="filter-sep">시작일</span>
-                    <input
-                      type="date"
-                      className="inline-search"
-                      value={dateFrom}
-                      onChange={(e) => setDateFrom(e.target.value)}
-                    />
-                    <span className="filter-sep">~ 종료일</span>
-                    <input
-                      type="date"
-                      className="inline-search"
-                      value={dateTo}
-                      onChange={(e) => setDateTo(e.target.value)}
-                    />
+                    <div className="date-input-wrapper">
+                      <input
+                        type="date"
+                        className="inline-search"
+                        value={dateFrom}
+                        onChange={(e) => setDateFrom(e.target.value)}
+                      />
+                      {!dateFrom && <span className="date-placeholder">년-월-일</span>}
+                    </div>
+                    <span className="filter-sep">~</span>
+                    <div className="date-input-wrapper">
+                      <input
+                        type="date"
+                        className="inline-search"
+                        value={dateTo}
+                        onChange={(e) => setDateTo(e.target.value)}
+                      />
+                      {!dateTo && <span className="date-placeholder">년-월-일</span>}
+                    </div>
                   </div>
                   <div className="filter-row">
                     <input
