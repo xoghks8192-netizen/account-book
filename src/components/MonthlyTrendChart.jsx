@@ -80,7 +80,13 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners }) 
         ))}
       </div>
 
-      <div className={`trend-tooltip${h ? ' visible' : ''}`}>
+      <div
+        className={`trend-tooltip${h ? ' visible' : ''}`}
+        onTouchStart={() => {
+          if (hideTimer.current) clearTimeout(hideTimer.current)
+          hideTimer.current = setTimeout(() => setHovered(null), 5000)
+        }}
+      >
         {h ? (
           <>
             <span className="trend-tooltip-month">{h.label}</span>

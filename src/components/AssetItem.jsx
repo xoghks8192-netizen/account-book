@@ -115,10 +115,17 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
               </div>
             </>
           ) : (
-            <div className="form-row">
-              <label>금액</label>
-              <input type="number" inputMode="numeric" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
-            </div>
+            <>
+              <div className="form-row">
+                <label>금액</label>
+                <input type="number" inputMode="numeric" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
+              </div>
+              {amount !== '' && Number(amount) !== asset.amount && (
+                <div style={{ textAlign: 'right', fontSize: 13, fontWeight: 700, color: Number(amount) > asset.amount ? '#ff5c5c' : '#6cb6ff', marginBottom: 8 }}>
+                  {Number(amount) > asset.amount ? '+' : ''}{formatAmount(Number(amount) - asset.amount)}원
+                </div>
+              )}
+            </>
           )}
           <div className="form-row">
             <label>메모 (선택)</label>

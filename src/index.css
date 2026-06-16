@@ -517,6 +517,15 @@ body {
   font-weight: 700;
 }
 
+.tx-date-header {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+  padding: 10px 4px 4px;
+  border-bottom: 1px solid var(--form-border);
+  margin-bottom: 2px;
+}
+
 .tx-item {
   position: relative;
   overflow: hidden;
@@ -1052,6 +1061,10 @@ body {
 
 .search-bar {
   padding: 0 16px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--card-bg);
 }
 
 .search-bar input {

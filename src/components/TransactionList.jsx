@@ -94,6 +94,17 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
 
   const editingTx = editingId ? transactions.find((t) => t.id === editingId) : null
 
+  // Group transactions by date
+  const groups = []
+  let lastDate = null
+  transactions.forEach((tx) => {
+    if (tx.date !== lastDate) {
+      groups.push({ date: tx.date, items: [] })
+      lastDate = tx.date
+    }
+    groups[groups.length - 1].items.push(tx)
+  })
+
   return (
     <>
       {editingTx && (
@@ -151,41 +162,45 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
         </Modal>
       )}
 
-      {transactions.map((tx) => (
-          <div
-            className={`tx-item${swipedId === tx.id ? ' swiped' : ''}`}
-            key={tx.id}
-            onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX }}
-            onTouchEnd={(e) => {
-              const delta = e.changedTouches[0].clientX - touchStartX.current
-              if (delta < -60) setSwipedId(tx.id)
-              else if (delta > 20) setSwipedId(null)
-            }}
-            onClick={() => { if (swipedId === tx.id) setSwipedId(null) }}
-          >
-            <div className="tx-inner">
-              <div className="tx-info">
-                <span className="category"><Highlight text={tx.category} query={search} /></span>
-                <span className="meta">
-                  <span className="date-badge">{formatDate(tx.date)}</span>
-                  {tx.owner ? ` · ${tx.owner}` : ''}
-                  {tx.memo ? <> · <Highlight text={tx.memo} query={search} /></> : ''}
-                </span>
+      {groups.map(({ date, items }) => (
+        <div key={date}>
+          <div className="tx-date-header">{formatDate(date)}</div>
+          {items.map((tx) => (
+            <div
+              className={`tx-item${swipedId === tx.id ? ' swiped' : ''}`}
+              key={tx.id}
+              onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX }}
+              onTouchEnd={(e) => {
+                const delta = e.changedTouches[0].clientX - touchStartX.current
+                if (delta < -60) setSwipedId(tx.id)
+                else if (delta > 20) setSwipedId(null)
+              }}
+              onClick={() => { if (swipedId === tx.id) setSwipedId(null) }}
+            >
+              <div className="tx-inner">
+                <div className="tx-info">
+                  <span className="category"><Highlight text={tx.category} query={search} /></span>
+                  <span className="meta">
+                    {tx.owner ? tx.owner : ''}
+                    {tx.memo ? <>{tx.owner ? ' · ' : ''}<Highlight text={tx.memo} query={search} /></> : ''}
+                  </span>
+                </div>
+                <div className="tx-amount">
+                  <span className={`amount ${tx.type}`}>
+                    {tx.type === 'income' ? '+' : '-'}
+                    {formatAmount(tx.amount)}원
+                  </span>
+                  <span className="swipe-hint"><span/><span/><span/></span>
+                </div>
               </div>
-              <div className="tx-amount">
-                <span className={`amount ${tx.type}`}>
-                  {tx.type === 'income' ? '+' : '-'}
-                  {formatAmount(tx.amount)}원
-                </span>
-                <span className="swipe-hint"><span/><span/><span/></span>
+              <div className="tx-swipe-actions">
+                <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(tx) }}>✎</button>
+                <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); setSwipedId(null); if (window.confirm('이 내역을 삭제할까요?')) onDelete(tx.id) }}>✕</button>
               </div>
             </div>
-            <div className="tx-swipe-actions">
-              <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(tx) }}>✎</button>
-              <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); setSwipedId(null); if (window.confirm('이 내역을 삭제할까요?')) onDelete(tx.id) }}>✕</button>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+      ))}
     </>
   )
 }

@@ -35,6 +35,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   const [linkedAssetId, setLinkedAssetId] = useState('')
   const [editLinkedAssetId, setEditLinkedAssetId] = useState('')
   const [reordering, setReordering] = useState(false)
+  const [undidIds, setUndidIds] = useState(new Set())
 
   useEffect(() => {
     if (ownerFilter !== '전체') {
@@ -205,6 +206,14 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
       delete next[templateId]
       return next
     })
+    setUndidIds((prev) => new Set([...prev, templateId]))
+    setTimeout(() => {
+      setUndidIds((prev) => {
+        const next = new Set(prev)
+        next.delete(templateId)
+        return next
+      })
+    }, 3000)
   }
 
   const visibleTemplates =
@@ -331,7 +340,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
                 {lastAdded[t.id] ? (
                   <button onClick={() => handleUndo(t.id)} className="quick-add-btn undo" title="되돌리기">↩</button>
                 ) : (
-                  <button onClick={() => handleQuickAdd(t)} disabled={adding === t.id} className="quick-add-btn" title="오늘 내역에 추가">
+                  <button onClick={() => handleQuickAdd(t)} disabled={adding === t.id || undidIds.has(t.id)} className="quick-add-btn" title="오늘 내역에 추가">
                     {adding === t.id ? '…' : '+'}
                   </button>
                 )}
