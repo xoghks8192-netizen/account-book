@@ -714,28 +714,11 @@ export default function App() {
                       onChange={(e) => setAmountMax(e.target.value)}
                     />
                   </div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {hasActiveFilters && (
-                      <button type="button" className="filter-clear-btn" style={{ flex: 1 }} onClick={clearFilters}>
-                        필터 초기화
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      className="filter-clear-btn"
-                      style={{ flex: 1 }}
-                      onClick={() => {
-                        const label = `${cursor.year}년${cursor.month + 1}월${ownerFilter !== '전체' ? `_${ownerFilter}` : ''}`
-                        const csv = toCSV(
-                          ['날짜', '유형', '카테고리', '금액', '구분', '메모'],
-                          filteredTransactions.map((t) => [t.date, t.type === 'income' ? '수입' : '지출', t.category, t.amount, t.owner, t.memo ?? '']),
-                        )
-                        downloadCSV(`내역_${label}.csv`, csv)
-                      }}
-                    >
-                      CSV 내보내기
+                  {hasActiveFilters && (
+                    <button type="button" className="filter-clear-btn" onClick={clearFilters}>
+                      필터 초기화
                     </button>
-                  </div>
+                  )}
                 </div>
               )}
               <TransactionList
