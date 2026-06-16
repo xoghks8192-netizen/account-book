@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { DEFAULT_CATEGORIES } from '../categories'
 import CategorySelect from './CategorySelect'
+import Modal from './Modal'
 
 function formatAmount(n) {
   return n.toLocaleString('ko-KR')
@@ -85,114 +86,66 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
     return <div className="empty">이번 달 내역이 없습니다.</div>
   }
 
+  const editingTx = editingId ? transactions.find((t) => t.id === editingId) : null
+
   return (
     <>
-      {transactions.map((tx) =>
-        editingId === tx.id ? (
-          <div className="tx-item asset-edit" key={tx.id}>
-            <div className="type-toggle">
-              <button
-                type="button"
-                className={`income ${editType === 'income' ? 'active' : ''}`}
-                onClick={() => handleEditTypeChange('income')}
-              >
-                수입
-              </button>
-              <button
-                type="button"
-                className={`expense ${editType === 'expense' ? 'active' : ''}`}
-                onClick={() => handleEditTypeChange('expense')}
-              >
-                지출
-              </button>
-            </div>
-            <div className="form-row">
-              <label>날짜</label>
-              <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
-            </div>
-            <div className="form-row">
-              <label>카테고리</label>
-              <CategorySelect
-                value={editCategory}
-                onChange={setEditCategory}
-                options={categories[editType]}
-                onAdd={(name) => onAddCategory(editType, name)}
-                onRemove={(name) => onRemoveCategory(editType, name)}
-              />
-            </div>
-            <div className="form-row">
-              <label>금액</label>
-              <input
-                type="number"
-                inputMode="numeric"
-                min="1"
-                value={editAmount}
-                onChange={(e) => setEditAmount(e.target.value)}
-              />
-            </div>
-            <div className="form-row">
-              <label>구분</label>
-              <select value={editOwner} onChange={(e) => handleEditOwnerChange(e.target.value)}>
-                {owners.map((o) => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button
-              type="button"
-              className="collapsible-toggle"
-              style={{ marginBottom: 12 }}
-              onClick={() => setShowMore((prev) => !prev)}
-            >
-              {showMore ? '추가 옵션 접기 ▲' : '연동 자산 · 메모 ▼'}
-            </button>
-
-            {showMore && (
-              <>
-                <div className="form-row">
-                  <label>연동될 자산 (선택)</label>
-                  <select value={editLinkedAssetId} onChange={(e) => setEditLinkedAssetId(e.target.value)}>
-                    <option value="">선택 안함</option>
-                    {editOwnerAssets.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.name} ({a.category} · {a.owner})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-row">
-                  <label>메모 (선택)</label>
-                  <input type="text" value={editMemo} onChange={(e) => setEditMemo(e.target.value)} placeholder="메모" />
-                </div>
-              </>
-            )}
-
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => handleSave(tx.id)} disabled={saving} className="submit-btn" style={{ flex: 1 }}>
-                저장
-              </button>
-              <button
-                onClick={() => setEditingId(null)}
-                style={{
-                  flex: 1,
-                  padding: 13,
-                  border: 'none',
-                  borderRadius: 999,
-                  background: '#fdeef3',
-                  color: '#b88a9c',
-                  fontSize: 15,
-                  fontWeight: 700,
-                  fontFamily: '"Jua", sans-serif',
-                  cursor: 'pointer',
-                }}
-              >
-                취소
-              </button>
-            </div>
+      {editingTx && (
+        <Modal title="내역 수정" onClose={() => setEditingId(null)}>
+          <div className="type-toggle">
+            <button type="button" className={`income ${editType === 'income' ? 'active' : ''}`} onClick={() => handleEditTypeChange('income')}>수입</button>
+            <button type="button" className={`expense ${editType === 'expense' ? 'active' : ''}`} onClick={() => handleEditTypeChange('expense')}>지출</button>
           </div>
-        ) : (
+          <div className="form-row">
+            <label>날짜</label>
+            <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
+          </div>
+          <div className="form-row">
+            <label>카테고리</label>
+            <CategorySelect
+              value={editCategory}
+              onChange={setEditCategory}
+              options={categories[editType]}
+              onAdd={(name) => onAddCategory(editType, name)}
+              onRemove={(name) => onRemoveCategory(editType, name)}
+            />
+          </div>
+          <div className="form-row">
+            <label>금액</label>
+            <input type="number" inputMode="numeric" min="1" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
+          </div>
+          <div className="form-row">
+            <label>구분</label>
+            <select value={editOwner} onChange={(e) => handleEditOwnerChange(e.target.value)}>
+              {owners.map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </div>
+          <button type="button" className="collapsible-toggle" style={{ marginBottom: 12 }} onClick={() => setShowMore((p) => !p)}>
+            {showMore ? '추가 옵션 접기 ▲' : '연동 자산 · 메모 ▼'}
+          </button>
+          {showMore && (
+            <>
+              <div className="form-row">
+                <label>연동될 자산 (선택)</label>
+                <select value={editLinkedAssetId} onChange={(e) => setEditLinkedAssetId(e.target.value)}>
+                  <option value="">선택 안함</option>
+                  {editOwnerAssets.map((a) => <option key={a.id} value={a.id}>{a.name} ({a.category} · {a.owner})</option>)}
+                </select>
+              </div>
+              <div className="form-row">
+                <label>메모 (선택)</label>
+                <input type="text" value={editMemo} onChange={(e) => setEditMemo(e.target.value)} placeholder="메모" />
+              </div>
+            </>
+          )}
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <button onClick={() => handleSave(editingId)} disabled={saving} className="submit-btn" style={{ flex: 1 }}>저장</button>
+            <button onClick={() => setEditingId(null)} style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: '"Jua", sans-serif', cursor: 'pointer' }}>취소</button>
+          </div>
+        </Modal>
+      )}
+
+      {transactions.map((tx) => (
           <div
             className={`tx-item${swipedId === tx.id ? ' swiped' : ''}`}
             key={tx.id}
@@ -226,8 +179,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
               <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); setSwipedId(null); if (window.confirm('이 내역을 삭제할까요?')) onDelete(tx.id) }}>✕</button>
             </div>
           </div>
-        ),
-      )}
+        ))}
     </>
   )
 }

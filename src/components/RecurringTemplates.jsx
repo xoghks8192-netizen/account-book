@@ -388,27 +388,19 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
               {lastAdded[t.id] ? (
                 <button
                   onClick={() => handleUndo(t.id)}
-                  className="submit-btn"
-                  style={{
-                    width: 'auto',
-                    padding: '6px 14px',
-                    fontSize: 13,
-                    margin: 0,
-                    background: '#fdeef3',
-                    color: '#ff8fab',
-                    boxShadow: 'none',
-                  }}
+                  className="quick-add-btn undo"
+                  title="되돌리기"
                 >
-                  되돌리기
+                  ↩
                 </button>
               ) : (
                 <button
                   onClick={() => handleQuickAdd(t)}
                   disabled={adding === t.id}
-                  className="submit-btn"
-                  style={{ width: 'auto', padding: '6px 14px', fontSize: 13, margin: 0 }}
+                  className="quick-add-btn"
+                  title="오늘 내역에 추가"
                 >
-                  {adding === t.id ? '추가 중...' : '오늘 추가'}
+                  {adding === t.id ? '…' : '+'}
                 </button>
               )}
               <button onClick={() => startEdit(t)} title="수정">

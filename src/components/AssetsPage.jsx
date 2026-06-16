@@ -186,6 +186,18 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
 
   return (
     <div>
+      <div className="owner-tabs">
+        {['전체', ...owners].map((o) => (
+          <button
+            key={o}
+            className={ownerFilter === o ? 'active' : ''}
+            onClick={() => setOwnerFilter(o)}
+          >
+            {o}
+          </button>
+        ))}
+      </div>
+
       <div className="summary">
         <div className="summary-item balance clickable" onClick={() => setSummaryModal('총자산')}>
           <div className="label">총 자산</div>
@@ -236,18 +248,6 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
           </div>
         </Modal>
       )}
-
-      <div className="owner-tabs">
-        {['전체', ...owners].map((o) => (
-          <button
-            key={o}
-            className={ownerFilter === o ? 'active' : ''}
-            onClick={() => setOwnerFilter(o)}
-          >
-            {o}
-          </button>
-        ))}
-      </div>
 
       <AssetChart data={chartData} total={total} />
 

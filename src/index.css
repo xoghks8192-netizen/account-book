@@ -508,6 +508,31 @@ body {
   border-radius: 0 14px 14px 0;
 }
 
+.quick-add-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--active-gradient);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px var(--active-shadow);
+}
+
+.quick-add-btn.undo {
+  background: var(--form-border);
+  color: var(--text-main);
+  box-shadow: none;
+  font-size: 16px;
+}
+
 .swipe-hint {
   display: flex;
   flex-direction: column;
