@@ -624,6 +624,18 @@ body {
   color: var(--icon-hover);
 }
 
+.tx-amount .quick-add-btn {
+  background: linear-gradient(135deg, #56c97a, #2eaf6a);
+  color: #fff;
+  box-shadow: 0 2px 8px var(--active-shadow);
+}
+
+.tx-amount .quick-add-btn.undo {
+  background: var(--form-border);
+  color: var(--text-main);
+  box-shadow: none;
+}
+
 .asset-chart {
   display: flex;
   align-items: center;

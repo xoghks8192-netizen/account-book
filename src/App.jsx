@@ -95,6 +95,22 @@ export default function App() {
   }, [page])
 
   useEffect(() => {
+    if (!householdId || !user) return
+    supabase
+      .from('households')
+      .select('categories, dating_start, wedding_date')
+      .eq('id', householdId)
+      .single()
+      .then(({ data }) => {
+        if (!data) return
+        const next = { ...user, categories: data.categories ?? {}, datingStart: data.dating_start, weddingDate: data.wedding_date }
+        saveSession(next)
+        setUser(next)
+      })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [householdId])
+
+  useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem(THEME_KEY, theme)
   }, [theme])
