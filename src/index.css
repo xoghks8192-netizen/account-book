@@ -1193,6 +1193,14 @@ body {
   font-size: 13px;
 }
 
+.modal-subrow {
+  padding: 4px 0 4px 10px;
+  background: var(--form-border);
+  border-radius: 6px;
+  margin: 2px 0;
+  border-bottom: none;
+}
+
 .modal-row:last-child {
   border-bottom: none;
 }

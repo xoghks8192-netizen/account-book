@@ -61,6 +61,11 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'light')
   const [showMoreMenu, setShowMoreMenu] = useState(false)
   const [summaryModal, setSummaryModal] = useState(null)
+  const [expandedCategory, setExpandedCategory] = useState(null)
+
+  function toggleCategory(cat) {
+    setExpandedCategory((prev) => (prev === cat ? null : cat))
+  }
   const [toast, setToast] = useState('')
   const [formCloseToken, setFormCloseToken] = useState(0)
 
@@ -561,47 +566,56 @@ export default function App() {
             </div>
           </div>
 
-          {summaryModal === '수입' && (
-            <Modal title="수입" onClose={() => setSummaryModal(null)}>
-              {Object.keys(incomeByCategory).length === 0 ? (
-                <div className="empty">수입 내역이 없습니다.</div>
-              ) : (
-                Object.entries(incomeByCategory)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([category, amount]) => (
-                    <div key={category} className="modal-row">
-                      <span className="modal-row-name">{category}</span>
-                      <span className="modal-row-amount">{formatAmount(amount)}원</span>
-                    </div>
-                  ))
-              )}
-              <div className="modal-total-row">
-                <span>합계</span>
-                <span className="modal-row-amount">{formatAmount(totalIncome)}원</span>
-              </div>
-            </Modal>
-          )}
-
-          {summaryModal === '지출' && (
-            <Modal title="지출" onClose={() => setSummaryModal(null)}>
-              {Object.keys(expenseByCategory).length === 0 ? (
-                <div className="empty">지출 내역이 없습니다.</div>
-              ) : (
-                Object.entries(expenseByCategory)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([category, amount]) => (
-                    <div key={category} className="modal-row">
-                      <span className="modal-row-name">{category}</span>
-                      <span className="modal-row-amount">{formatAmount(amount)}원</span>
-                    </div>
-                  ))
-              )}
-              <div className="modal-total-row">
-                <span>합계</span>
-                <span className="modal-row-amount">{formatAmount(totalExpense)}원</span>
-              </div>
-            </Modal>
-          )}
+          {(summaryModal === '수입' || summaryModal === '지출') && (() => {
+            const isIncome = summaryModal === '수입'
+            const byCategory = isIncome ? incomeByCategory : expenseByCategory
+            const total = isIncome ? totalIncome : totalExpense
+            const txType = isIncome ? 'income' : 'expense'
+            const txPool = ownedTransactions.filter((t) => t.type === txType && (!isIncome || t.category !== TRANSFER_CATEGORY))
+            return (
+              <Modal title={summaryModal} onClose={() => { setSummaryModal(null); setExpandedCategory(null) }}>
+                {Object.keys(byCategory).length === 0 ? (
+                  <div className="empty">{summaryModal} 내역이 없습니다.</div>
+                ) : (
+                  Object.entries(byCategory)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([category, amount]) => {
+                      const isOpen = expandedCategory === category
+                      const items = txPool.filter((t) => t.category === category).sort((a, b) => b.date.localeCompare(a.date))
+                      return (
+                        <div key={category}>
+                          <div
+                            className="modal-row clickable"
+                            onClick={() => toggleCategory(category)}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <span className="modal-row-name">
+                              {category}
+                              <span style={{ fontSize: 10, marginLeft: 4, opacity: 0.5 }}>{isOpen ? '▲' : '▼'}</span>
+                            </span>
+                            <span className="modal-row-amount">{formatAmount(amount)}원</span>
+                          </div>
+                          {isOpen && items.map((t) => (
+                            <div key={t.id} className="modal-row modal-subrow">
+                              <span className="modal-row-name" style={{ fontSize: 12, color: 'var(--meta-text)' }}>
+                                {t.date.slice(5).replace('-', '.')}
+                                {t.memo ? ` · ${t.memo}` : ''}
+                                {t.owner ? ` · ${t.owner}` : ''}
+                              </span>
+                              <span className="modal-row-amount" style={{ fontSize: 13 }}>{formatAmount(t.amount)}원</span>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    })
+                )}
+                <div className="modal-total-row">
+                  <span>합계</span>
+                  <span className="modal-row-amount">{formatAmount(total)}원</span>
+                </div>
+              </Modal>
+            )
+          })()}
 
           <ExpenseChart transactions={ownedTransactions} />
 
@@ -700,11 +714,28 @@ export default function App() {
                       onChange={(e) => setAmountMax(e.target.value)}
                     />
                   </div>
-                  {hasActiveFilters && (
-                    <button type="button" className="filter-clear-btn" onClick={clearFilters}>
-                      필터 초기화
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {hasActiveFilters && (
+                      <button type="button" className="filter-clear-btn" style={{ flex: 1 }} onClick={clearFilters}>
+                        필터 초기화
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="filter-clear-btn"
+                      style={{ flex: 1 }}
+                      onClick={() => {
+                        const label = `${cursor.year}년${cursor.month + 1}월${ownerFilter !== '전체' ? `_${ownerFilter}` : ''}`
+                        const csv = toCSV(
+                          ['날짜', '유형', '카테고리', '금액', '구분', '메모'],
+                          filteredTransactions.map((t) => [t.date, t.type === 'income' ? '수입' : '지출', t.category, t.amount, t.owner, t.memo ?? '']),
+                        )
+                        downloadCSV(`내역_${label}.csv`, csv)
+                      }}
+                    >
+                      CSV 내보내기
                     </button>
-                  )}
+                  </div>
                 </div>
               )}
               <TransactionList
