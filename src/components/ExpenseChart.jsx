@@ -45,7 +45,10 @@ export default function ExpenseChart({ transactions }) {
           <div className="legend-item" key={category}>
             <span className="dot" style={{ background: getCategoryColor(category) }} />
             <span className="legend-category">{category}</span>
-            <span className="legend-percent">{((amount / total) * 100).toFixed(1)}%</span>
+            <span className="legend-right">
+              <span className="legend-amount">{formatAmount(amount)}원</span>
+              <span className="legend-percent">{((amount / total) * 100).toFixed(1)}%</span>
+            </span>
           </div>
         ))}
         {hiddenCount > 0 && (

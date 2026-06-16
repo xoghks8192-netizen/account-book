@@ -212,6 +212,78 @@ body {
   color: var(--text-heading);
 }
 
+.month-nav-pill {
+  background: var(--tab-bg);
+  border-radius: 999px;
+  padding: 6px 20px;
+  font-size: 17px;
+  font-family: "Jua", sans-serif;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.trend-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  margin-top: 4px;
+}
+.trend-badge.up {
+  background: rgba(46, 175, 106, 0.15);
+  color: #2eaf6a;
+}
+.trend-badge.down {
+  background: rgba(224, 82, 76, 0.15);
+  color: #e0524c;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 16px 32px;
+  color: var(--empty-text);
+}
+.empty-state-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+.empty-state-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+.empty-state-desc {
+  font-size: 13px;
+  color: var(--empty-text);
+  line-height: 1.5;
+}
+
+.date-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--tab-bg);
+  color: var(--text-muted, var(--icon-muted));
+  border-radius: 6px;
+  padding: 1px 6px;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+
+.legend-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  margin-left: auto;
+}
+.legend-amount {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+}
 .summary {
   display: flex;
   justify-content: space-between;
@@ -732,11 +804,6 @@ body {
 
 .legend-category {
   flex: 1;
-}
-
-.legend-percent {
-  font-weight: 700;
-  color: var(--tab-text);
 }
 
 .empty {

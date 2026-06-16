@@ -83,7 +83,13 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
   }
 
   if (transactions.length === 0) {
-    return <div className="empty">이번 달 내역이 없습니다.</div>
+    return (
+      <div className="empty-state">
+        <div className="empty-state-icon">📭</div>
+        <div className="empty-state-title">이번 달 내역이 없어요</div>
+        <div className="empty-state-desc">아래 내역 추가 버튼으로 첫 번째 내역을 추가해보세요</div>
+      </div>
+    )
   }
 
   const editingTx = editingId ? transactions.find((t) => t.id === editingId) : null
@@ -161,7 +167,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
               <div className="tx-info">
                 <span className="category"><Highlight text={tx.category} query={search} /></span>
                 <span className="meta">
-                  {formatDate(tx.date)}
+                  <span className="date-badge">{formatDate(tx.date)}</span>
                   {tx.owner ? ` · ${tx.owner}` : ''}
                   {tx.memo ? <> · <Highlight text={tx.memo} query={search} /></> : ''}
                 </span>
