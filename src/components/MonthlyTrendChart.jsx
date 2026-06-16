@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import Collapsible from './Collapsible'
 import { TRANSFER_CATEGORY } from '../categories'
@@ -10,6 +10,7 @@ function formatAmount(n) {
 export default function MonthlyTrendChart({ householdId, ownerFilter, owners }) {
   const [data, setData] = useState([])
   const [hovered, setHovered] = useState(null)
+  const hideTimer = useRef(null)
 
   useEffect(() => {
     if (!householdId) return
@@ -64,8 +65,11 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners }) 
             className={`trend-col${hovered === i ? ' trend-col-active' : ''}`}
             onMouseEnter={() => setHovered(i)}
             onMouseLeave={() => setHovered(null)}
-            onTouchStart={() => setHovered(i)}
-            onTouchEnd={() => setTimeout(() => setHovered(null), 1500)}
+            onTouchStart={() => {
+              if (hideTimer.current) clearTimeout(hideTimer.current)
+              setHovered(i)
+              hideTimer.current = setTimeout(() => setHovered(null), 5000)
+            }}
           >
             <div className="trend-bars">
               <div className="trend-bar income" style={{ height: `${(income / maxVal) * 100}%` }} />
