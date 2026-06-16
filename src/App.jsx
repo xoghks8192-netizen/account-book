@@ -210,12 +210,13 @@ export default function App() {
       await adjustAssetAmount(data.linked_asset_id, Number(data.amount))
     }
 
-    if (tx.category === TRANSFER_CATEGORY && tx.type === 'expense') {
+    if (tx.category === TRANSFER_CATEGORY) {
       const partner = owners.filter((o) => o !== '공동' && o !== tx.owner)[0]
       if (partner) {
+        const counterType = tx.type === 'expense' ? 'income' : 'expense'
         const counterTx = {
           date: tx.date,
-          type: 'income',
+          type: counterType,
           category: TRANSFER_CATEGORY,
           amount: tx.amount,
           owner: partner,
