@@ -544,7 +544,7 @@ export default function App() {
             <div className="summary-item income clickable" onClick={() => setSummaryModal('수입')}>
               <div className="label">수입</div>
               <div className="value">{formatAmount(totalIncome)}</div>
-              {transferReceived > 0 && (
+              {transferReceived > 0 && ownerFilter !== '전체' && (
                 <div className="sub-label">💸 이체 +{formatAmount(transferReceived)}</div>
               )}
             </div>
