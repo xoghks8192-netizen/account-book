@@ -18,9 +18,13 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners }) 
       const now = new Date()
       for (let i = 5; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-        const start = d.toISOString().slice(0, 7) + '-01'
-        const end = new Date(d.getFullYear(), d.getMonth() + 1, 1).toISOString().slice(0, 10)
-        months.push({ label: `${d.getMonth() + 1}월`, start, end })
+        const y = d.getFullYear()
+        const m = d.getMonth()
+        const pad = (n) => String(n).padStart(2, '0')
+        const start = `${y}-${pad(m + 1)}-01`
+        const nd = new Date(y, m + 1, 1)
+        const end = `${nd.getFullYear()}-${pad(nd.getMonth() + 1)}-01`
+        months.push({ label: `${m + 1}월`, start, end })
       }
 
       const { data: rows } = await supabase
