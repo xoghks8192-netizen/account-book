@@ -645,6 +645,18 @@ body {
   font-family: "Jua", sans-serif;
 }
 
+.search-highlight {
+  background: #ffe066;
+  color: #4a3800;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+[data-theme="dark"] .search-highlight {
+  background: #b8860b;
+  color: #fff8dc;
+}
+
 .legend {
   flex: 1;
   display: flex;

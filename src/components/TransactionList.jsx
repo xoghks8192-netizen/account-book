@@ -6,6 +6,19 @@ function formatAmount(n) {
   return n.toLocaleString('ko-KR')
 }
 
+function Highlight({ text, query }) {
+  if (!query || !text) return text
+  const idx = text.toLowerCase().indexOf(query.toLowerCase())
+  if (idx === -1) return text
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="search-highlight">{text.slice(idx, idx + query.length)}</mark>
+      {text.slice(idx + query.length)}
+    </>
+  )
+}
+
 const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토']
 function formatDate(dateStr) {
   const d = new Date(dateStr + 'T00:00:00')
@@ -14,7 +27,7 @@ function formatDate(dateStr) {
   return `${mm}.${dd} (${DAY_NAMES[d.getDay()]})`
 }
 
-export default function TransactionList({ transactions, onDelete, onUpdate, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory }) {
+export default function TransactionList({ transactions, onDelete, onUpdate, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, search = '' }) {
   const [editingId, setEditingId] = useState(null)
   const [swipedId, setSwipedId] = useState(null)
   const touchStartX = { current: 0 }
@@ -193,11 +206,11 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
           >
             <div className="tx-inner">
               <div className="tx-info">
-                <span className="category">{tx.category}</span>
+                <span className="category"><Highlight text={tx.category} query={search} /></span>
                 <span className="meta">
                   {formatDate(tx.date)}
                   {tx.owner ? ` · ${tx.owner}` : ''}
-                  {tx.memo ? ` · ${tx.memo}` : ''}
+                  {tx.memo ? <> · <Highlight text={tx.memo} query={search} /></> : ''}
                 </span>
               </div>
               <div className="tx-amount">

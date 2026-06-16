@@ -716,6 +716,7 @@ export default function App() {
                 categories={categories}
                 onAddCategory={handleAddCategory}
                 onRemoveCategory={handleRemoveCategory}
+                search={search}
               />
             </Collapsible>
           )}
