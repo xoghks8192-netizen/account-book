@@ -12,6 +12,8 @@ const UNDO_TIMEOUT = 8000
 
 export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, owners, householdId, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onToast }) {
   const [templates, setTemplates] = useState([])
+  const [swipedId, setSwipedId] = useState(null)
+  const touchStartX = { current: 0 }
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
   const [type, setType] = useState('expense')
@@ -334,86 +336,59 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
             </div>
           </div>
         ) : (
-          <div className="tx-item" key={t.id}>
-            {reordering && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 4 }}>
-                <button
-                  onClick={() => handleMove(t.id, -1)}
-                  disabled={templates.findIndex((x) => x.id === t.id) === 0}
-                  title="위로"
-                  style={{
-                    fontSize: 11,
-                    padding: '2px 4px',
-                    lineHeight: 1,
-                    border: 'none',
-                    borderRadius: 6,
-                    background: '#f1eefb',
-                    color: '#9b8fc0',
-                    cursor: 'pointer',
-                  }}
-                >
-                  ▲
-                </button>
-                <button
-                  onClick={() => handleMove(t.id, 1)}
-                  disabled={templates.findIndex((x) => x.id === t.id) === templates.length - 1}
-                  title="아래로"
-                  style={{
-                    fontSize: 11,
-                    padding: '2px 4px',
-                    lineHeight: 1,
-                    border: 'none',
-                    borderRadius: 6,
-                    background: '#f1eefb',
-                    color: '#9b8fc0',
-                    cursor: 'pointer',
-                  }}
-                >
-                  ▼
-                </button>
-              </div>
-            )}
-            <div className="tx-info">
-              <span className="category">{t.name}</span>
-              <span className="meta">
-                {t.category}
-                {t.author ? ` · ${t.author}` : ''} ·{' '}
-                <span className={t.type === 'income' ? 'amount income' : 'amount expense'}>
-                  {t.type === 'income' ? '+' : '-'}
-                  {formatAmount(t.amount)}원
-                </span>
-              </span>
-            </div>
-            <div className="tx-amount">
-              {lastAdded[t.id] ? (
-                <button
-                  onClick={() => handleUndo(t.id)}
-                  className="quick-add-btn undo"
-                  title="되돌리기"
-                >
-                  ↩
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleQuickAdd(t)}
-                  disabled={adding === t.id}
-                  className="quick-add-btn"
-                  title="오늘 내역에 추가"
-                >
-                  {adding === t.id ? '…' : '+'}
-                </button>
+          <div
+            className={`tx-item${swipedId === t.id ? ' swiped' : ''}`}
+            key={t.id}
+            onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX }}
+            onTouchEnd={(e) => {
+              const delta = e.changedTouches[0].clientX - touchStartX.current
+              if (delta < -60) setSwipedId(t.id)
+              else if (delta > 20) setSwipedId(null)
+            }}
+            onClick={() => { if (swipedId === t.id) setSwipedId(null) }}
+          >
+            <div className="tx-inner">
+              {reordering && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 4 }}>
+                  <button
+                    onClick={() => handleMove(t.id, -1)}
+                    disabled={templates.findIndex((x) => x.id === t.id) === 0}
+                    title="위로"
+                    style={{ fontSize: 11, padding: '2px 4px', lineHeight: 1, border: 'none', borderRadius: 6, background: '#f1eefb', color: '#9b8fc0', cursor: 'pointer' }}
+                  >▲</button>
+                  <button
+                    onClick={() => handleMove(t.id, 1)}
+                    disabled={templates.findIndex((x) => x.id === t.id) === templates.length - 1}
+                    title="아래로"
+                    style={{ fontSize: 11, padding: '2px 4px', lineHeight: 1, border: 'none', borderRadius: 6, background: '#f1eefb', color: '#9b8fc0', cursor: 'pointer' }}
+                  >▼</button>
+                </div>
               )}
-              <button onClick={() => startEdit(t)} title="수정">
-                ✎
-              </button>
-              <button
-                onClick={() => {
-                  if (window.confirm('이 항목을 삭제할까요?')) handleDelete(t.id)
-                }}
-                title="삭제"
-              >
-                ✕
-              </button>
+              <div className="tx-info">
+                <span className="category">{t.name}</span>
+                <span className="meta">
+                  {t.category}
+                  {t.author ? ` · ${t.author}` : ''} ·{' '}
+                  <span className={t.type === 'income' ? 'amount income' : 'amount expense'}>
+                    {t.type === 'income' ? '+' : '-'}
+                    {formatAmount(t.amount)}원
+                  </span>
+                </span>
+              </div>
+              <div className="tx-amount">
+                {lastAdded[t.id] ? (
+                  <button onClick={() => handleUndo(t.id)} className="quick-add-btn undo" title="되돌리기">↩</button>
+                ) : (
+                  <button onClick={() => handleQuickAdd(t)} disabled={adding === t.id} className="quick-add-btn" title="오늘 내역에 추가">
+                    {adding === t.id ? '…' : '+'}
+                  </button>
+                )}
+                <span className="swipe-hint"><span/><span/><span/></span>
+              </div>
+            </div>
+            <div className="tx-swipe-actions">
+              <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(t) }}>✎</button>
+              <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); setSwipedId(null); if (window.confirm('이 항목을 삭제할까요?')) handleDelete(t.id) }}>✕</button>
             </div>
           </div>
         ),
