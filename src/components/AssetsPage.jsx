@@ -13,7 +13,7 @@ function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-export default function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory }) {
+export default function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory, onToast }) {
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -53,6 +53,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       return
     }
     setAssets((prev) => [...prev, data])
+    onToast?.('✓ 자산이 추가되었습니다')
   }
 
   async function handleUpdate(id, fields) {
@@ -67,6 +68,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       return
     }
     setAssets((prev) => prev.map((a) => (a.id === id ? data : a)))
+    onToast?.('✓ 자산이 수정되었습니다')
   }
 
   async function handleDelete(id) {
@@ -81,6 +83,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       return
     }
     setAssets((prev) => prev.map((a) => (a.id === id ? data : a)))
+    onToast?.('🗑 자산이 삭제되었습니다')
   }
 
   async function handleRestore(id) {
@@ -96,6 +99,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       return
     }
     setAssets((prev) => prev.map((a) => (a.id === id ? data : a)))
+    onToast?.('✓ 자산이 복구되었습니다')
   }
 
   async function handlePermanentDelete(id) {
@@ -106,6 +110,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       return
     }
     setAssets((prev) => prev.filter((a) => a.id !== id))
+    onToast?.('🗑 자산이 영구 삭제되었습니다')
   }
 
   const activeAssets = assets.filter((a) => !a.deleted_at)

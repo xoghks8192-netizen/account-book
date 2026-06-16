@@ -202,6 +202,7 @@ export default function App() {
     if (target?.linked_asset_id) {
       await adjustAssetAmount(target.linked_asset_id, -Number(target.amount))
     }
+    showToast('🗑 내역이 삭제되었습니다')
   }
 
   async function handleUpdateTransaction(id, fields) {
@@ -222,6 +223,7 @@ export default function App() {
     if (data.linked_asset_id) {
       await adjustAssetAmount(data.linked_asset_id, Number(data.amount))
     }
+    showToast('✓ 내역이 수정되었습니다')
     return true
   }
 
@@ -518,6 +520,7 @@ export default function App() {
           onAddCategory={(name) => handleAddCategory('asset', name)}
           onRemoveCategory={(name) => handleRemoveCategory('asset', name)}
           onMoveCategory={(name, direction) => handleMoveCategory('asset', name, direction)}
+          onToast={showToast}
         />
       ) : (
         <>
@@ -726,6 +729,7 @@ export default function App() {
             onAddCategory={handleAddCategory}
             onRemoveCategory={handleRemoveCategory}
             onUndo={handleDelete}
+            onToast={showToast}
             onQuickAdd={(t) =>
               handleAdd({
                 type: t.type,

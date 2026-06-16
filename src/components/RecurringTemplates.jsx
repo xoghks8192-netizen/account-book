@@ -10,7 +10,7 @@ function formatAmount(n) {
 
 const UNDO_TIMEOUT = 8000
 
-export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, owners, householdId, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory }) {
+export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, owners, householdId, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onToast }) {
   const [templates, setTemplates] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
@@ -97,12 +97,14 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
       setMemo('')
       setLinkedAssetId('')
       setShowForm(false)
+      onToast?.('✓ 고정 항목이 추가되었습니다')
     }
   }
 
   async function handleDelete(id) {
     await supabase.from('recurring_templates').delete().eq('id', id)
     setTemplates((prev) => prev.filter((t) => t.id !== id))
+    onToast?.('🗑 고정 항목이 삭제되었습니다')
   }
 
   async function handleMove(id, direction) {
@@ -170,6 +172,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
     if (!error) {
       setTemplates((prev) => prev.map((t) => (t.id === id ? data : t)))
       setEditingId(null)
+      onToast?.('✓ 고정 항목이 수정되었습니다')
     }
   }
 
@@ -178,6 +181,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
     const added = await onQuickAdd(template)
     setAdding(null)
     if (added) {
+      onToast?.('✓ 내역에 추가되었습니다')
       setLastAdded((prev) => ({ ...prev, [template.id]: added.id }))
       setTimeout(() => {
         setLastAdded((prev) => {
