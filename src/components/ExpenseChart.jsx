@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { getCategoryColor } from '../categories'
-import Modal from './Modal'
 
 const VISIBLE_COUNT = 5
 
@@ -8,9 +7,8 @@ function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-export default function ExpenseChart({ transactions }) {
+export default function ExpenseChart({ transactions, onOpen }) {
   const [showAll, setShowAll] = useState(false)
-  const [showModal, setShowModal] = useState(false)
 
   const expenseByCategory = transactions
     .filter((t) => t.type === 'expense')
@@ -36,27 +34,7 @@ export default function ExpenseChart({ transactions }) {
   const hiddenCount = data.length - visibleData.length
 
   return (
-    <div className="asset-chart clickable" onClick={() => setShowModal(true)} style={{ cursor: 'pointer' }}>
-      {showModal && (
-        <Modal title="이번 달 지출 요약" onClose={(e) => { e?.stopPropagation?.(); setShowModal(false) }}>
-          {data.map(([category, amount]) => (
-            <div key={category} className="modal-row">
-              <span className="modal-row-name" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ width: 10, height: 10, borderRadius: '50%', background: getCategoryColor(category), flexShrink: 0, display: 'inline-block' }} />
-                {category}
-              </span>
-              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
-                <span className="modal-row-amount">-{formatAmount(amount)}원</span>
-                <span style={{ fontSize: 11, color: 'var(--icon-muted)' }}>{((amount / total) * 100).toFixed(1)}%</span>
-              </span>
-            </div>
-          ))}
-          <div className="modal-total-row">
-            <span>합계</span>
-            <span className="modal-row-amount">-{formatAmount(total)}원</span>
-          </div>
-        </Modal>
-      )}
+    <div className="asset-chart clickable" onClick={onOpen} style={{ cursor: onOpen ? 'pointer' : 'default' }}>
       <div className="donut" style={{ background: `conic-gradient(${stops.join(', ')})` }}>
         <div className="donut-hole">
           <span className="donut-label">이번 달 지출</span>

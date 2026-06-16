@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { DEFAULT_CATEGORIES } from '../categories'
 import Collapsible from './Collapsible'
 import CategorySelect from './CategorySelect'
+import Modal from './Modal'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
@@ -244,98 +245,49 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
 
       {visibleTemplates.length === 0 && !showForm && <div className="empty">등록된 항목이 없습니다.</div>}
 
-      {visibleTemplates.map((t) =>
-        editingId === t.id ? (
-          <div className="tx-item asset-edit" key={t.id}>
-            <div className="type-toggle">
-              <button
-                type="button"
-                className={`income ${editType === 'income' ? 'active' : ''}`}
-                onClick={() => handleEditTypeChange('income')}
-              >
-                수입
-              </button>
-              <button
-                type="button"
-                className={`expense ${editType === 'expense' ? 'active' : ''}`}
-                onClick={() => handleEditTypeChange('expense')}
-              >
-                지출
-              </button>
-            </div>
-            <div className="form-row">
-              <label>이름</label>
-              <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} />
-            </div>
-            <div className="form-row">
-              <label>카테고리</label>
-              <CategorySelect
-                value={editCategory}
-                onChange={setEditCategory}
-                options={categories[editType]}
-                onAdd={(name) => onAddCategory(editType, name)}
-                onRemove={(name) => onRemoveCategory(editType, name)}
-              />
-            </div>
-            <div className="form-row">
-              <label>금액</label>
-              <input
-                type="number"
-                inputMode="numeric"
-                min="1"
-                value={editAmount}
-                onChange={(e) => setEditAmount(e.target.value)}
-              />
-            </div>
-            <div className="form-row">
-              <label>구분</label>
-              <select value={editAuthor} onChange={(e) => handleEditAuthorChange(e.target.value)}>
-                {owners.map((o) => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-row">
-              <label>연동될 자산 (선택)</label>
-              <select value={editLinkedAssetId} onChange={(e) => setEditLinkedAssetId(e.target.value)}>
-                <option value="">선택 안함</option>
-                {editAuthorAssets.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name} ({a.category} · {a.owner})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-row">
-              <label>메모 (선택)</label>
-              <input type="text" value={editMemo} onChange={(e) => setEditMemo(e.target.value)} placeholder="메모" />
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => handleUpdate(t.id)} className="submit-btn" style={{ flex: 1 }}>
-                저장
-              </button>
-              <button
-                onClick={() => setEditingId(null)}
-                style={{
-                  flex: 1,
-                  padding: 13,
-                  border: 'none',
-                  borderRadius: 999,
-                  background: '#fdeef3',
-                  color: '#b88a9c',
-                  fontSize: 15,
-                  fontWeight: 700,
-                  fontFamily: '"Jua", sans-serif',
-                  cursor: 'pointer',
-                }}
-              >
-                취소
-              </button>
-            </div>
+      {editingId && visibleTemplates.find((t) => t.id === editingId) && (
+        <Modal title="고정 항목 수정" onClose={() => setEditingId(null)}>
+          <div className="type-toggle">
+            <button type="button" className={`income ${editType === 'income' ? 'active' : ''}`} onClick={() => handleEditTypeChange('income')}>수입</button>
+            <button type="button" className={`expense ${editType === 'expense' ? 'active' : ''}`} onClick={() => handleEditTypeChange('expense')}>지출</button>
           </div>
-        ) : (
+          <div className="form-row">
+            <label>이름</label>
+            <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} />
+          </div>
+          <div className="form-row">
+            <label>카테고리</label>
+            <CategorySelect value={editCategory} onChange={setEditCategory} options={categories[editType]} onAdd={(name) => onAddCategory(editType, name)} onRemove={(name) => onRemoveCategory(editType, name)} />
+          </div>
+          <div className="form-row">
+            <label>금액</label>
+            <input type="number" inputMode="numeric" min="1" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
+          </div>
+          <div className="form-row">
+            <label>구분</label>
+            <select value={editAuthor} onChange={(e) => handleEditAuthorChange(e.target.value)}>
+              {owners.map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </div>
+          <div className="form-row">
+            <label>연동될 자산 (선택)</label>
+            <select value={editLinkedAssetId} onChange={(e) => setEditLinkedAssetId(e.target.value)}>
+              <option value="">선택 안함</option>
+              {editAuthorAssets.map((a) => <option key={a.id} value={a.id}>{a.name} ({a.category} · {a.owner})</option>)}
+            </select>
+          </div>
+          <div className="form-row">
+            <label>메모 (선택)</label>
+            <input type="text" value={editMemo} onChange={(e) => setEditMemo(e.target.value)} placeholder="메모" />
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <button onClick={() => handleUpdate(editingId)} className="submit-btn" style={{ flex: 1 }}>저장</button>
+            <button onClick={() => setEditingId(null)} style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: '"Jua", sans-serif', cursor: 'pointer' }}>취소</button>
+          </div>
+        </Modal>
+      )}
+
+      {visibleTemplates.map((t) => (
           <div
             className={`tx-item${swipedId === t.id ? ' swiped' : ''}`}
             key={t.id}
