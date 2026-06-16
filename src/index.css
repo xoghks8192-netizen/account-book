@@ -797,6 +797,12 @@ body {
   white-space: nowrap;
 }
 
+@media (pointer: fine) {
+  .date-placeholder {
+    display: none;
+  }
+}
+
 .filter-sep {
   flex-shrink: 0;
   font-size: 12px;
