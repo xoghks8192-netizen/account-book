@@ -212,7 +212,7 @@ export default function App() {
 
     if (data.category === TRANSFER_CATEGORY && data.type === 'expense') {
       const partner = owners.find((o) => o !== '공동' && o !== data.owner)
-      showToast(`[디버그] 이체감지: category=${data.category}, partner=${partner}`)
+      alert(`[디버그] 이체감지\ncategory: ${data.category}\npartner: ${partner}`)
       if (partner) {
         const { data: counterData, error: counterError } = await supabase
           .from('transactions')
@@ -228,7 +228,8 @@ export default function App() {
           })
           .select()
           .single()
-        if (counterError) showToast(`[디버그] 오류: ${counterError.message}`)
+        if (counterError) alert(`[디버그] 오류: ${counterError.message}`)
+        else alert(`[디버그] 성공\ncounterData.category: ${counterData?.category}`)
         if (counterData && counterData.date >= start && counterData.date < end) {
           setTransactions((prev) =>
             [...prev, counterData].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id)),
@@ -236,7 +237,7 @@ export default function App() {
         }
       }
     } else if (data.type === 'expense') {
-      showToast(`[디버그] 이체아님: category=${data.category}`)
+      alert(`[디버그] 이체아님\ncategory: ${data.category}\nTRANSFER_CATEGORY: ${TRANSFER_CATEGORY}`)
     }
 
     return data
