@@ -46,6 +46,7 @@ export default function App() {
   })
   const [transactions, setTransactions] = useState([])
   const [prevTransactions, setPrevTransactions] = useState([])
+  const [lastAddedTxId, setLastAddedTxId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
@@ -211,6 +212,7 @@ export default function App() {
       setTransactions((prev) =>
         [...prev, data].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id)),
       )
+      setLastAddedTxId(data.id)
     }
     if (data.linked_asset_id) {
       await adjustAssetAmount(data.linked_asset_id, Number(data.amount))
@@ -783,6 +785,7 @@ export default function App() {
                 onAddCategory={handleAddCategory}
                 onRemoveCategory={handleRemoveCategory}
                 search={search}
+                scrollToId={lastAddedTxId}
               />
             </Collapsible>
           )}

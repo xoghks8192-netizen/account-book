@@ -326,7 +326,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
               if (delta < -60) setSwipedId(t.id)
               else if (delta > 20) setSwipedId(null)
             }}
-            onClick={() => { if (swipedId === t.id) setSwipedId(null) }}
+            onClick={() => { if (swipedId !== null) setSwipedId(null) }}
           >
             <div className="tx-inner">
               {reordering && (

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DEFAULT_CATEGORIES } from '../categories'
 import CategorySelect from './CategorySelect'
 import Modal from './Modal'
@@ -29,7 +29,7 @@ function formatDate(dateStr) {
   return `${mm}.${dd} (${DAY_NAMES[d.getDay()]})`
 }
 
-export default function TransactionList({ transactions, onDelete, onUpdate, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, search = '' }) {
+export default function TransactionList({ transactions, onDelete, onUpdate, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, search = '', scrollToId = null }) {
   const [editingId, setEditingId] = useState(null)
   const [swipedId, setSwipedId] = useState(null)
   const touchStartX = { current: 0 }
@@ -43,6 +43,13 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
   const [saving, setSaving] = useState(false)
   const [showMore, setShowMore] = useState(false)
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const itemRefs = useRef({})
+
+  useEffect(() => {
+    if (!scrollToId) return
+    const el = itemRefs.current[scrollToId]
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [scrollToId])
 
 
   function startEdit(tx) {
@@ -179,13 +186,14 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
             <div
               className={`tx-item${swipedId === tx.id ? ' swiped' : ''}`}
               key={tx.id}
+              ref={(el) => { itemRefs.current[tx.id] = el }}
               onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX }}
               onTouchEnd={(e) => {
                 const delta = e.changedTouches[0].clientX - touchStartX.current
                 if (delta < -60) setSwipedId(tx.id)
                 else if (delta > 20) setSwipedId(null)
               }}
-              onClick={() => { if (swipedId === tx.id) setSwipedId(null) }}
+              onClick={() => { if (swipedId !== null) setSwipedId(null) }}
             >
               <div className="tx-inner">
                 <div className="tx-info">
