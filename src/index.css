@@ -1306,7 +1306,7 @@ body {
 .pin-overlay {
   position: fixed;
   inset: 0;
-  background: var(--bg);
+  background: var(--bg-root);
   display: flex;
   align-items: center;
   justify-content: center;
