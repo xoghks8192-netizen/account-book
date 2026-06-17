@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from './lib/supabase'
 import TransactionForm from './components/TransactionForm'
 import TransactionList from './components/TransactionList'
@@ -18,6 +18,7 @@ import { toCSV, downloadCSV } from './lib/csv'
 import { loadSession, saveSession, clearSession } from './users'
 import { STOCK_CATEGORIES } from './assetMeta'
 import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from './categories'
+import PinLock from './components/PinLock'
 
 const PAGE_KEY = 'household-budget-page'
 const THEME_KEY = 'household-budget-theme'
@@ -38,6 +39,24 @@ function monthRange(year, month) {
 }
 
 export default function App() {
+  const [pinLocked, setPinLocked] = useState(() => !!localStorage.getItem('app_pin'))
+  const hiddenAt = useRef(null)
+
+  useEffect(() => {
+    function handleVisibility() {
+      if (document.hidden) {
+        hiddenAt.current = Date.now()
+      } else {
+        if (localStorage.getItem('app_pin') && hiddenAt.current && Date.now() - hiddenAt.current > 30000) {
+          setPinLocked(true)
+        }
+        hiddenAt.current = null
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [])
+
   const [user, setUser] = useState(() => loadSession())
   const [page, setPage] = useState(() => localStorage.getItem(PAGE_KEY) || 'transactions')
   const [cursor, setCursor] = useState(() => {
@@ -427,6 +446,10 @@ export default function App() {
 
   if (!user) {
     return <Login onLogin={setUser} />
+  }
+
+  if (pinLocked) {
+    return <PinLock mode="unlock" onUnlock={() => setPinLocked(false)} />
   }
 
   function handleLogout() {

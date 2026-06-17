@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import PinLock from './PinLock'
 
 export default function ChangePassword({ user, onClose, onUpdateSession }) {
   const [current, setCurrent] = useState('')
@@ -7,6 +8,9 @@ export default function ChangePassword({ user, onClose, onUpdateSession }) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [saving, setSaving] = useState(false)
+
+  const [showPinSetup, setShowPinSetup] = useState(false)
+  const [hasPin, setHasPin] = useState(!!localStorage.getItem('app_pin'))
 
   const [datingStart, setDatingStart] = useState(user.datingStart || '')
   const [weddingDate, setWeddingDate] = useState(user.weddingDate || '')
@@ -121,6 +125,35 @@ export default function ChangePassword({ user, onClose, onUpdateSession }) {
       <button type="button" onClick={handleAnniversarySave} className="submit-btn" disabled={annivSaving}>
         {annivSaving ? '저장 중...' : '기념일 저장'}
       </button>
+
+      <h3 style={{ marginTop: 24 }}>앱 잠금 PIN</h3>
+      {showPinSetup ? (
+        <PinLock
+          mode="setup"
+          onUnlock={() => { setShowPinSetup(false); setHasPin(true) }}
+        />
+      ) : (
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            type="button"
+            className="submit-btn"
+            style={{ flex: 1 }}
+            onClick={() => setShowPinSetup(true)}
+          >
+            {hasPin ? 'PIN 변경' : 'PIN 설정'}
+          </button>
+          {hasPin && (
+            <button
+              type="button"
+              className="submit-btn"
+              style={{ flex: 1, background: 'var(--form-border)', color: 'var(--text-main)' }}
+              onClick={() => { localStorage.removeItem('app_pin'); setHasPin(false) }}
+            >
+              PIN 해제
+            </button>
+          )}
+        </div>
+      )}
 
       <button
         type="button"
