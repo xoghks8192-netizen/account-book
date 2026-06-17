@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from '../categories'
 import CategoryManager from './CategoryManager'
 
@@ -135,6 +135,7 @@ export default function TransactionForm({ onAdd, onSuccess, currentUser, owners,
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           required
+          autoFocus
         />
       </div>
 

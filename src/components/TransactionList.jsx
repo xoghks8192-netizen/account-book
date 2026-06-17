@@ -41,6 +41,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
   const [editLinkedAssetId, setEditLinkedAssetId] = useState('')
   const [saving, setSaving] = useState(false)
   const [showMore, setShowMore] = useState(false)
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   function startEdit(tx) {
     setEditingId(tx.id)
@@ -195,7 +196,14 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
               </div>
               <div className="tx-swipe-actions">
                 <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(tx) }}>✎</button>
-                <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); setSwipedId(null); if (window.confirm('이 내역을 삭제할까요?')) onDelete(tx.id) }}>✕</button>
+                {confirmDeleteId === tx.id ? (
+                  <>
+                    <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); onDelete(tx.id); setConfirmDeleteId(null); setSwipedId(null) }}>확인</button>
+                    <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null) }}>취소</button>
+                  </>
+                ) : (
+                  <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(tx.id) }}>✕</button>
+                )}
               </div>
             </div>
           ))}

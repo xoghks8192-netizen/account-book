@@ -239,6 +239,39 @@ body {
   color: #e0524c;
 }
 
+.added-badge {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #56c97a;
+  background: #e8faf0;
+  border-radius: 6px;
+  padding: 1px 5px;
+  vertical-align: middle;
+}
+
+[data-theme="dark"] .added-badge {
+  background: #1a3d28;
+  color: #7be09a;
+}
+
+.tx-month-summary {
+  display: flex;
+  gap: 12px;
+  padding: 6px 4px 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tx-month-income {
+  color: #56c97a;
+}
+
+.tx-month-expense {
+  color: #ff7aa2;
+}
+
 .empty-state {
   text-align: center;
   padding: 48px 16px 32px;

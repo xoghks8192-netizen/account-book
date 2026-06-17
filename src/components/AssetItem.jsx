@@ -18,6 +18,7 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
   const [currentPrice, setCurrentPrice] = useState(asset.current_price ?? '')
   const [ticker, setTicker] = useState(asset.ticker ?? '')
   const [saving, setSaving] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [refreshError, setRefreshError] = useState('')
 
@@ -163,7 +164,14 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
             </button>
           )}
           <button onClick={() => setEditing(true)} title="수정">✎</button>
-          <button onClick={() => { if (window.confirm('이 자산을 삭제할까요?')) onDelete(asset.id) }} title="삭제">✕</button>
+          {confirmDelete ? (
+            <>
+              <button onClick={() => { onDelete(asset.id); setConfirmDelete(false) }} title="삭제 확인" style={{ fontSize: 11, padding: '4px 8px' }}>확인</button>
+              <button onClick={() => setConfirmDelete(false)} title="취소" style={{ fontSize: 11, padding: '4px 8px' }}>취소</button>
+            </>
+          ) : (
+            <button onClick={() => setConfirmDelete(true)} title="삭제">✕</button>
+          )}
         </div>
       </div>
     </>

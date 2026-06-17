@@ -331,7 +331,7 @@ export default function App() {
     const min = amountMin ? Number(amountMin) : null
     const max = amountMax ? Number(amountMax) : null
     return ownedTransactions.filter((t) => {
-      if (q && !(t.category.toLowerCase().includes(q) || (t.memo && t.memo.toLowerCase().includes(q)))) return false
+      if (q && !(t.category.toLowerCase().includes(q) || (t.memo && t.memo.toLowerCase().includes(q)) || String(t.amount).includes(q))) return false
       if (min !== null && Number(t.amount) < min) return false
       if (max !== null && Number(t.amount) > max) return false
       if (dateFrom && t.date < dateFrom) return false
@@ -769,6 +769,10 @@ export default function App() {
                   )}
                 </div>
               )}
+              <div className="tx-month-summary">
+                <span className="tx-month-income">+{totalIncome.toLocaleString('ko-KR')}원</span>
+                <span className="tx-month-expense">-{totalExpense.toLocaleString('ko-KR')}원</span>
+              </div>
               <TransactionList
                 transactions={filteredTransactions}
                 onDelete={handleDelete}
@@ -793,6 +797,7 @@ export default function App() {
             onRemoveCategory={handleRemoveCategory}
             onUndo={handleDelete}
             onToast={showToast}
+            currentMonthTransactions={transactions}
             onQuickAdd={(t) =>
               handleAdd({
                 type: t.type,

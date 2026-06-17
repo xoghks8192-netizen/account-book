@@ -11,7 +11,7 @@ function formatAmount(n) {
 
 const UNDO_TIMEOUT = 8000
 
-export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, owners, householdId, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onToast }) {
+export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, owners, householdId, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onToast, currentMonthTransactions = [] }) {
   const [templates, setTemplates] = useState([])
   const [swipedId, setSwipedId] = useState(null)
   const touchStartX = { current: 0 }
@@ -36,6 +36,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   const [editLinkedAssetId, setEditLinkedAssetId] = useState('')
   const [reordering, setReordering] = useState(false)
   const [undidIds, setUndidIds] = useState(new Set())
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   useEffect(() => {
     if (ownerFilter !== '전체') {
@@ -216,8 +217,19 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
     }, 3000)
   }
 
-  const visibleTemplates =
-    ownerFilter === '전체' ? templates : templates.filter((t) => t.author === ownerFilter)
+  function isAddedThisMonth(t) {
+    return currentMonthTransactions.some(
+      (tx) => tx.category === t.category && Number(tx.amount) === Number(t.amount) && tx.owner === t.author,
+    )
+  }
+
+  const baseTemplates = ownerFilter === '전체' ? templates : templates.filter((t) => t.author === ownerFilter)
+  const visibleTemplates = [...baseTemplates].sort((a, b) => {
+    const aAdded = isAddedThisMonth(a) ? 1 : 0
+    const bAdded = isAddedThisMonth(b) ? 1 : 0
+    if (aAdded !== bAdded) return aAdded - bAdded
+    return (a.sort_order ?? a.id) - (b.sort_order ?? b.id)
+  })
 
   return (
     <Collapsible title="고정 지출/수입">
@@ -326,7 +338,10 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
                 </div>
               )}
               <div className="tx-info">
-                <span className="category">{t.name}</span>
+                <span className="category">
+                  {t.name}
+                  {isAddedThisMonth(t) && <span className="added-badge">이번 달 ✓</span>}
+                </span>
                 <span className="meta">
                   {t.category}
                   {t.author ? ` · ${t.author}` : ''} ·{' '}
@@ -349,7 +364,14 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
             </div>
             <div className="tx-swipe-actions">
               <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(t) }}>✎</button>
-              <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); setSwipedId(null); if (window.confirm('이 항목을 삭제할까요?')) handleDelete(t.id) }}>✕</button>
+              {confirmDeleteId === t.id ? (
+                <>
+                  <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); handleDelete(t.id); setConfirmDeleteId(null); setSwipedId(null) }}>확인</button>
+                  <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null) }}>취소</button>
+                </>
+              ) : (
+                <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(t.id) }}>✕</button>
+              )}
             </div>
           </div>
         ),

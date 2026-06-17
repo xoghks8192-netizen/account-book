@@ -19,6 +19,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
   const [error, setError] = useState(null)
   const [ownerFilter, setOwnerFilter] = useState('전체')
   const [summaryModal, setSummaryModal] = useState(null)
+  const [lastMonthTotal, setLastMonthTotal] = useState(null)
 
   useEffect(() => {
     if (!householdId) return
@@ -175,6 +176,21 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       )
   }, [householdId, loading, householdTotal, householdLiquidTotal, householdNonLiquidTotal])
 
+  useEffect(() => {
+    if (!householdId) return
+    const now = new Date()
+    const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10)
+    supabase
+      .from('net_worth_snapshots')
+      .select('total, snapshot_date')
+      .eq('household_id', householdId)
+      .lt('snapshot_date', firstOfMonth)
+      .order('snapshot_date', { ascending: false })
+      .limit(1)
+      .single()
+      .then(({ data }) => { if (data) setLastMonthTotal(data.total) })
+  }, [householdId])
+
   const summaryModalConfigs = {
     총자산: { title: '총 자산', items: visible, total },
     비상금: {
@@ -206,6 +222,11 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
         <div className="summary-item balance clickable" onClick={() => setSummaryModal('총자산')}>
           <div className="label">총 자산</div>
           <div className="value">{formatAmount(total)}</div>
+          {lastMonthTotal !== null && (
+            <div style={{ fontSize: 11, fontWeight: 700, color: householdTotal >= lastMonthTotal ? '#ff5c5c' : '#6cb6ff', marginTop: 2 }}>
+              {householdTotal >= lastMonthTotal ? '+' : ''}{formatAmount(householdTotal - lastMonthTotal)}원
+            </div>
+          )}
         </div>
         <div className="summary-item income clickable" onClick={() => setSummaryModal('비상금')}>
           <div className="label">비상금</div>
