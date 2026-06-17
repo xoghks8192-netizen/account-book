@@ -153,6 +153,23 @@ body {
   line-height: 1;
 }
 
+.page-slide {
+  overflow: hidden;
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(40px); opacity: 0 }
+  to   { transform: translateX(0);    opacity: 1 }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(-40px); opacity: 0 }
+  to   { transform: translateX(0);     opacity: 1 }
+}
+
+.page-slide.slide-left  { animation: slideInLeft  0.3s cubic-bezier(0.25,0.46,0.45,0.94) }
+.page-slide.slide-right { animation: slideInRight 0.3s cubic-bezier(0.25,0.46,0.45,0.94) }
+
 .page-tabs,
 .owner-tabs {
   display: flex;

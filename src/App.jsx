@@ -19,6 +19,7 @@ import { loadSession, saveSession, clearSession } from './users'
 import { STOCK_CATEGORIES } from './assetMeta'
 import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from './categories'
 import PinLock from './components/PinLock'
+import { useCountUp } from './hooks/useCountUp'
 
 const PAGE_KEY = 'household-budget-page'
 const THEME_KEY = 'household-budget-theme'
@@ -67,6 +68,15 @@ export default function App() {
 
   const [user, setUser] = useState(() => loadSession())
   const [page, setPage] = useState(() => localStorage.getItem(PAGE_KEY) || 'transactions')
+  const [slideDir, setSlideDir] = useState(null)
+  const PAGE_ORDER = ['transactions', 'assets']
+  function navigateTo(next) {
+    if (next === page) return
+    const dir = PAGE_ORDER.indexOf(next) > PAGE_ORDER.indexOf(page) ? 'left' : 'right'
+    setSlideDir(dir)
+    setPage(next)
+    setTimeout(() => setSlideDir(null), 350)
+  }
   const [cursor, setCursor] = useState(() => {
     const now = new Date()
     return { year: now.getFullYear(), month: now.getMonth() }
@@ -328,6 +338,10 @@ export default function App() {
     .reduce((s, t) => s + Number(t.amount), 0)
   const totalExpense = ownedTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
   const balance = totalIncome - totalExpense
+
+  const animatedIncome = useCountUp(totalIncome)
+  const animatedExpense = useCountUp(totalExpense)
+  const animatedBalance = useCountUp(balance)
   const transferReceived = ownedTransactions
     .filter((t) => t.type === 'income' && t.category === TRANSFER_CATEGORY)
     .reduce((s, t) => s + Number(t.amount), 0)
@@ -613,14 +627,15 @@ export default function App() {
       )}
 
       <div className="page-tabs">
-        <button className={page === 'transactions' ? 'active' : ''} onClick={() => setPage('transactions')}>
+        <button className={page === 'transactions' ? 'active' : ''} onClick={() => navigateTo('transactions')}>
           내역
         </button>
-        <button className={page === 'assets' ? 'active' : ''} onClick={() => setPage('assets')}>
+        <button className={page === 'assets' ? 'active' : ''} onClick={() => navigateTo('assets')}>
           자산
         </button>
       </div>
 
+      <div className={`page-slide${slideDir ? ` slide-${slideDir}` : ''}`}>
       {page === 'assets' ? (
         <AssetsPage
           currentUser={myName}
@@ -653,21 +668,21 @@ export default function App() {
           <div className="summary">
             <div className="summary-item income clickable" onClick={() => setSummaryModal('수입')}>
               <div className="label">수입</div>
-              <div className="value">{formatAmount(totalIncome)}</div>
+              <div className="value">{formatAmount(animatedIncome)}</div>
               {transferReceived > 0 && ownerFilter !== '전체' && (
                 <div className="sub-label">💸 이체 +{formatAmount(transferReceived)}</div>
               )}
             </div>
             <div className="summary-item expense clickable" onClick={() => setSummaryModal('지출')}>
               <div className="label">지출</div>
-              <div className="value">{formatAmount(totalExpense)}</div>
+              <div className="value">{formatAmount(animatedExpense)}</div>
               {transferSent > 0 && (
                 <div className="sub-label">💸 이체 -{formatAmount(transferSent)}</div>
               )}
             </div>
             <div className="summary-item balance">
               <div className="label">합계</div>
-              <div className="value">{formatAmount(balance)}</div>
+              <div className="value">{formatAmount(animatedBalance)}</div>
             </div>
           </div>
 
@@ -889,6 +904,7 @@ export default function App() {
           />
         </>
       )}
+      </div>
 
       {toast && <div className="toast">{toast}</div>}
     </div>
