@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 
 const KEYS = ['1','2','3','4','5','6','7','8','9','','0','⌫']
 
-export default function PinLock({ onUnlock, mode = 'unlock' }) {
+export default function PinLock({ onUnlock, onCancel, mode = 'unlock' }) {
   const [digits, setDigits] = useState([])
   const [shake, setShake] = useState(false)
   const [setupStep, setSetupStep] = useState(1)
@@ -53,6 +53,9 @@ export default function PinLock({ onUnlock, mode = 'unlock' }) {
   return createPortal(
     <div className="pin-overlay">
       <div className="pin-box">
+        {onCancel && (
+          <button className="pin-cancel" onClick={onCancel}>취소</button>
+        )}
         <div className="pin-title">{title}</div>
         <div className="pin-subtitle">{subtitle}</div>
         <div className={`pin-dots${shake ? ' shake' : ''}`}>

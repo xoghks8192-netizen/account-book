@@ -74,6 +74,8 @@ export default function App() {
   const [transactions, setTransactions] = useState([])
   const [prevTransactions, setPrevTransactions] = useState([])
   const [lastAddedTxId, setLastAddedTxId] = useState(null)
+  const [showPinSetup, setShowPinSetup] = useState(false)
+  const [hasPin, setHasPin] = useState(!!localStorage.getItem('app_pin'))
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
@@ -567,6 +569,20 @@ export default function App() {
               내 정보 변경
             </button>
             <button
+              onClick={() => { setShowMoreMenu(false); setShowPinSetup(true) }}
+              style={{ border: 'none', background: 'none', color: '#f0a05a', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif', padding: '4px 12px', textAlign: 'left' }}
+            >
+              🔒 {hasPin ? 'PIN 변경' : 'PIN 설정'}
+            </button>
+            {hasPin && (
+              <button
+                onClick={() => { localStorage.removeItem('app_pin'); sessionStorage.removeItem('pin_unlocked'); setHasPin(false); setShowMoreMenu(false) }}
+                style={{ border: 'none', background: 'none', color: '#aaa', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif', padding: '4px 12px', textAlign: 'left' }}
+              >
+                🔓 PIN 해제
+              </button>
+            )}
+            <button
               onClick={handleLogout}
               style={{ border: 'none', background: 'none', color: '#ff8fab', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif', padding: '4px 12px', textAlign: 'left' }}
             >
@@ -585,6 +601,14 @@ export default function App() {
             saveSession(next)
             setUser(next)
           }}
+        />
+      )}
+
+      {showPinSetup && (
+        <PinLock
+          mode="setup"
+          onUnlock={() => { setShowPinSetup(false); setHasPin(true) }}
+          onCancel={() => setShowPinSetup(false)}
         />
       )}
 

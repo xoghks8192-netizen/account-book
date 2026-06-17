@@ -1402,6 +1402,18 @@ body {
   pointer-events: none;
 }
 
+.pin-cancel {
+  align-self: flex-end;
+  border: none;
+  background: none;
+  color: var(--text-sub);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: "Jua", sans-serif;
+  cursor: pointer;
+  padding: 4px 0 12px;
+}
+
 .confirm-dialog {
   background: var(--card-bg);
   border-radius: 20px;
