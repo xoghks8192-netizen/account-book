@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 const KEYS = ['1','2','3','4','5','6','7','8','9','','0','⌫']
 
@@ -49,7 +50,7 @@ export default function PinLock({ onUnlock, mode = 'unlock' }) {
     ? '앱 잠금을 해제하세요'
     : setupStep === 1 ? '사용할 PIN 4자리를 입력하세요' : '한 번 더 입력하세요'
 
-  return (
+  return createPortal(
     <div className="pin-overlay">
       <div className="pin-box">
         <div className="pin-title">{title}</div>
@@ -67,6 +68,7 @@ export default function PinLock({ onUnlock, mode = 'unlock' }) {
           ))}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
