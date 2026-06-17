@@ -196,14 +196,15 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
               </div>
               <div className="tx-swipe-actions">
                 <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(tx) }}>✎</button>
-                {confirmDeleteId === tx.id ? (
-                  <>
-                    <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); onDelete(tx.id); setConfirmDeleteId(null); setSwipedId(null) }}>확인</button>
-                    <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null) }}>취소</button>
-                  </>
-                ) : (
-                  <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(tx.id) }}>✕</button>
-                )}
+                <button
+                  className={`swipe-btn delete${confirmDeleteId === tx.id ? ' confirming' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (confirmDeleteId === tx.id) { onDelete(tx.id); setConfirmDeleteId(null); setSwipedId(null) }
+                    else setConfirmDeleteId(tx.id)
+                  }}
+                  onBlur={() => setConfirmDeleteId(null)}
+                >{confirmDeleteId === tx.id ? '삭제?' : '✕'}</button>
               </div>
             </div>
           ))}

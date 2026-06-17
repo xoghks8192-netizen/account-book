@@ -364,14 +364,15 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
             </div>
             <div className="tx-swipe-actions">
               <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(t) }}>✎</button>
-              {confirmDeleteId === t.id ? (
-                <>
-                  <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); handleDelete(t.id); setConfirmDeleteId(null); setSwipedId(null) }}>확인</button>
-                  <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null) }}>취소</button>
-                </>
-              ) : (
-                <button className="swipe-btn delete" onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(t.id) }}>✕</button>
-              )}
+              <button
+                className={`swipe-btn delete${confirmDeleteId === t.id ? ' confirming' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (confirmDeleteId === t.id) { handleDelete(t.id); setConfirmDeleteId(null); setSwipedId(null) }
+                  else setConfirmDeleteId(t.id)
+                }}
+                onBlur={() => setConfirmDeleteId(null)}
+              >{confirmDeleteId === t.id ? '삭제?' : '✕'}</button>
             </div>
           </div>
         ),

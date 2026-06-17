@@ -164,14 +164,12 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
             </button>
           )}
           <button onClick={() => setEditing(true)} title="수정">✎</button>
-          {confirmDelete ? (
-            <>
-              <button onClick={() => { onDelete(asset.id); setConfirmDelete(false) }} title="삭제 확인" style={{ fontSize: 11, padding: '4px 8px' }}>확인</button>
-              <button onClick={() => setConfirmDelete(false)} title="취소" style={{ fontSize: 11, padding: '4px 8px' }}>취소</button>
-            </>
-          ) : (
-            <button onClick={() => setConfirmDelete(true)} title="삭제">✕</button>
-          )}
+          <button
+            onClick={() => { if (confirmDelete) { onDelete(asset.id); setConfirmDelete(false) } else setConfirmDelete(true) }}
+            onBlur={() => setConfirmDelete(false)}
+            title="삭제"
+            style={confirmDelete ? { background: '#ff5c5c', color: '#fff', fontSize: 11, minWidth: 36 } : undefined}
+          >{confirmDelete ? '삭제?' : '✕'}</button>
         </div>
       </div>
     </>

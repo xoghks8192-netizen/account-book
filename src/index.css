@@ -636,6 +636,13 @@ body {
   border-radius: 0 14px 14px 0;
 }
 
+.swipe-btn.delete.confirming {
+  background: #c0392b;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
 .quick-add-btn {
   width: 32px;
   height: 32px;
