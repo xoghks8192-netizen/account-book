@@ -39,8 +39,15 @@ function monthRange(year, month) {
 }
 
 export default function App() {
-  const [pinLocked, setPinLocked] = useState(() => !!localStorage.getItem('app_pin'))
+  const [pinLocked, setPinLocked] = useState(() =>
+    !!localStorage.getItem('app_pin') && !sessionStorage.getItem('pin_unlocked'),
+  )
   const hiddenAt = useRef(null)
+
+  function unlockPin() {
+    sessionStorage.setItem('pin_unlocked', '1')
+    setPinLocked(false)
+  }
 
   useEffect(() => {
     function handleVisibility() {
@@ -48,6 +55,7 @@ export default function App() {
         hiddenAt.current = Date.now()
       } else {
         if (localStorage.getItem('app_pin') && hiddenAt.current && Date.now() - hiddenAt.current > 30000) {
+          sessionStorage.removeItem('pin_unlocked')
           setPinLocked(true)
         }
         hiddenAt.current = null
@@ -449,7 +457,7 @@ export default function App() {
   }
 
   if (pinLocked) {
-    return <PinLock mode="unlock" onUnlock={() => setPinLocked(false)} />
+    return <PinLock mode="unlock" onUnlock={unlockPin} />
   }
 
   function handleLogout() {
