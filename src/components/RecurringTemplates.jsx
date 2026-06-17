@@ -38,6 +38,10 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   const [reordering, setReordering] = useState(false)
   const [undidIds, setUndidIds] = useState(new Set())
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const [suggestions, setSuggestions] = useState([])
+  const [dismissedSuggestions, setDismissedSuggestions] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('dismissed_suggestions') || '[]') } catch { return [] }
+  })
 
   useEffect(() => {
     if (ownerFilter !== '전체') {
@@ -64,6 +68,92 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
       cancelled = true
     }
   }, [householdId])
+
+  useEffect(() => {
+    if (!householdId || templates.length === 0) return
+    async function detect() {
+      const now = new Date()
+      const months = []
+      for (let i = 1; i <= 3; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        const y = d.getFullYear()
+        const m = String(d.getMonth() + 1).padStart(2, '0')
+        const nd = new Date(d.getFullYear(), d.getMonth() + 1, 1)
+        const nm = String(nd.getMonth() + 1).padStart(2, '0')
+        months.push({ start: `${y}-${m}-01`, end: `${nd.getFullYear()}-${nm}-01` })
+      }
+      const { data } = await supabase
+        .from('transactions')
+        .select('type, category, amount, owner, date')
+        .eq('household_id', householdId)
+        .gte('date', months[months.length - 1].start)
+        .lt('date', months[0].end)
+      if (!data) return
+
+      // 월별 그룹: key = type|category|owner|반올림금액
+      const byMonth = months.map(({ start, end }) =>
+        data.filter((t) => t.date >= start && t.date < end)
+      )
+      const keyOf = (t) => {
+        const rounded = Math.round(Number(t.amount) / 1000) * 1000
+        return `${t.type}|${t.category}|${t.owner}|${rounded}`
+      }
+      const countMap = {}
+      byMonth.forEach((txs) => {
+        const seen = new Set()
+        txs.forEach((t) => {
+          const k = keyOf(t)
+          if (!seen.has(k)) { seen.add(k); countMap[k] = (countMap[k] || 0) + 1 }
+        })
+      })
+
+      const templateKeys = new Set(
+        templates.map((t) => {
+          const rounded = Math.round(Number(t.amount) / 1000) * 1000
+          return `${t.type}|${t.category}|${t.author}|${rounded}`
+        })
+      )
+
+      const found = []
+      Object.entries(countMap).forEach(([k, count]) => {
+        if (count < 2) return
+        if (templateKeys.has(k)) return
+        if (dismissedSuggestions.includes(k)) return
+        const [type, category, owner, amountStr] = k.split('|')
+        found.push({ key: k, type, category, owner, amount: Number(amountStr) })
+      })
+      setSuggestions(found)
+    }
+    detect()
+  }, [householdId, templates])
+
+  function dismissSuggestion(key) {
+    const next = [...dismissedSuggestions, key]
+    setDismissedSuggestions(next)
+    localStorage.setItem('dismissed_suggestions', JSON.stringify(next))
+    setSuggestions((prev) => prev.filter((s) => s.key !== key))
+  }
+
+  async function registerSuggestion(s) {
+    const maxOrder = templates.reduce((max, t) => Math.max(max, t.sort_order ?? 0), 0)
+    const { data, error } = await supabase
+      .from('recurring_templates')
+      .insert({
+        name: s.category,
+        type: s.type,
+        category: s.category,
+        amount: s.amount,
+        author: s.owner,
+        household_id: householdId,
+        sort_order: maxOrder + 1,
+      })
+      .select().single()
+    if (!error) {
+      setTemplates((prev) => [...prev, data])
+      dismissSuggestion(s.key)
+      onToast?.('✓ 고정 항목으로 등록되었습니다')
+    }
+  }
 
   function handleTypeChange(newType) {
     setType(newType)
@@ -248,6 +338,28 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
           </button>
         ))}
       </div>
+
+      {suggestions.length > 0 && (
+        <div className="suggestion-section">
+          <div className="suggestion-title">💡 고정 항목으로 등록할까요?</div>
+          {suggestions.map((s) => (
+            <div key={s.key} className="suggestion-item">
+              <div className="suggestion-info">
+                <span className="suggestion-category">{s.category}</span>
+                <span className="suggestion-meta">
+                  {s.owner} · <span className={s.type === 'income' ? 'amount income' : 'amount expense'}>
+                    {s.type === 'income' ? '+' : '-'}{formatAmount(s.amount)}원
+                  </span> · 최근 2~3달 반복
+                </span>
+              </div>
+              <div className="suggestion-actions">
+                <button className="suggestion-btn register" onClick={() => registerSuggestion(s)}>등록</button>
+                <button className="suggestion-btn dismiss" onClick={() => dismissSuggestion(s.key)}>무시</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {visibleTemplates.length > 1 && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>

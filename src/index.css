@@ -239,6 +239,75 @@ body {
   color: #e0524c;
 }
 
+.suggestion-section {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggestion-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 2px;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--form-bg);
+  border: 1.5px solid var(--form-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  gap: 8px;
+}
+
+.suggestion-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.suggestion-category {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.suggestion-meta {
+  font-size: 12px;
+  color: var(--meta-text);
+}
+
+.suggestion-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.suggestion-btn {
+  border: none;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: "Jua", sans-serif;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.suggestion-btn.register {
+  background: var(--active-gradient);
+  color: #fff;
+}
+
+.suggestion-btn.dismiss {
+  background: var(--form-border);
+  color: var(--text-sub);
+}
+
 .added-badge {
   display: inline-block;
   margin-left: 6px;
