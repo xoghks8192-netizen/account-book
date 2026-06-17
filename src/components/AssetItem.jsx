@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
 import Modal from './Modal'
+import ConfirmDialog from './ConfirmDialog'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
@@ -78,6 +79,13 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
 
   return (
     <>
+      {confirmDelete && (
+        <ConfirmDialog
+          message="이 자산을 삭제할까요?"
+          onConfirm={() => { onDelete(asset.id); setConfirmDelete(false) }}
+          onCancel={() => setConfirmDelete(false)}
+        />
+      )}
       {editing && (
         <Modal title="자산 수정" onClose={handleCancel}>
           <div className="form-row">
@@ -164,12 +172,7 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
             </button>
           )}
           <button onClick={() => setEditing(true)} title="수정">✎</button>
-          <button
-            onClick={() => { if (confirmDelete) { onDelete(asset.id); setConfirmDelete(false) } else setConfirmDelete(true) }}
-            onBlur={() => setConfirmDelete(false)}
-            title="삭제"
-            style={confirmDelete ? { background: '#ff5c5c', color: '#fff', fontSize: 11, minWidth: 36 } : undefined}
-          >{confirmDelete ? '삭제?' : '✕'}</button>
+          <button onClick={() => setConfirmDelete(true)} title="삭제">✕</button>
         </div>
       </div>
     </>

@@ -4,6 +4,7 @@ import { DEFAULT_CATEGORIES } from '../categories'
 import Collapsible from './Collapsible'
 import CategorySelect from './CategorySelect'
 import Modal from './Modal'
+import ConfirmDialog from './ConfirmDialog'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
@@ -233,6 +234,13 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
 
   return (
     <Collapsible title="고정 지출/수입">
+      {confirmDeleteId && (
+        <ConfirmDialog
+          message="이 항목을 삭제할까요?"
+          onConfirm={() => { handleDelete(confirmDeleteId); setConfirmDeleteId(null); setSwipedId(null) }}
+          onCancel={() => setConfirmDeleteId(null)}
+        />
+      )}
       <div className="owner-tabs" style={{ padding: '0 0 12px', margin: 0 }}>
         {['전체', ...owners].map((o) => (
           <button key={o} className={ownerFilter === o ? 'active' : ''} onClick={() => setOwnerFilter(o)}>
@@ -365,14 +373,9 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
             <div className="tx-swipe-actions">
               <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(t) }}>✎</button>
               <button
-                className={`swipe-btn delete${confirmDeleteId === t.id ? ' confirming' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  if (confirmDeleteId === t.id) { handleDelete(t.id); setConfirmDeleteId(null); setSwipedId(null) }
-                  else setConfirmDeleteId(t.id)
-                }}
-                onBlur={() => setConfirmDeleteId(null)}
-              >{confirmDeleteId === t.id ? '삭제?' : '✕'}</button>
+                className="swipe-btn delete"
+                onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(t.id) }}
+              >✕</button>
             </div>
           </div>
         ),

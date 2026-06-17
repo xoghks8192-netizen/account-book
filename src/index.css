@@ -1303,6 +1303,49 @@ body {
   cursor: pointer;
 }
 
+.confirm-dialog {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 28px 24px 20px;
+  width: 280px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  text-align: center;
+}
+
+.confirm-message {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.confirm-btn {
+  flex: 1;
+  padding: 13px 0;
+  border: none;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: "Jua", sans-serif;
+  cursor: pointer;
+}
+
+.confirm-btn.cancel {
+  background: var(--form-border);
+  color: var(--text-main);
+}
+
+.confirm-btn.delete {
+  background: linear-gradient(135deg, #ff7aa2, #e0524c);
+  color: #fff;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;

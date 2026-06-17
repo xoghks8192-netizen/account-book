@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { DEFAULT_CATEGORIES } from '../categories'
 import CategorySelect from './CategorySelect'
 import Modal from './Modal'
+import ConfirmDialog from './ConfirmDialog'
 
 function formatAmount(n) {
   return n.toLocaleString('ko-KR')
@@ -42,6 +43,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
   const [saving, setSaving] = useState(false)
   const [showMore, setShowMore] = useState(false)
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+
 
   function startEdit(tx) {
     setEditingId(tx.id)
@@ -108,6 +110,13 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
 
   return (
     <>
+      {confirmDeleteId && (
+        <ConfirmDialog
+          message="이 내역을 삭제할까요?"
+          onConfirm={() => { onDelete(confirmDeleteId); setConfirmDeleteId(null); setSwipedId(null) }}
+          onCancel={() => setConfirmDeleteId(null)}
+        />
+      )}
       {editingTx && (
         <Modal title="내역 수정" onClose={() => setEditingId(null)}>
           <div className="type-toggle">
@@ -197,14 +206,9 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
               <div className="tx-swipe-actions">
                 <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(tx) }}>✎</button>
                 <button
-                  className={`swipe-btn delete${confirmDeleteId === tx.id ? ' confirming' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    if (confirmDeleteId === tx.id) { onDelete(tx.id); setConfirmDeleteId(null); setSwipedId(null) }
-                    else setConfirmDeleteId(tx.id)
-                  }}
-                  onBlur={() => setConfirmDeleteId(null)}
-                >{confirmDeleteId === tx.id ? '삭제?' : '✕'}</button>
+                  className="swipe-btn delete"
+                  onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(tx.id) }}
+                >✕</button>
               </div>
             </div>
           ))}
