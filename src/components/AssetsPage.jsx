@@ -116,13 +116,17 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
   const activeAssets = assets.filter((a) => !a.deleted_at)
   const deletedAssets = assets.filter((a) => a.deleted_at)
 
+  // 비상금: 본인 소유 또는 공동만 표시, 상대방 비상금은 완전히 제외
   const myAssets = activeAssets.filter(
     (a) => a.category !== '비상금' || a.owner === currentUser || a.owner === '공동',
   )
-  const visible = ownerFilter === '전체' ? myAssets : myAssets.filter((a) => a.owner === ownerFilter)
+  const myEmergencyAssets = myAssets.filter((a) => a.category === '비상금')
+  // 총자산/유동성 계산에서 비상금 제외 (역산 방지)
+  const nonEmergencyAssets = myAssets.filter((a) => a.category !== '비상금')
+  const visible = ownerFilter === '전체' ? nonEmergencyAssets : nonEmergencyAssets.filter((a) => a.owner === ownerFilter)
   const total = visible.reduce((s, a) => s + Number(a.amount), 0)
-  const emergencyTotal = myAssets
-    .filter((a) => a.category === '비상금' && (ownerFilter === '전체' || a.owner === ownerFilter))
+  const emergencyTotal = myEmergencyAssets
+    .filter((a) => ownerFilter === '전체' || a.owner === ownerFilter)
     .reduce((s, a) => s + Number(a.amount), 0)
 
   function groupByCategory(items) {
@@ -146,11 +150,11 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
     .filter(([, amount]) => amount > 0)
     .sort((a, b) => b[1] - a[1])
 
-  const householdTotal = myAssets.reduce((s, a) => s + Number(a.amount), 0)
-  const householdLiquidTotal = myAssets
+  const householdTotal = nonEmergencyAssets.reduce((s, a) => s + Number(a.amount), 0)
+  const householdLiquidTotal = nonEmergencyAssets
     .filter((a) => (a.liquidity ?? defaultLiquidity(a.category)) === '유동')
     .reduce((s, a) => s + Number(a.amount), 0)
-  const householdNonLiquidTotal = myAssets
+  const householdNonLiquidTotal = nonEmergencyAssets
     .filter((a) => (a.liquidity ?? defaultLiquidity(a.category)) === '비유동')
     .reduce((s, a) => s + Number(a.amount), 0)
 
@@ -175,7 +179,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
     총자산: { title: '총 자산', items: visible, total },
     비상금: {
       title: '비상금',
-      items: myAssets.filter((a) => a.category === '비상금' && (ownerFilter === '전체' || a.owner === ownerFilter)),
+      items: myEmergencyAssets.filter((a) => ownerFilter === '전체' || a.owner === ownerFilter),
       total: emergencyTotal,
     },
     유동자산: { title: '💧 유동자산', items: liquidAssets, total: liquidTotal },
