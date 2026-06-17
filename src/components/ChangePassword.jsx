@@ -127,12 +127,13 @@ export default function ChangePassword({ user, onClose, onUpdateSession }) {
       </button>
 
       <h3 style={{ marginTop: 24 }}>앱 잠금 PIN</h3>
-      {showPinSetup ? (
+      {showPinSetup && (
         <PinLock
           mode="setup"
           onUnlock={() => { setShowPinSetup(false); setHasPin(true) }}
         />
-      ) : (
+      )}
+      {!showPinSetup && (
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             type="button"
