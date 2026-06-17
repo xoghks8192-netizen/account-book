@@ -321,11 +321,35 @@ export default function App() {
     return true
   }
 
+  const [monthSlideDir, setMonthSlideDir] = useState(null)
+
   function changeMonth(delta) {
+    const dir = delta > 0 ? 'left' : 'right'
+    setMonthSlideDir(dir)
+    setTimeout(() => setMonthSlideDir(null), 350)
     setCursor((prev) => {
       const d = new Date(prev.year, prev.month + delta, 1)
       return { year: d.getFullYear(), month: d.getMonth() }
     })
+  }
+
+  const monthSwipeStart = useRef(null)
+
+  function handleMonthSwipeStart(e) {
+    if (page !== 'transactions') return
+    monthSwipeStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+  }
+
+  function handleMonthSwipeEnd(e) {
+    if (!monthSwipeStart.current) return
+    const dx = e.changedTouches[0].clientX - monthSwipeStart.current.x
+    const dy = e.changedTouches[0].clientY - monthSwipeStart.current.y
+    monthSwipeStart.current = null
+    if (Math.abs(dx) < 80 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+    // tx-item 스와이프와 겹치지 않도록 시작점이 tx-item 안이면 무시
+    const target = e.changedTouches[0].target
+    if (target.closest('.tx-item')) return
+    changeMonth(dx < 0 ? 1 : -1)
   }
 
   const ownedTransactions =
@@ -635,7 +659,11 @@ export default function App() {
         </button>
       </div>
 
-      <div className={`page-slide${slideDir ? ` slide-${slideDir}` : ''}`}>
+      <div
+        className={`page-slide${slideDir ? ` slide-${slideDir}` : ''}`}
+        onTouchStart={handleMonthSwipeStart}
+        onTouchEnd={handleMonthSwipeEnd}
+      >
       {page === 'assets' ? (
         <AssetsPage
           currentUser={myName}
@@ -648,7 +676,7 @@ export default function App() {
           onToast={showToast}
         />
       ) : (
-        <>
+        <div className={`month-content${monthSlideDir ? ` slide-${monthSlideDir}` : ''}`}>
           <div className="month-nav">
             <button onClick={() => changeMonth(-1)}>‹</button>
             <div className="month-nav-pill">
@@ -902,7 +930,7 @@ export default function App() {
             balance={balance}
             monthLabel={`${cursor.year}년 ${cursor.month + 1}월`}
           />
-        </>
+        </div>
       )}
       </div>
 
