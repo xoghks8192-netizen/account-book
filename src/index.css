@@ -758,6 +758,33 @@ body {
   font-size: 16px;
 }
 
+.quick-add-btn.done {
+  background: var(--form-border);
+  color: #56c97a;
+  box-shadow: none;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.reorder-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: var(--form-border);
+  color: var(--text-sub);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 0;
+}
+.reorder-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
 .swipe-hint {
   display: flex;
   flex-direction: column;

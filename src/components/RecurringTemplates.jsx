@@ -458,10 +458,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
                 </div>
               )}
               <div className="tx-info">
-                <span className="category">
-                  {t.name}
-                  {isAddedThisMonth(t) && <span className="added-badge">이번 달 ✓</span>}
-                </span>
+                <span className="category">{t.name}</span>
                 <span className="meta">
                   {t.category}
                   {t.author ? ` · ${t.author}` : ''} ·{' '}
@@ -475,8 +472,13 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
                 {lastAdded[t.id] ? (
                   <button onClick={() => handleUndo(t.id)} className="quick-add-btn undo" title="되돌리기">↩</button>
                 ) : (
-                  <button onClick={() => handleQuickAdd(t)} disabled={adding === t.id || undidIds.has(t.id)} className="quick-add-btn" title="오늘 내역에 추가">
-                    {adding === t.id ? '…' : '+'}
+                  <button
+                    onClick={() => handleQuickAdd(t)}
+                    disabled={adding === t.id || undidIds.has(t.id)}
+                    className={`quick-add-btn${isAddedThisMonth(t) ? ' done' : ''}`}
+                    title={isAddedThisMonth(t) ? '이번 달 추가됨' : '오늘 내역에 추가'}
+                  >
+                    {adding === t.id ? '…' : isAddedThisMonth(t) ? '✓' : '+'}
                   </button>
                 )}
                 <span className="swipe-hint"><span/><span/><span/></span>

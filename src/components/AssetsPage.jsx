@@ -20,6 +20,10 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
   const [ownerFilter, setOwnerFilter] = useState('전체')
   const [summaryModal, setSummaryModal] = useState(null)
   const [lastMonthTotal, setLastMonthTotal] = useState(null)
+  const [reordering, setReordering] = useState(false)
+  const [assetOrder, setAssetOrder] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(`asset_order_${householdId}`) || '[]') } catch { return [] }
+  })
 
   useEffect(() => {
     if (!householdId) return
@@ -129,6 +133,39 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
   const emergencyTotal = myEmergencyAssets
     .filter((a) => ownerFilter === '전체' || a.owner === ownerFilter)
     .reduce((s, a) => s + Number(a.amount), 0)
+
+  function moveAsset(id, direction, groupItems) {
+    const ids = groupItems.map((a) => a.id)
+    const idx = ids.indexOf(id)
+    if (direction === 'up' && idx === 0) return
+    if (direction === 'down' && idx === ids.length - 1) return
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+    const newIds = [...ids]
+    ;[newIds[idx], newIds[swapIdx]] = [newIds[swapIdx], newIds[idx]]
+    const allIds = assets.filter((a) => !a.deleted_at).map((a) => a.id)
+    const orderMap = new Map(assetOrder.map((id, i) => [id, i]))
+    // Rebuild full order: replace positions for this group
+    const newOrder = allIds.map((aid) => {
+      const groupPos = newIds.indexOf(aid)
+      return groupPos !== -1 ? aid : aid
+    })
+    // Just store the group's new order, merged with existing
+    const merged = [...assetOrder.filter((oid) => !ids.includes(oid)), ...newIds]
+    setAssetOrder(merged)
+    localStorage.setItem(`asset_order_${householdId}`, JSON.stringify(merged))
+  }
+
+  function sortByOrder(items) {
+    if (assetOrder.length === 0) return items
+    return [...items].sort((a, b) => {
+      const ai = assetOrder.indexOf(a.id)
+      const bi = assetOrder.indexOf(b.id)
+      if (ai === -1 && bi === -1) return 0
+      if (ai === -1) return 1
+      if (bi === -1) return -1
+      return ai - bi
+    })
+  }
 
   function groupByCategory(items) {
     return items.reduce((acc, a) => {
@@ -294,33 +331,75 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
         </div>
       ) : (
         <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 16px 4px' }}>
+            <button
+              type="button"
+              onClick={() => setReordering((v) => !v)}
+              style={{
+                border: 'none',
+                background: reordering ? 'var(--tab-active-bg)' : 'var(--form-border)',
+                color: reordering ? 'var(--tab-active-color)' : 'var(--text-sub)',
+                borderRadius: 999,
+                padding: '5px 14px',
+                fontSize: 13,
+                fontWeight: 700,
+                fontFamily: '"Jua", sans-serif',
+                cursor: 'pointer',
+              }}
+            >
+              {reordering ? '완료' : '순서 변경'}
+            </button>
+          </div>
+
           {liquidAssets.length > 0 && (
             <Collapsible title={`💧 유동자산 · ${formatAmount(liquidTotal)}원`}>
-              {Object.entries(liquidGrouped).map(([category, items]) => (
-                <div key={category}>
-                  <h3>
-                    {category} · {formatAmount(items.reduce((s, a) => s + Number(a.amount), 0))}원
-                  </h3>
-                  {items.map((asset) => (
-                    <AssetItem key={asset.id} asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
-                  ))}
-                </div>
-              ))}
+              {Object.entries(liquidGrouped).map(([category, items]) => {
+                const sorted = sortByOrder(items)
+                return (
+                  <div key={category}>
+                    <h3>
+                      {category} · {formatAmount(items.reduce((s, a) => s + Number(a.amount), 0))}원
+                    </h3>
+                    {sorted.map((asset, idx) => (
+                      <div key={asset.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {reordering && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'up', sorted)} disabled={idx === 0}>▲</button>
+                            <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'down', sorted)} disabled={idx === sorted.length - 1}>▼</button>
+                          </div>
+                        )}
+                        <AssetItem key={asset.id} asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
+                      </div>
+                    ))}
+                  </div>
+                )
+              })}
             </Collapsible>
           )}
 
           {nonLiquidAssets.length > 0 && (
             <Collapsible title={`🔒 비유동자산 · ${formatAmount(nonLiquidTotal)}원`}>
-              {Object.entries(nonLiquidGrouped).map(([category, items]) => (
-                <div key={category}>
-                  <h3>
-                    {category} · {formatAmount(items.reduce((s, a) => s + Number(a.amount), 0))}원
-                  </h3>
-                  {items.map((asset) => (
-                    <AssetItem key={asset.id} asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
-                  ))}
-                </div>
-              ))}
+              {Object.entries(nonLiquidGrouped).map(([category, items]) => {
+                const sorted = sortByOrder(items)
+                return (
+                  <div key={category}>
+                    <h3>
+                      {category} · {formatAmount(items.reduce((s, a) => s + Number(a.amount), 0))}원
+                    </h3>
+                    {sorted.map((asset, idx) => (
+                      <div key={asset.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {reordering && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'up', sorted)} disabled={idx === 0}>▲</button>
+                            <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'down', sorted)} disabled={idx === sorted.length - 1}>▼</button>
+                          </div>
+                        )}
+                        <AssetItem key={asset.id} asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
+                      </div>
+                    ))}
+                  </div>
+                )
+              })}
             </Collapsible>
           )}
         </>
