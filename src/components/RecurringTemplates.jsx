@@ -481,7 +481,6 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
                     {adding === t.id ? '…' : isAddedThisMonth(t) ? '✓' : '+'}
                   </button>
                 )}
-                <span className="swipe-hint"><span/><span/><span/></span>
               </div>
             </div>
             <div className="tx-swipe-actions">

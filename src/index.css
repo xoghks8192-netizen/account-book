@@ -184,13 +184,13 @@ body {
 .page-tabs button,
 .owner-tabs button {
   flex: 1;
-  padding: 10px;
+  padding: 7px 6px;
   border: none;
   border-radius: 999px;
   background: var(--tab-bg);
   color: var(--tab-text);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   font-family: inherit;
   transition: all 0.15s ease;
@@ -348,10 +348,24 @@ body {
 
 .tx-month-summary {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
   padding: 6px 4px 10px;
-  font-size: 13px;
+}
+
+.tx-month-balance {
+  font-size: 16px;
   font-weight: 700;
+  font-family: "Jua", sans-serif;
+  color: var(--balance-color);
+}
+
+.tx-month-sub {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
 }
 
 .tx-month-income {
@@ -634,10 +648,21 @@ body {
 }
 
 .list h3 {
-  font-size: 14px;
-  margin: 18px 0 8px;
-  color: var(--tab-text);
-  font-weight: 700;
+  font-size: 11px;
+  margin: 14px 0 4px;
+  color: var(--text-sub);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.list h3::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--form-border);
 }
 
 .tx-date-header {

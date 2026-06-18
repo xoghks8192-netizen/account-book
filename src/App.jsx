@@ -870,8 +870,11 @@ export default function App() {
                 </div>
               )}
               <div className="tx-month-summary">
-                <span className="tx-month-income">+{totalIncome.toLocaleString('ko-KR')}원</span>
-                <span className="tx-month-expense">-{totalExpense.toLocaleString('ko-KR')}원</span>
+                <span className="tx-month-balance">{(totalIncome - totalExpense).toLocaleString('ko-KR')}원</span>
+                <span className="tx-month-sub">
+                  <span className="tx-month-income">+{totalIncome.toLocaleString('ko-KR')}</span>
+                  <span className="tx-month-expense">−{totalExpense.toLocaleString('ko-KR')}</span>
+                </span>
               </div>
               <TransactionList
                 transactions={filteredTransactions}

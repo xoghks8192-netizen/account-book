@@ -24,9 +24,9 @@ function Highlight({ text, query }) {
 const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토']
 function formatDate(dateStr) {
   const d = new Date(dateStr + 'T00:00:00')
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  return `${mm}.${dd} (${DAY_NAMES[d.getDay()]})`
+  const mm = d.getMonth() + 1
+  const dd = d.getDate()
+  return `${mm}/${dd} ${DAY_NAMES[d.getDay()]}`
 }
 
 export default function TransactionList({ transactions, onDelete, onUpdate, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, search = '', scrollToId = null }) {
@@ -208,7 +208,6 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
                     {tx.type === 'income' ? '+' : '-'}
                     {formatAmount(tx.amount)}원
                   </span>
-                  <span className="swipe-hint"><span/><span/><span/></span>
                 </div>
               </div>
               <div className="tx-swipe-actions">
