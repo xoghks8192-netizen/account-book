@@ -243,7 +243,7 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
 
   return (
     <div>
-      <div className="owner-tabs">
+      <div className="owner-tabs" style={{ alignItems: 'center' }}>
         {['전체', ...owners].map((o) => (
           <button
             key={o}
@@ -253,6 +253,25 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
             {o}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => setReordering((v) => !v)}
+          style={{
+            flexShrink: 0,
+            border: 'none',
+            background: reordering ? 'var(--active-gradient)' : 'var(--form-border)',
+            color: reordering ? '#fff' : 'var(--text-sub)',
+            borderRadius: 999,
+            padding: '7px 12px',
+            fontSize: 12,
+            fontWeight: 700,
+            fontFamily: '"Jua", sans-serif',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {reordering ? '완료' : '순서'}
+        </button>
       </div>
 
       <div className="summary">
@@ -331,26 +350,6 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
         </div>
       ) : (
         <>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 16px 4px' }}>
-            <button
-              type="button"
-              onClick={() => setReordering((v) => !v)}
-              style={{
-                border: 'none',
-                background: reordering ? 'var(--tab-active-bg)' : 'var(--form-border)',
-                color: reordering ? 'var(--tab-active-color)' : 'var(--text-sub)',
-                borderRadius: 999,
-                padding: '5px 14px',
-                fontSize: 13,
-                fontWeight: 700,
-                fontFamily: '"Jua", sans-serif',
-                cursor: 'pointer',
-              }}
-            >
-              {reordering ? '완료' : '순서 변경'}
-            </button>
-          </div>
-
           {liquidAssets.length > 0 && (
             <Collapsible title={`💧 유동자산 · ${formatAmount(liquidTotal)}원`}>
               {Object.entries(liquidGrouped).map(([category, items]) => {

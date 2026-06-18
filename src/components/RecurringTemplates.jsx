@@ -483,6 +483,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
                 )}
               </div>
             </div>
+            <span className="swipe-hint"><span/><span/><span/></span>
             <div className="tx-swipe-actions">
               <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(t) }}>✎</button>
               <button

@@ -210,6 +210,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
                   </span>
                 </div>
               </div>
+              <span className="swipe-hint"><span/><span/><span/></span>
               <div className="tx-swipe-actions">
                 <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(tx) }}>✎</button>
                 <button
