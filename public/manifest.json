@@ -1,12 +1,14 @@
 {
   "name": "우리 가계부",
   "short_name": "가계부",
-  "description": "부부를 위한 가계부 앱",
+  "description": "부부를 위한 스마트 가계부",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#fbfaff",
   "theme_color": "#b896ff",
   "orientation": "portrait",
+  "categories": ["finance", "lifestyle"],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -31,6 +33,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "내역 추가",
+      "short_name": "추가",
+      "description": "새 거래 내역 추가",
+      "url": "/?tab=transactions",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "자산 현황",
+      "short_name": "자산",
+      "description": "자산 현황 보기",
+      "url": "/?tab=assets",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

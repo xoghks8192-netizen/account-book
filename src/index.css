@@ -1467,6 +1467,68 @@ body {
   cursor: pointer;
 }
 
+.more-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  background: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px var(--card-shadow);
+  padding: 8px;
+  z-index: 20;
+}
+
+.more-menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.more-menu-divider {
+  height: 1px;
+  background: var(--form-border);
+  margin: 6px 4px;
+}
+
+.more-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  background: none;
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: "Jua", sans-serif;
+  padding: 8px 10px;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.more-menu-item:hover {
+  background: var(--tab-bg);
+}
+
+.more-menu-item:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.more-menu-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
 .pin-overlay {
   position: fixed;
   inset: 0;

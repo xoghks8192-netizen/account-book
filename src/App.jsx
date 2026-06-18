@@ -572,60 +572,37 @@ export default function App() {
           </button>
         </div>
         {showMoreMenu && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '100%',
-              marginTop: 4,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 4,
-              background: 'var(--card-bg)',
-              borderRadius: 12,
-              boxShadow: '0 2px 8px var(--card-shadow)',
-              padding: 8,
-              zIndex: 10,
-            }}
-          >
-            <button
-              onClick={() => {
-                setShowMoreMenu(false)
-                handleExportAll()
-              }}
-              disabled={exporting}
-              style={{ border: 'none', background: 'none', color: '#7ec8a0', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif', padding: '4px 12px', textAlign: 'left' }}
-            >
-              {exporting ? '내보내는 중...' : '데이터 백업'}
-            </button>
-            <button
-              onClick={() => {
-                setShowMoreMenu(false)
-                setShowPasswordForm((prev) => !prev)
-              }}
-              style={{ border: 'none', background: 'none', color: '#b896ff', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif', padding: '4px 12px', textAlign: 'left' }}
-            >
-              내 정보 변경
-            </button>
-            <button
-              onClick={() => { setShowMoreMenu(false); setShowPinSetup(true) }}
-              style={{ border: 'none', background: 'none', color: '#f0a05a', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif', padding: '4px 12px', textAlign: 'left' }}
-            >
-              🔒 {hasPin ? 'PIN 변경' : 'PIN 설정'}
-            </button>
-            {hasPin && (
-              <button
-                onClick={() => { localStorage.removeItem('app_pin'); sessionStorage.removeItem('pin_unlocked'); setHasPin(false); setShowMoreMenu(false) }}
-                style={{ border: 'none', background: 'none', color: '#aaa', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif', padding: '4px 12px', textAlign: 'left' }}
-              >
-                🔓 PIN 해제
+          <div className="more-menu">
+            <div className="more-menu-group">
+              <button className="more-menu-item" onClick={() => { setShowMoreMenu(false); handleExportAll() }} disabled={exporting}>
+                <span className="more-menu-icon" style={{ background: '#e8f8ef', color: '#4caf7d' }}>💾</span>
+                {exporting ? '내보내는 중...' : '데이터 백업'}
               </button>
-            )}
-            <button
-              onClick={handleLogout}
-              style={{ border: 'none', background: 'none', color: '#ff8fab', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif', padding: '4px 12px', textAlign: 'left' }}
-            >
-              로그아웃
-            </button>
+              <button className="more-menu-item" onClick={() => { setShowMoreMenu(false); setShowPasswordForm((prev) => !prev) }}>
+                <span className="more-menu-icon" style={{ background: '#f0ebff', color: '#9b6ff5' }}>👤</span>
+                내 정보 변경
+              </button>
+            </div>
+            <div className="more-menu-divider" />
+            <div className="more-menu-group">
+              <button className="more-menu-item" onClick={() => { setShowMoreMenu(false); setShowPinSetup(true) }}>
+                <span className="more-menu-icon" style={{ background: '#fff3e6', color: '#f0a05a' }}>🔒</span>
+                {hasPin ? 'PIN 변경' : 'PIN 설정'}
+              </button>
+              {hasPin && (
+                <button className="more-menu-item" onClick={() => { localStorage.removeItem('app_pin'); sessionStorage.removeItem('pin_unlocked'); setHasPin(false); setShowMoreMenu(false) }}>
+                  <span className="more-menu-icon" style={{ background: '#f5f5f5', color: '#999' }}>🔓</span>
+                  PIN 해제
+                </button>
+              )}
+            </div>
+            <div className="more-menu-divider" />
+            <div className="more-menu-group">
+              <button className="more-menu-item" onClick={handleLogout}>
+                <span className="more-menu-icon" style={{ background: '#fff0f3', color: '#ff6b8a' }}>🚪</span>
+                로그아웃
+              </button>
+            </div>
           </div>
         )}
       </div>
