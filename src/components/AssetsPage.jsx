@@ -360,16 +360,18 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
                     <h3>
                       {category} · {formatAmount(items.reduce((s, a) => s + Number(a.amount), 0))}원
                     </h3>
-                    {sorted.map((asset, idx) => (
+                    {sorted.map((asset, idx) => reordering ? (
                       <div key={asset.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        {reordering && (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'up', sorted)} disabled={idx === 0}>▲</button>
-                            <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'down', sorted)} disabled={idx === sorted.length - 1}>▼</button>
-                          </div>
-                        )}
-                        <AssetItem key={asset.id} asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
+                          <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'up', sorted)} disabled={idx === 0}>▲</button>
+                          <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'down', sorted)} disabled={idx === sorted.length - 1}>▼</button>
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <AssetItem asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
+                        </div>
                       </div>
+                    ) : (
+                      <AssetItem key={asset.id} asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
                     ))}
                   </div>
                 )
@@ -386,16 +388,18 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
                     <h3>
                       {category} · {formatAmount(items.reduce((s, a) => s + Number(a.amount), 0))}원
                     </h3>
-                    {sorted.map((asset, idx) => (
+                    {sorted.map((asset, idx) => reordering ? (
                       <div key={asset.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        {reordering && (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'up', sorted)} disabled={idx === 0}>▲</button>
-                            <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'down', sorted)} disabled={idx === sorted.length - 1}>▼</button>
-                          </div>
-                        )}
-                        <AssetItem key={asset.id} asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
+                          <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'up', sorted)} disabled={idx === 0}>▲</button>
+                          <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'down', sorted)} disabled={idx === sorted.length - 1}>▼</button>
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <AssetItem asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
+                        </div>
                       </div>
+                    ) : (
+                      <AssetItem key={asset.id} asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
                     ))}
                   </div>
                 )
