@@ -648,21 +648,43 @@ body {
 }
 
 .list h3 {
+  font-size: 14px;
+  margin: 18px 0 8px;
+  color: var(--tab-text);
+  font-weight: 700;
+}
+
+.collapsible-body h3 {
   font-size: 11px;
   margin: 14px 0 4px;
   color: var(--text-sub);
   font-weight: 600;
   letter-spacing: 0.03em;
-  text-transform: uppercase;
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.list h3::after {
+.collapsible-body h3::after {
   content: '';
   flex: 1;
   height: 1px;
   background: var(--form-border);
+}
+
+.reorder-toggle-btn {
+  border: none;
+  background: var(--form-border);
+  color: var(--text-sub);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: "Jua", sans-serif;
+  cursor: pointer;
+}
+.reorder-toggle-btn.active {
+  background: var(--active-gradient);
+  color: #fff;
 }
 
 .tx-date-header {
