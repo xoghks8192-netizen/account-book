@@ -68,13 +68,7 @@ export default function App() {
 
   const [user, setUser] = useState(() => loadSession())
 
-  useEffect(() => {
-    if (!user) window.hideSplash?.()
-  }, [user])
-
-  useEffect(() => {
-    if (user && !loading) window.hideSplash?.()
-  }, [user, loading])
+  useEffect(() => { window.hideSplash?.() }, [])
   const [page, setPage] = useState(() => localStorage.getItem(PAGE_KEY) || 'transactions')
   const [slideDir, setSlideDir] = useState(null)
   const PAGE_ORDER = ['transactions', 'assets']
