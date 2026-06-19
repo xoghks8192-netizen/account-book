@@ -572,6 +572,7 @@ export default function App() {
   return (
     <div>
       <div className="brand-header">
+        <button className="header-icon-btn" onClick={() => window.location.reload()} title="새로고침">🔄</button>
         <h1>{user.members.length === 2 ? `${shortName(user.members[0])} ❤️ ${shortName(user.members[1])}` : shortName(user.members[0])}</h1>
         <div className="brand-header-actions">
           <button className="header-icon-btn" onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))} title="테마 변경">
@@ -584,11 +585,7 @@ export default function App() {
         {showMoreMenu && (
           <div className="more-menu">
             <div className="more-menu-group">
-              <button className="more-menu-item" onClick={() => { setShowMoreMenu(false); window.location.reload() }}>
-                <span className="more-menu-icon" style={{ background: '#e8f0ff', color: '#6a8aff' }}>🔄</span>
-                새로고침
-              </button>
-              <button className="more-menu-item" onClick={() => { setShowMoreMenu(false); handleExportAll() }} disabled={exporting}>
+<button className="more-menu-item" onClick={() => { setShowMoreMenu(false); handleExportAll() }} disabled={exporting}>
                 <span className="more-menu-icon" style={{ background: '#e8f8ef', color: '#4caf7d' }}>💾</span>
                 {exporting ? '내보내는 중...' : '데이터 백업'}
               </button>

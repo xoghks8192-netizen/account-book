@@ -118,6 +118,8 @@ body {
   font-size: 20px;
   color: var(--text-heading);
   letter-spacing: 0.5px;
+  flex: 1;
+  text-align: center;
 }
 
 .brand-header-actions {
