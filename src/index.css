@@ -103,24 +103,41 @@ body {
 }
 
 .brand-header {
-  text-align: center;
-  padding: 24px 16px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
   background: var(--brand-gradient);
-  border-radius: 0 0 28px 28px;
+  border-radius: 0 0 24px 24px;
+  position: relative;
 }
 
 .brand-header h1 {
   margin: 0;
   font-family: "Jua", sans-serif;
-  font-size: 24px;
+  font-size: 20px;
   color: var(--text-heading);
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
-.brand-header span {
-  font-size: 12px;
-  color: var(--text-sub);
+.brand-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
+
+.header-icon-btn {
+  border: none;
+  background: none;
+  color: var(--text-heading);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 10px;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+.header-icon-btn:hover { opacity: 1; }
 
 .anniversary {
   display: flex;
@@ -291,35 +308,42 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 14px 16px 8px;
 }
 
-.month-nav button {
+.month-nav-arrow {
   border: none;
-  background: var(--tab-bg);
-  color: var(--anniversary-value);
-  font-size: 18px;
+  background: none;
+  color: var(--text-sub);
+  font-size: 24px;
   cursor: pointer;
-  padding: 6px 16px;
+  padding: 4px 12px;
   border-radius: 999px;
-  font-weight: 700;
+  font-weight: 300;
+  line-height: 1;
+  transition: color 0.15s;
 }
-
-.month-nav h2 {
-  margin: 0;
-  font-size: 18px;
-  font-family: "Jua", sans-serif;
-  color: var(--text-heading);
-}
+.month-nav-arrow:hover { color: var(--text-main); }
 
 .month-nav-pill {
-  background: var(--tab-bg);
-  border-radius: 999px;
-  padding: 6px 20px;
-  font-size: 17px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.month-nav-month {
   font-family: "Jua", sans-serif;
+  font-size: 26px;
   font-weight: 700;
   color: var(--text-heading);
+  line-height: 1.1;
+}
+
+.month-nav-year {
+  font-size: 11px;
+  color: var(--text-sub);
+  font-family: "Jua", sans-serif;
 }
 
 .trend-badge {
@@ -1548,8 +1572,8 @@ body {
 
 .more-menu {
   position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
+  top: calc(100% - 8px);
+  right: 16px;
   min-width: 180px;
   background: var(--card-bg);
   border-radius: 16px;

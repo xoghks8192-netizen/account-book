@@ -97,6 +97,7 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [formOpenToken, setFormOpenToken] = useState(0)
   const formRef = useRef(null)
+  const assetsPageRef = useRef(null)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   useEffect(() => {
     const on = () => setIsOnline(true)
@@ -572,39 +573,21 @@ export default function App() {
     <div>
       <div className="brand-header">
         <h1>{user.members.length === 2 ? `${shortName(user.members[0])} ❤️ ${shortName(user.members[1])}` : shortName(user.members[0])}</h1>
-        <span>가계부</span>
-      </div>
-
-      <AnniversaryBanner datingStart={user.datingStart} weddingDate={user.weddingDate} />
-
-      <div style={{ textAlign: 'center', padding: '8px 16px 0', fontSize: 13, color: '#c0a3b0' }}>
-        {myName}님 반가워요 🌸
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '8px 16px', fontSize: 13, color: '#c0a3b0', position: 'relative' }}>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-          <button
-            onClick={() => window.location.reload()}
-            style={{ border: 'none', background: 'none', color: '#a89cc4', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
-          >
-            🔄 새로고침
+        <div className="brand-header-actions">
+          <button className="header-icon-btn" onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))} title="테마 변경">
+            {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          <button
-            onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
-            style={{ border: 'none', background: 'none', color: '#a89cc4', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
-          >
-            {theme === 'dark' ? '☀️ 라이트모드' : '🌙 다크모드'}
-          </button>
-          <button
-            onClick={() => setShowMoreMenu((prev) => !prev)}
-            style={{ border: 'none', background: 'none', color: '#a89cc4', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: '"Jua", sans-serif' }}
-          >
-            ⋯ 더보기
+          <button className="header-icon-btn" onClick={() => setShowMoreMenu((prev) => !prev)} title="더보기">
+            ☰
           </button>
         </div>
         {showMoreMenu && (
           <div className="more-menu">
             <div className="more-menu-group">
+              <button className="more-menu-item" onClick={() => { setShowMoreMenu(false); window.location.reload() }}>
+                <span className="more-menu-icon" style={{ background: '#e8f0ff', color: '#6a8aff' }}>🔄</span>
+                새로고침
+              </button>
               <button className="more-menu-item" onClick={() => { setShowMoreMenu(false); handleExportAll() }} disabled={exporting}>
                 <span className="more-menu-icon" style={{ background: '#e8f8ef', color: '#4caf7d' }}>💾</span>
                 {exporting ? '내보내는 중...' : '데이터 백업'}
@@ -638,6 +621,8 @@ export default function App() {
         )}
       </div>
 
+      <AnniversaryBanner datingStart={user.datingStart} weddingDate={user.weddingDate} />
+
       {showPasswordForm && (
         <ChangePassword
           user={user}
@@ -664,7 +649,7 @@ export default function App() {
         onTouchEnd={handleMonthSwipeEnd}
       >
       {page === 'assets' ? (
-        <AssetsPage
+        <AssetsPage ref={assetsPageRef}
           currentUser={myName}
           owners={owners}
           householdId={householdId}
@@ -677,11 +662,12 @@ export default function App() {
       ) : (
         <div className={`month-content${monthSlideDir ? ` slide-${monthSlideDir}` : ''}`}>
           <div className="month-nav">
-            <button onClick={() => changeMonth(-1)}>‹</button>
+            <button className="month-nav-arrow" onClick={() => changeMonth(-1)}>‹</button>
             <div className="month-nav-pill">
-              <span>{cursor.year}년 {cursor.month + 1}월</span>
+              <span className="month-nav-month">{cursor.month + 1}월</span>
+              <span className="month-nav-year">{cursor.year}</span>
             </div>
-            <button onClick={() => changeMonth(1)}>›</button>
+            <button className="month-nav-arrow" onClick={() => changeMonth(1)}>›</button>
           </div>
 
           <div className="owner-tabs">
@@ -938,14 +924,10 @@ export default function App() {
       </div>
 
       {page === 'transactions' && (
-        <button
-          className="fab"
-          onClick={() => {
-            setFormOpenToken((n) => n + 1)
-            setTimeout(() => formRef.current?.focusAmount(), 100)
-          }}
-          aria-label="내역 추가"
-        >+</button>
+        <button className="fab" onClick={() => { setFormOpenToken((n) => n + 1); setTimeout(() => formRef.current?.focusAmount(), 100) }} aria-label="내역 추가">+</button>
+      )}
+      {page === 'assets' && (
+        <button className="fab" onClick={() => assetsPageRef.current?.openAddForm()} aria-label="자산 추가">+</button>
       )}
 
       <div className="bottom-tab-bar">

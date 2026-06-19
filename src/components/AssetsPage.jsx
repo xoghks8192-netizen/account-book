@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { defaultLiquidity } from '../assetMeta'
 import AssetForm from './AssetForm'
@@ -13,7 +13,7 @@ function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-export default function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory, onToast }) {
+const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory, onToast }, ref) {
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -21,6 +21,14 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
   const [summaryModal, setSummaryModal] = useState(null)
   const [lastMonthTotal, setLastMonthTotal] = useState(null)
   const [reordering, setReordering] = useState(false)
+  const [assetFormOpenToken, setAssetFormOpenToken] = useState(0)
+  const assetFormRef = useRef(null)
+  useImperativeHandle(ref, () => ({
+    openAddForm() {
+      setAssetFormOpenToken((n) => n + 1)
+      setTimeout(() => assetFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+    }
+  }))
   const [assetOrder, setAssetOrder] = useState(() => {
     try { return JSON.parse(localStorage.getItem(`asset_order_${householdId}`) || '[]') } catch { return [] }
   })
@@ -320,9 +328,11 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       <NetWorthChart householdId={householdId} />
 
       {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === currentUser ? (
-        <Collapsible title="자산 항목 추가">
-          <AssetForm key={ownerFilter} onAdd={handleAdd} owners={owners} categories={categories} onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory} onMoveCategory={onMoveCategory} defaultOwner={ownerFilter === '전체' ? owners[0] : ownerFilter} />
-        </Collapsible>
+        <div ref={assetFormRef}>
+          <Collapsible title="자산 항목 추가" forceOpen={assetFormOpenToken}>
+            <AssetForm key={ownerFilter} onAdd={handleAdd} owners={owners} categories={categories} onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory} onMoveCategory={onMoveCategory} defaultOwner={ownerFilter === '전체' ? owners[0] : ownerFilter} />
+          </Collapsible>
+        </div>
       ) : null}
 
       {error && <div className="container" style={{ color: '#e0524c' }}>오류: {error}</div>}
@@ -459,4 +469,6 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       />
     </div>
   )
-}
+})
+
+export default AssetsPage
