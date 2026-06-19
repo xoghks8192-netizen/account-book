@@ -67,9 +67,11 @@ export default function App() {
   }, [])
 
   const [user, setUser] = useState(() => loadSession())
-  const [splashDone, setSplashDone] = useState(false)
+  const isReload = performance.getEntriesByType('navigation')[0]?.type === 'reload'
+  const [splashDone, setSplashDone] = useState(isReload)
 
   useEffect(() => {
+    if (isReload) return
     const t = setTimeout(() => setSplashDone(true), 1500)
     return () => clearTimeout(t)
   }, [])
