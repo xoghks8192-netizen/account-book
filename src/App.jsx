@@ -355,19 +355,25 @@ export default function App() {
   const monthSwipeStart = useRef(null)
 
   function handleMonthSwipeStart(e) {
-    if (page !== 'transactions') return
     monthSwipeStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
   }
 
   function handleMonthSwipeEnd(e) {
     if (!monthSwipeStart.current) return
-    const dx = e.changedTouches[0].clientX - monthSwipeStart.current.x
+    const startX = monthSwipeStart.current.x
+    const dx = e.changedTouches[0].clientX - startX
     const dy = e.changedTouches[0].clientY - monthSwipeStart.current.y
     monthSwipeStart.current = null
-    if (Math.abs(dx) < 80 || Math.abs(dx) < Math.abs(dy) * 1.5) return
-    // tx-item 스와이프와 겹치지 않도록 시작점이 tx-item 안이면 무시
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return
     const target = e.changedTouches[0].target
     if (target.closest('.tx-item')) return
+    // 화면 엣지(30px)에서 시작한 스와이프 → 탭 전환
+    const screenW = window.innerWidth
+    if (startX < 30 && dx > 60) { navigateTo('transactions'); return }
+    if (startX > screenW - 30 && dx < -60) { navigateTo('assets'); return }
+    // 내역 탭에서만 월 전환
+    if (page !== 'transactions') return
+    if (Math.abs(dx) < 80) return
     changeMonth(dx < 0 ? 1 : -1)
   }
 
@@ -381,6 +387,24 @@ export default function App() {
     .reduce((s, t) => s + Number(t.amount), 0)
   const totalExpense = ownedTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
   const balance = totalIncome - totalExpense
+
+  const prevIncome = ownedPrevTransactions
+    .filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY)
+    .reduce((s, t) => s + Number(t.amount), 0)
+  const prevExpense = ownedPrevTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
+
+  function pctChange(curr, prev) {
+    if (prev === 0) return null
+    const p = Math.round(((curr - prev) / prev) * 100)
+    return p
+  }
+
+  const top3Expense = Object.entries(
+    ownedTransactions.filter((t) => t.type === 'expense').reduce((acc, t) => {
+      acc[t.category] = (acc[t.category] || 0) + Number(t.amount)
+      return acc
+    }, {})
+  ).sort((a, b) => b[1] - a[1]).slice(0, 3)
 
   const animatedIncome = useCountUp(totalIncome)
   const animatedExpense = useCountUp(totalExpense)
@@ -408,10 +432,6 @@ export default function App() {
   )
   const expenseByCategory = groupByCategory(ownedTransactions.filter((t) => t.type === 'expense'))
 
-  const prevIncome = ownedPrevTransactions
-    .filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY)
-    .reduce((s, t) => s + Number(t.amount), 0)
-  const prevExpense = ownedPrevTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
   const prevBalance = prevIncome - prevExpense
 
   const filteredTransactions = useMemo(() => {
@@ -589,7 +609,7 @@ export default function App() {
                 <span className="more-menu-icon" style={{ background: '#e8f8ef', color: '#4caf7d' }}>💾</span>
                 {exporting ? '내보내는 중...' : '데이터 백업'}
               </button>
-              <button className="more-menu-item" onClick={() => { setShowMoreMenu(false); setShowPasswordForm((prev) => !prev) }}>
+              <button className="more-menu-item" onClick={() => setShowPasswordForm((prev) => !prev)}>
                 <span className="more-menu-icon" style={{ background: '#f0ebff', color: '#9b6ff5' }}>👤</span>
                 내 정보 변경
               </button>
@@ -679,15 +699,25 @@ export default function App() {
             <div className="summary-item income clickable" onClick={() => setSummaryModal('수입')}>
               <div className="label">수입</div>
               <div className="value">{formatAmount(animatedIncome)}</div>
+              {pctChange(totalIncome, prevIncome) !== null && (
+                <div className="sub-label" style={{ color: totalIncome >= prevIncome ? '#56c97a' : '#ff8fab' }}>
+                  {totalIncome >= prevIncome ? '▲' : '▼'}{Math.abs(pctChange(totalIncome, prevIncome))}%
+                </div>
+              )}
               {transferReceived > 0 && ownerFilter !== '전체' && (
-                <div className="sub-label">💸 이체 +{formatAmount(transferReceived)}</div>
+                <div className="sub-label">💸 +{formatAmount(transferReceived)}</div>
               )}
             </div>
             <div className="summary-item expense clickable" onClick={() => setSummaryModal('지출')}>
               <div className="label">지출</div>
               <div className="value">{formatAmount(animatedExpense)}</div>
+              {pctChange(totalExpense, prevExpense) !== null && (
+                <div className="sub-label" style={{ color: totalExpense <= prevExpense ? '#56c97a' : '#ff8fab' }}>
+                  {totalExpense >= prevExpense ? '▲' : '▼'}{Math.abs(pctChange(totalExpense, prevExpense))}%
+                </div>
+              )}
               {transferSent > 0 && (
-                <div className="sub-label">💸 이체 -{formatAmount(transferSent)}</div>
+                <div className="sub-label">💸 -{formatAmount(transferSent)}</div>
               )}
             </div>
             <div className="summary-item balance">
@@ -695,6 +725,18 @@ export default function App() {
               <div className="value">{formatAmount(animatedBalance)}</div>
             </div>
           </div>
+
+          {top3Expense.length > 0 && (
+            <div className="top3-expense">
+              {top3Expense.map(([cat, amt], i) => (
+                <div key={cat} className="top3-item">
+                  <span className="top3-rank">{i + 1}</span>
+                  <span className="top3-cat">{cat}</span>
+                  <span className="top3-amt">{formatAmount(amt)}원</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           {(summaryModal === '수입' || summaryModal === '지출') && (() => {
             const isIncome = summaryModal === '수입'

@@ -135,12 +135,14 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
       <div className="form-row">
         <label>금액</label>
         <input
-          type="number"
+          type="text"
           inputMode="numeric"
-          min="1"
           placeholder="0"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          value={amount ? Number(amount).toLocaleString('ko-KR') : ''}
+          onChange={(e) => {
+            const raw = e.target.value.replace(/[^0-9]/g, '')
+            setAmount(raw)
+          }}
           required
           ref={amountRef}
         />

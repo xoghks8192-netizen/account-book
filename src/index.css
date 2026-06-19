@@ -219,6 +219,41 @@ body {
   box-shadow: 0 3px 10px var(--active-shadow);
 }
 
+.top3-expense {
+  display: flex;
+  gap: 6px;
+  padding: 0 16px 12px;
+}
+
+.top3-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--tab-bg);
+  border-radius: 12px;
+  padding: 8px 4px;
+}
+
+.top3-rank {
+  font-size: 10px;
+  color: var(--text-sub);
+  font-weight: 700;
+}
+
+.top3-cat {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+}
+
+.top3-amt {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
 .fab {
   position: fixed;
   bottom: calc(72px + env(safe-area-inset-bottom) + 12px);

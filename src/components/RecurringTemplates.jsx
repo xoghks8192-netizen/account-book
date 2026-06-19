@@ -36,6 +36,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   const [linkedAssetId, setLinkedAssetId] = useState('')
   const [editLinkedAssetId, setEditLinkedAssetId] = useState('')
   const [reordering, setReordering] = useState(false)
+  const [sortMode, setSortMode] = useState('unadded')
   const [undidIds, setUndidIds] = useState(new Set())
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const [suggestions, setSuggestions] = useState([])
@@ -316,6 +317,9 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
 
   const baseTemplates = ownerFilter === '전체' ? templates : templates.filter((t) => t.author === ownerFilter)
   const visibleTemplates = [...baseTemplates].sort((a, b) => {
+    if (sortMode === 'name') return a.name.localeCompare(b.name, 'ko')
+    if (sortMode === 'amount') return Number(b.amount) - Number(a.amount)
+    // 미추가 먼저 (default)
     const aAdded = isAddedThisMonth(a) ? 1 : 0
     const bAdded = isAddedThisMonth(b) ? 1 : 0
     if (aAdded !== bAdded) return aAdded - bAdded
@@ -331,10 +335,17 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
           onCancel={() => setConfirmDeleteId(null)}
         />
       )}
-      <div className="owner-tabs" style={{ padding: '0 0 12px', margin: 0 }}>
+      <div className="owner-tabs" style={{ padding: '0 0 8px', margin: 0 }}>
         {['전체', ...owners].map((o) => (
           <button key={o} className={ownerFilter === o ? 'active' : ''} onClick={() => setOwnerFilter(o)}>
             {o}
+          </button>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 6, padding: '0 0 10px' }}>
+        {[['unadded', '미추가순'], ['name', '이름순'], ['amount', '금액순']].map(([mode, label]) => (
+          <button key={mode} onClick={() => setSortMode(mode)} style={{ border: 'none', borderRadius: 999, padding: '4px 12px', fontSize: 12, fontWeight: 700, fontFamily: '"Jua", sans-serif', cursor: 'pointer', background: sortMode === mode ? 'var(--active-gradient)' : 'var(--form-border)', color: sortMode === mode ? '#fff' : 'var(--text-sub)' }}>
+            {label}
           </button>
         ))}
       </div>
