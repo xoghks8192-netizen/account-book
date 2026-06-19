@@ -17,7 +17,7 @@
   </head>
   <body>
     <div id="root"></div>
-    <div id="app-splash" style="position:fixed;inset:0;background:#fbfaff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:99999;transition:opacity 0.3s;">
+    <div id="app-splash" style="position:fixed;inset:0;background:#fbfaff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:99999;animation:splashFade 0.3s ease 1.4s forwards;">
       <div style="font-size:56px;line-height:1;">💜</div>
       <div style="font-family:'Jua',sans-serif;font-size:22px;color:#b896ff;letter-spacing:0.02em;">우리 가계부</div>
       <div style="width:40px;height:3px;border-radius:99px;background:#e8deff;overflow:hidden;margin-top:8px;">
@@ -26,18 +26,12 @@
     </div>
     <style>
       @keyframes splashBar { from { transform: translateX(-100%) } to { transform: translateX(100%) } }
+      @keyframes splashFade { to { opacity: 0; pointer-events: none; } }
     </style>
     <script>
-      window.__splashStart = Date.now()
       window.hideSplash = function() {
         var el = document.getElementById('app-splash')
-        if (!el) return
-        var elapsed = Date.now() - window.__splashStart
-        var delay = Math.max(0, 1200 - elapsed)
-        setTimeout(function() {
-          el.style.opacity = '0'
-          setTimeout(function() { el.remove() }, 300)
-        }, delay)
+        if (el) setTimeout(function() { el.remove() }, 1800)
       }
     </script>
     <script type="module" src="/src/main.jsx"></script>
