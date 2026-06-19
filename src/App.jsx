@@ -95,6 +95,15 @@ export default function App() {
   const [showPinSetup, setShowPinSetup] = useState(false)
   const [hasPin, setHasPin] = useState(!!localStorage.getItem('app_pin'))
   const [loading, setLoading] = useState(true)
+  const [formOpenToken, setFormOpenToken] = useState(0)
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  useEffect(() => {
+    const on = () => setIsOnline(true)
+    const off = () => setIsOnline(false)
+    window.addEventListener('online', on)
+    window.addEventListener('offline', off)
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) }
+  }, [])
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
   const [showFilters, setShowFilters] = useState(false)
@@ -766,7 +775,7 @@ export default function App() {
           </Collapsible>
 
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
-            <Collapsible title="내역 추가" forceClose={formCloseToken}>
+            <Collapsible title="내역 추가" forceClose={formCloseToken} forceOpen={formOpenToken}>
               <TransactionForm
                 onAdd={handleAdd}
                 onSuccess={handleAddSuccess}
@@ -926,6 +935,17 @@ export default function App() {
       )}
       </div>
 
+      {page === 'transactions' && (
+        <button
+          className="fab"
+          onClick={() => {
+            setFormOpenToken((n) => n + 1)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+          aria-label="내역 추가"
+        >+</button>
+      )}
+
       <div className="bottom-tab-bar">
         <button className={page === 'transactions' ? 'active' : ''} onClick={() => navigateTo('transactions')}>
           <span className="tab-icon">📋</span>
@@ -937,6 +957,7 @@ export default function App() {
         </button>
       </div>
 
+      {!isOnline && <div className="offline-banner">📡 오프라인 상태예요 — 데이터가 저장되지 않을 수 있어요</div>}
       {toast && <div className="toast">{toast}</div>}
     </div>
   )

@@ -200,6 +200,44 @@ body {
   box-shadow: 0 3px 10px var(--active-shadow);
 }
 
+.fab {
+  position: fixed;
+  bottom: calc(72px + env(safe-area-inset-bottom) + 12px);
+  right: max(16px, calc(50vw - 240px + 16px));
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: var(--active-gradient);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 16px var(--active-shadow);
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+.fab:active { transform: scale(0.92); }
+
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #ff8c42;
+  color: #fff;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: "Jua", sans-serif;
+  padding: 10px 16px;
+  z-index: 9999;
+}
+
 .bottom-tab-bar {
   position: fixed;
   bottom: 0;

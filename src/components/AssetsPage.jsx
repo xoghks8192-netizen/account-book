@@ -285,7 +285,11 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
       {activeModal && (
         <Modal title={activeModal.title} onClose={() => setSummaryModal(null)}>
           {activeModal.items.length === 0 ? (
-            <div className="empty">자산 항목이 없습니다.</div>
+            <div className="empty-state">
+            <div className="empty-state-icon">🌿</div>
+            <div className="empty-state-title">아직 자산이 없어요</div>
+            <div className="empty-state-desc">자산 항목 추가로 첫 번째 자산을 등록해볼까요?</div>
+          </div>
           ) : (
             Object.entries(groupByCategory(activeModal.items)).map(([category, items]) => (
               <div key={category}>
@@ -327,7 +331,11 @@ export default function AssetsPage({ currentUser, owners, householdId, categorie
         <div className="container">불러오는 중...</div>
       ) : visible.length === 0 ? (
         <div className="form">
-          <div className="empty">자산 항목이 없습니다.</div>
+          <div className="empty-state">
+            <div className="empty-state-icon">🌿</div>
+            <div className="empty-state-title">아직 자산이 없어요</div>
+            <div className="empty-state-desc">자산 항목 추가로 첫 번째 자산을 등록해볼까요?</div>
+          </div>
         </div>
       ) : (
         <>
