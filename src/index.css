@@ -92,7 +92,7 @@ body {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
-  padding-bottom: 24px;
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
   background: var(--bg-root);
   box-shadow: 0 0 30px var(--shadow-root);
   transition: background 0.2s ease;
@@ -174,14 +174,12 @@ body {
 .month-content.slide-left  { animation: slideInLeft  0.28s cubic-bezier(0.25,0.46,0.45,0.94) }
 .month-content.slide-right { animation: slideInRight 0.28s cubic-bezier(0.25,0.46,0.45,0.94) }
 
-.page-tabs,
 .owner-tabs {
   display: flex;
   gap: 8px;
   padding: 16px 16px 8px;
 }
 
-.page-tabs button,
 .owner-tabs button {
   flex: 1;
   padding: 7px 6px;
@@ -196,11 +194,54 @@ body {
   transition: all 0.15s ease;
 }
 
-.page-tabs button.active,
 .owner-tabs button.active {
   background: var(--active-gradient);
   color: #fff;
   box-shadow: 0 3px 10px var(--active-shadow);
+}
+
+.bottom-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  background: var(--card-bg);
+  border-top: 1px solid var(--form-border);
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+  z-index: 100;
+}
+
+.bottom-tab-bar button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  border: none;
+  background: none;
+  color: var(--text-sub);
+  cursor: pointer;
+  padding: 6px 0;
+  border-radius: 12px;
+  transition: all 0.15s ease;
+}
+
+.bottom-tab-bar button.active {
+  color: #b896ff;
+}
+
+.tab-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.tab-label {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: "Jua", sans-serif;
 }
 
 .owner-tabs {

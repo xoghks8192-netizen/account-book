@@ -648,15 +648,6 @@ export default function App() {
         />
       )}
 
-      <div className="page-tabs">
-        <button className={page === 'transactions' ? 'active' : ''} onClick={() => navigateTo('transactions')}>
-          내역
-        </button>
-        <button className={page === 'assets' ? 'active' : ''} onClick={() => navigateTo('assets')}>
-          자산
-        </button>
-      </div>
-
       <div
         className={`page-slide${slideDir ? ` slide-${slideDir}` : ''}`}
         onTouchStart={handleMonthSwipeStart}
@@ -933,6 +924,17 @@ export default function App() {
           />
         </div>
       )}
+      </div>
+
+      <div className="bottom-tab-bar">
+        <button className={page === 'transactions' ? 'active' : ''} onClick={() => navigateTo('transactions')}>
+          <span className="tab-icon">📋</span>
+          <span className="tab-label">내역</span>
+        </button>
+        <button className={page === 'assets' ? 'active' : ''} onClick={() => navigateTo('assets')}>
+          <span className="tab-icon">💰</span>
+          <span className="tab-label">자산</span>
+        </button>
       </div>
 
       {toast && <div className="toast">{toast}</div>}
