@@ -414,6 +414,10 @@ export default function App() {
   )
   const expenseByCategory = groupByCategory(ownedTransactions.filter((t) => t.type === 'expense'))
 
+  const prevIncome = ownedPrevTransactions
+    .filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY)
+    .reduce((s, t) => s + Number(t.amount), 0)
+  const prevExpense = ownedPrevTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
   const prevBalance = prevIncome - prevExpense
 
   const filteredTransactions = useMemo(() => {
