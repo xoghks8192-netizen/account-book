@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from '../categories'
 import CategoryManager from './CategoryManager'
 
@@ -7,7 +7,7 @@ function todayStr() {
   return d.toISOString().slice(0, 10)
 }
 
-export default function TransactionForm({ onAdd, onSuccess, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory }) {
+const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory }, ref) {
   const [type, setType] = useState('expense')
   const [date, setDate] = useState(todayStr())
   const [category, setCategory] = useState(categories.expense[0])
@@ -18,6 +18,13 @@ export default function TransactionForm({ onAdd, onSuccess, currentUser, owners,
   const [linkedAssetId, setLinkedAssetId] = useState('')
   const [showCategoryManager, setShowCategoryManager] = useState(false)
   const [showMore, setShowMore] = useState(false)
+  const amountRef = useRef(null)
+  useImperativeHandle(ref, () => ({
+    focusAmount() {
+      amountRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      amountRef.current?.focus()
+    }
+  }))
   const [transferToSpouse, setTransferToSpouse] = useState(false)
 
   const partner = owners.find((o) => o !== '공동' && o !== owner)
@@ -135,7 +142,7 @@ export default function TransactionForm({ onAdd, onSuccess, currentUser, owners,
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           required
-          autoFocus
+          ref={amountRef}
         />
       </div>
 
@@ -199,4 +206,6 @@ export default function TransactionForm({ onAdd, onSuccess, currentUser, owners,
       </button>
     </form>
   )
-}
+})
+
+export default TransactionForm

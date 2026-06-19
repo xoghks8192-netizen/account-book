@@ -96,6 +96,7 @@ export default function App() {
   const [hasPin, setHasPin] = useState(!!localStorage.getItem('app_pin'))
   const [loading, setLoading] = useState(true)
   const [formOpenToken, setFormOpenToken] = useState(0)
+  const formRef = useRef(null)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   useEffect(() => {
     const on = () => setIsOnline(true)
@@ -777,6 +778,7 @@ export default function App() {
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
             <Collapsible title="내역 추가" forceClose={formCloseToken} forceOpen={formOpenToken}>
               <TransactionForm
+                ref={formRef}
                 onAdd={handleAdd}
                 onSuccess={handleAddSuccess}
                 currentUser={myName}
@@ -940,7 +942,7 @@ export default function App() {
           className="fab"
           onClick={() => {
             setFormOpenToken((n) => n + 1)
-            window.scrollTo({ top: 0, behavior: 'smooth' })
+            setTimeout(() => formRef.current?.focusAmount(), 100)
           }}
           aria-label="내역 추가"
         >+</button>
