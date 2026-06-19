@@ -388,24 +388,6 @@ export default function App() {
   const totalExpense = ownedTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
   const balance = totalIncome - totalExpense
 
-  const prevIncome = ownedPrevTransactions
-    .filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY)
-    .reduce((s, t) => s + Number(t.amount), 0)
-  const prevExpense = ownedPrevTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
-
-  function pctChange(curr, prev) {
-    if (prev === 0) return null
-    const p = Math.round(((curr - prev) / prev) * 100)
-    return p
-  }
-
-  const top3Expense = Object.entries(
-    ownedTransactions.filter((t) => t.type === 'expense').reduce((acc, t) => {
-      acc[t.category] = (acc[t.category] || 0) + Number(t.amount)
-      return acc
-    }, {})
-  ).sort((a, b) => b[1] - a[1]).slice(0, 3)
-
   const animatedIncome = useCountUp(totalIncome)
   const animatedExpense = useCountUp(totalExpense)
   const animatedBalance = useCountUp(balance)
@@ -699,25 +681,15 @@ export default function App() {
             <div className="summary-item income clickable" onClick={() => setSummaryModal('수입')}>
               <div className="label">수입</div>
               <div className="value">{formatAmount(animatedIncome)}</div>
-              {pctChange(totalIncome, prevIncome) !== null && (
-                <div className="sub-label" style={{ color: totalIncome >= prevIncome ? '#56c97a' : '#ff8fab' }}>
-                  {totalIncome >= prevIncome ? '▲' : '▼'}{Math.abs(pctChange(totalIncome, prevIncome))}%
-                </div>
-              )}
               {transferReceived > 0 && ownerFilter !== '전체' && (
-                <div className="sub-label">💸 +{formatAmount(transferReceived)}</div>
+                <div className="sub-label">💸 이체 +{formatAmount(transferReceived)}</div>
               )}
             </div>
             <div className="summary-item expense clickable" onClick={() => setSummaryModal('지출')}>
               <div className="label">지출</div>
               <div className="value">{formatAmount(animatedExpense)}</div>
-              {pctChange(totalExpense, prevExpense) !== null && (
-                <div className="sub-label" style={{ color: totalExpense <= prevExpense ? '#56c97a' : '#ff8fab' }}>
-                  {totalExpense >= prevExpense ? '▲' : '▼'}{Math.abs(pctChange(totalExpense, prevExpense))}%
-                </div>
-              )}
               {transferSent > 0 && (
-                <div className="sub-label">💸 -{formatAmount(transferSent)}</div>
+                <div className="sub-label">💸 이체 -{formatAmount(transferSent)}</div>
               )}
             </div>
             <div className="summary-item balance">
@@ -725,18 +697,6 @@ export default function App() {
               <div className="value">{formatAmount(animatedBalance)}</div>
             </div>
           </div>
-
-          {top3Expense.length > 0 && (
-            <div className="top3-expense">
-              {top3Expense.map(([cat, amt], i) => (
-                <div key={cat} className="top3-item">
-                  <span className="top3-rank">{i + 1}</span>
-                  <span className="top3-cat">{cat}</span>
-                  <span className="top3-amt">{formatAmount(amt)}원</span>
-                </div>
-              ))}
-            </div>
-          )}
 
           {(summaryModal === '수입' || summaryModal === '지출') && (() => {
             const isIncome = summaryModal === '수입'
