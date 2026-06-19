@@ -201,6 +201,7 @@ export default function App() {
         setTransactions(data)
       }
       setLoading(false)
+      window.hideSplash?.()
     }
     load()
     return () => {
