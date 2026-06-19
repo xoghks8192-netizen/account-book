@@ -67,8 +67,12 @@ export default function App() {
   }, [])
 
   const [user, setUser] = useState(() => loadSession())
+  const [splashDone, setSplashDone] = useState(false)
 
-  useEffect(() => { window.hideSplash?.() }, [])
+  useEffect(() => {
+    const t = setTimeout(() => setSplashDone(true), 1500)
+    return () => clearTimeout(t)
+  }, [])
   const [page, setPage] = useState(() => localStorage.getItem(PAGE_KEY) || 'transactions')
   const [slideDir, setSlideDir] = useState(null)
   const PAGE_ORDER = ['transactions', 'assets']
@@ -496,6 +500,19 @@ export default function App() {
 
   if (!user) {
     return <Login onLogin={setUser} />
+  }
+
+  if (!splashDone) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, background: '#fbfaff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, zIndex: 99999 }}>
+        <div style={{ fontSize: 56, lineHeight: 1 }}>💜</div>
+        <div style={{ fontFamily: '"Jua", sans-serif', fontSize: 22, color: '#b896ff', letterSpacing: '0.02em' }}>우리 가계부</div>
+        <div style={{ width: 40, height: 3, borderRadius: 99, background: '#e8deff', overflow: 'hidden', marginTop: 8 }}>
+          <div style={{ height: '100%', width: '100%', background: 'linear-gradient(90deg,#b896ff,#d4b8ff)', borderRadius: 99, animation: 'splashBar 1s ease-in-out infinite alternate' }} />
+        </div>
+        <style>{`@keyframes splashBar { from { transform: translateX(-100%) } to { transform: translateX(100%) } }`}</style>
+      </div>
+    )
   }
 
   if (pinLocked) {
