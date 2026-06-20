@@ -21,7 +21,7 @@ async function fetchItems(endpoint, lawdCd, dealYmd) {
 function recentMonths(n) {
   const now = new Date()
   const months = []
-  for (let i = 0; i < n; i++) {
+  for (let i = 1; i <= n; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
     months.push(`${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}`)
   }
@@ -42,9 +42,10 @@ export default async function handler(req, res) {
 
   if (!code) return res.status(400).json({ error: 'code required' })
 
-  const key = `${type}-${deal === 'monthly' ? 'rent' : deal}`
+  const dealKey = deal === 'trade' ? 'trade' : 'rent'
+  const key = `${type}-${dealKey}`
   const endpoint = ENDPOINTS[key] || ENDPOINTS['apt-trade']
-  const months = recentMonths(3)
+  const months = recentMonths(5)
 
   try {
     const results = await Promise.all(months.map((ym) => fetchItems(endpoint, code, ym)))
