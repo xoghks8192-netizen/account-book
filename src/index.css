@@ -244,7 +244,7 @@ body {
   display: flex;
   justify-content: center;
   gap: 16px;
-  padding: 14px 16px 12px;
+  padding: 14px 16px 6px;
 }
 
 .anniversary-item {
@@ -295,7 +295,7 @@ body {
 .owner-tabs {
   display: flex;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 6px 16px;
 }
 
 .owner-tabs button {
