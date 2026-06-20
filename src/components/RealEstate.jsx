@@ -253,19 +253,18 @@ export default function RealEstate({ user, transactions = [], assets = [] }) {
             onChange={handleQueryChange}
             onFocus={() => query && setSuggestions(searchRegions(query))}
           />
-          {selected && (
-            <button
-              className={`re-fav-btn${isFav(selected) ? ' active' : ''}`}
-              onClick={() => toggleFav(selected)}
-              title={isFav(selected) ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-            >
-              {isFav(selected) ? '★' : '☆'}
-            </button>
-          )}
           <button className="re-search-btn" onClick={() => search()} disabled={!selected || loading}>
             {loading ? '⏳' : '검색'}
           </button>
         </div>
+        {selected && (
+          <button
+            className={`re-fav-row-btn${isFav(selected) ? ' active' : ''}`}
+            onClick={() => toggleFav(selected)}
+          >
+            {isFav(selected) ? '★ 즐겨찾기 해제' : '☆ 즐겨찾기 추가'}
+          </button>
+        )}
         {suggestions.length > 0 && (
           <div className="re-suggestions">
             {suggestions.map((r) => (

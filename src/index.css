@@ -3089,18 +3089,20 @@ body {
   color: #fff;
   border-color: transparent;
 }
-.re-fav-btn {
-  padding: 0 12px;
-  background: none;
+.re-fav-row-btn {
+  display: block;
+  margin-top: 6px;
+  padding: 5px 12px;
+  border-radius: 8px;
   border: 1.5px solid var(--input-border);
-  border-radius: 10px;
-  font-size: 18px;
+  background: none;
   color: var(--text-sub);
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
-  margin-right: 4px;
 }
-.re-fav-btn.active { color: #f5a623; border-color: #f5a623; }
+.re-fav-row-btn.active { color: #f5a623; border-color: #f5a623; }
 
 /* 가격 요약 배너 */
 .re-summary {
