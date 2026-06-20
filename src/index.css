@@ -3168,3 +3168,123 @@ body {
   border-color: transparent;
   box-shadow: 0 2px 8px var(--active-shadow);
 }
+
+/* 카드 가격 컬럼 */
+.re-price-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  min-width: 72px;
+}
+.re-per-py {
+  font-size: 10px;
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+
+/* 단지명 검색 인풋 */
+.re-name-search {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 13px;
+  box-sizing: border-box;
+  margin-bottom: 2px;
+}
+.re-name-search:focus { outline: none; border-color: var(--focus-border); }
+.re-name-search::placeholder { color: var(--meta-text); }
+
+/* 단지 상세 모달 */
+.re-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+}
+.re-modal {
+  background: var(--form-bg);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.re-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 4px;
+}
+.re-modal-title {
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  color: var(--text-heading);
+}
+.re-modal-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--text-sub);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.re-modal-sub {
+  font-size: 12px;
+  color: var(--text-sub);
+  padding: 0 20px 12px;
+}
+.re-modal-list {
+  overflow-y: auto;
+  padding: 0 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.re-modal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card-bg);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.re-modal-row-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.re-modal-floor {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+.re-modal-area {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.re-modal-date {
+  font-size: 11px;
+  color: var(--meta-text);
+}
+.re-modal-row-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.re-modal-price {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: var(--balance-color);
+}
+.re-modal-per {
+  font-size: 10px;
+  color: var(--text-sub);
+}
