@@ -76,6 +76,86 @@
   --date-icon-filter: invert(0.85) sepia(1) saturate(2) hue-rotate(220deg);
 }
 
+/* ── 컬러 테마 (라이트) ── */
+[data-color="pink"] {
+  --brand-gradient: linear-gradient(135deg, #ffb3d1, #ff85b3);
+  --active-gradient: linear-gradient(135deg, #ff85b3, #ff5c95);
+  --active-shadow: rgba(255, 92, 149, 0.35);
+  --anniversary-value: #ff5c95;
+  --balance-color: #ff5c95;
+  --focus-border: #ff85b3;
+  --icon-hover: #ff5c95;
+  --submit-shadow: rgba(255, 92, 149, 0.3);
+}
+[data-color="mint"] {
+  --brand-gradient: linear-gradient(135deg, #a8e6cf, #56c97a);
+  --active-gradient: linear-gradient(135deg, #56c97a, #2db86a);
+  --active-shadow: rgba(45, 184, 106, 0.35);
+  --anniversary-value: #2db86a;
+  --balance-color: #2db86a;
+  --focus-border: #56c97a;
+  --icon-hover: #2db86a;
+  --submit-shadow: rgba(45, 184, 106, 0.3);
+}
+[data-color="blue"] {
+  --brand-gradient: linear-gradient(135deg, #a3d4ff, #5ba4ef);
+  --active-gradient: linear-gradient(135deg, #5ba4ef, #3a87e0);
+  --active-shadow: rgba(58, 135, 224, 0.35);
+  --anniversary-value: #3a87e0;
+  --balance-color: #3a87e0;
+  --focus-border: #5ba4ef;
+  --icon-hover: #3a87e0;
+  --submit-shadow: rgba(58, 135, 224, 0.3);
+}
+[data-color="coral"] {
+  --brand-gradient: linear-gradient(135deg, #ffcba4, #ff8c69);
+  --active-gradient: linear-gradient(135deg, #ff8c69, #ff6547);
+  --active-shadow: rgba(255, 101, 71, 0.35);
+  --anniversary-value: #ff6547;
+  --balance-color: #ff6547;
+  --focus-border: #ff8c69;
+  --icon-hover: #ff6547;
+  --submit-shadow: rgba(255, 101, 71, 0.3);
+}
+
+/* 다크모드 + 컬러 테마 조합 */
+[data-theme="dark"][data-color="pink"] {
+  --brand-gradient: linear-gradient(135deg, #8a3055, #b84575);
+  --active-gradient: linear-gradient(135deg, #c05080, #e06090);
+  --active-shadow: rgba(0,0,0,0.4);
+  --anniversary-value: #e080aa;
+  --balance-color: #e080aa;
+  --focus-border: #d070a0;
+  --icon-hover: #e080aa;
+}
+[data-theme="dark"][data-color="mint"] {
+  --brand-gradient: linear-gradient(135deg, #1a4d35, #2a6b48);
+  --active-gradient: linear-gradient(135deg, #2d8050, #40a868);
+  --active-shadow: rgba(0,0,0,0.4);
+  --anniversary-value: #50c880;
+  --balance-color: #50c880;
+  --focus-border: #40a868;
+  --icon-hover: #50c880;
+}
+[data-theme="dark"][data-color="blue"] {
+  --brand-gradient: linear-gradient(135deg, #1a3a6a, #2a4f8a);
+  --active-gradient: linear-gradient(135deg, #3a70c0, #5090e0);
+  --active-shadow: rgba(0,0,0,0.4);
+  --anniversary-value: #70b0f0;
+  --balance-color: #70b0f0;
+  --focus-border: #5090e0;
+  --icon-hover: #70b0f0;
+}
+[data-theme="dark"][data-color="coral"] {
+  --brand-gradient: linear-gradient(135deg, #6a2a1a, #8a3a28);
+  --active-gradient: linear-gradient(135deg, #c05030, #e06848);
+  --active-shadow: rgba(0,0,0,0.4);
+  --anniversary-value: #f08060;
+  --balance-color: #f08060;
+  --focus-border: #e06848;
+  --icon-hover: #f08060;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -1667,6 +1747,40 @@ body {
   justify-content: center;
   font-size: 14px;
   flex-shrink: 0;
+}
+
+.more-menu-color-section {
+  padding: 12px 16px 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.more-menu-color-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.more-menu-color-swatches {
+  display: flex;
+  gap: 8px;
+}
+.color-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s, border-color 0.15s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.color-swatch:hover {
+  transform: scale(1.15);
+}
+.color-swatch.selected {
+  border-color: var(--text-primary);
+  transform: scale(1.1);
 }
 
 .pin-overlay {

@@ -23,6 +23,7 @@ import { useCountUp } from './hooks/useCountUp'
 
 const PAGE_KEY = 'household-budget-page'
 const THEME_KEY = 'household-budget-theme'
+const COLOR_KEY = 'household-budget-color'
 
 function formatAmount(n) {
   return n.toLocaleString('ko-KR')
@@ -118,6 +119,7 @@ export default function App() {
   const [linkableAssets, setLinkableAssets] = useState([])
   const [exporting, setExporting] = useState(false)
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'light')
+  const [colorTheme, setColorTheme] = useState(() => localStorage.getItem(COLOR_KEY) || 'purple')
   const [showMoreMenu, setShowMoreMenu] = useState(false)
   const [summaryModal, setSummaryModal] = useState(null)
   const [expandedCategory, setExpandedCategory] = useState(null)
@@ -179,6 +181,15 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem(THEME_KEY, theme)
   }, [theme])
+
+  useEffect(() => {
+    if (colorTheme === 'purple') {
+      document.documentElement.removeAttribute('data-color')
+    } else {
+      document.documentElement.setAttribute('data-color', colorTheme)
+    }
+    localStorage.setItem(COLOR_KEY, colorTheme)
+  }, [colorTheme])
 
   useEffect(() => {
     if (!householdId) return
@@ -590,6 +601,27 @@ export default function App() {
         </div>
         {showMoreMenu && (
           <div className="more-menu">
+            <div className="more-menu-color-section">
+              <span className="more-menu-color-label">테마 색상</span>
+              <div className="more-menu-color-swatches">
+                {[
+                  { id: 'purple', color: '#b896ff', label: '보라' },
+                  { id: 'pink',   color: '#ff85b3', label: '핑크' },
+                  { id: 'mint',   color: '#56c97a', label: '민트' },
+                  { id: 'blue',   color: '#5ba4ef', label: '블루' },
+                  { id: 'coral',  color: '#ff8c69', label: '코랄' },
+                ].map(({ id, color, label }) => (
+                  <button
+                    key={id}
+                    className={`color-swatch${colorTheme === id ? ' selected' : ''}`}
+                    style={{ background: color }}
+                    title={label}
+                    onClick={() => { setColorTheme(id); setShowMoreMenu(false) }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="more-menu-divider" />
             <div className="more-menu-group">
 <button className="more-menu-item" onClick={() => { setShowMoreMenu(false); handleExportAll() }} disabled={exporting}>
                 <span className="more-menu-icon" style={{ background: '#e8f8ef', color: '#4caf7d' }}>💾</span>
