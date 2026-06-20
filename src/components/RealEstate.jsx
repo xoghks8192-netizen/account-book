@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { searchRegions } from '../regionCodes'
 
 const PROPERTY_TYPES = [{ id: 'apt', label: '🏢 아파트' }, { id: 'villa', label: '🏠 빌라' }]
-const DEAL_TYPES = [{ id: 'trade', label: '매매' }, { id: 'jeonse', label: '전세' }, { id: 'monthly', label: '월세' }]
+const DEAL_TYPES = [{ id: 'trade', label: '매매' }, { id: 'jeonse', label: '전세' }, { id: 'monthly', label: '월세' }, { id: 'presale', label: '분양권' }]
 const SIZE_FILTERS = [{ id: 'all', label: '전체' }, { id: 's', label: '10평대' }, { id: 'm', label: '20평대' }, { id: 'l', label: '30평 이상' }]
 const YEAR_FILTERS = [{ id: 'all', label: '전체' }, { id: 'new', label: '신축(2020~)' }, { id: 'mid', label: '준신축(2010~)' }, { id: 'old', label: '구축(~2009)' }]
 const SORT_OPTIONS = [{ id: 'date', label: '최신순' }, { id: 'asc', label: '낮은순' }, { id: 'desc', label: '높은순' }]
@@ -222,7 +222,7 @@ export default function RealEstate({ user, transactions = [], assets = [] }) {
   }
 
   function openAptModal(name) {
-    const currentKey = `${propType}-${dealType}`
+    const currentKey = dealType === 'presale' ? 'apt-presale' : `${propType}-${dealType}`
     const all = data?.[currentKey] ?? []
     const items = all.filter(i => i.name === name)
     setModalApt({ name, items })
@@ -260,7 +260,7 @@ export default function RealEstate({ user, transactions = [], assets = [] }) {
     finally { setAiLoading(false) }
   }
 
-  const currentKey = `${propType}-${dealType}`
+  const currentKey = dealType === 'presale' ? 'apt-presale' : `${propType}-${dealType}`
   const currentItems = data?.[currentKey] ?? []
   const filtered = filterItems(currentItems, { sizeFilter, yearFilter, nameQuery })
   const displayItems = sortItems(filtered, sortBy, dealType)
@@ -338,11 +338,12 @@ export default function RealEstate({ user, transactions = [], assets = [] }) {
         </div>
         <div className="re-filter-row">
           {DEAL_TYPES.map((t) => {
-            const cnt = data?.[`${propType}-${t.id}`]?.length ?? 0
+            const key = t.id === 'presale' ? 'apt-presale' : `${propType}-${t.id}`
+            const cnt = data?.[key]?.length ?? 0
             return (
               <button key={t.id}
                 className={`re-filter-btn${dealType === t.id ? ' active' : ''}`}
-                onClick={() => { setDealType(t.id); setAiText(null) }}>
+                onClick={() => { setDealType(t.id); setAiText(null); if (t.id === 'presale') setPropType('apt') }}>
                 {t.label} {data && cnt > 0 && <span className="re-filter-count">{cnt}</span>}
               </button>
             )
@@ -420,7 +421,7 @@ export default function RealEstate({ user, transactions = [], assets = [] }) {
             </div>
           ) : (
             displayItems.map((item, i) =>
-              item.dealType === 'trade'
+              (item.dealType === 'trade' || item.dealType === 'presale')
                 ? <TradeCard key={i} item={item} onClick={() => openAptModal(item.name)} />
                 : <RentCard key={i} item={item} onClick={() => openAptModal(item.name)} />
             )
