@@ -18,6 +18,7 @@ async function fetchSavings(type, topFinGrpNo) {
       term: opt.save_trm,
       rate: parseFloat(opt.intr_rate2 ?? opt.intr_rate ?? 0),
       joinWay: base.join_way,
+      bankType: topFinGrpNo === '020000' ? 'bank' : 'saving',
       type,
     }))
   })
@@ -71,7 +72,7 @@ export default async function handler(req, res) {
     const all = [...depositBank, ...depositSaving, ...savingBank, ...savingSaving]
     const byTerm = (items, term) =>
       items.filter((p) => p.rate > 0 && String(p.term) === String(term))
-           .sort((a, b) => b.rate - a.rate).slice(0, 15)
+           .sort((a, b) => b.rate - a.rate).slice(0, 50)
 
     const sortLoans = (items) =>
       items.sort((a, b) => a.rateMin - b.rateMin).slice(0, 15)

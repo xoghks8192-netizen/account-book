@@ -2187,6 +2187,54 @@ body {
 }
 
 /* ── 적금 계산기 ── */
+.bank-filter-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.bank-filter-btn {
+  padding: 5px 14px;
+  border: 1.5px solid var(--form-border);
+  border-radius: 999px;
+  background: var(--card-bg);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.bank-filter-btn.active {
+  background: var(--active-gradient);
+  border-color: transparent;
+  color: #fff;
+}
+.bank-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+.bank-badge.bank {
+  background: #e8f0ff;
+  color: #5b8af0;
+}
+.bank-badge.saving {
+  background: #fff0e8;
+  color: #f0905b;
+}
+[data-theme="dark"] .bank-badge.bank {
+  background: #2a3a60;
+  color: #8ab0ff;
+}
+[data-theme="dark"] .bank-badge.saving {
+  background: #60382a;
+  color: #ffb08a;
+}
+
 .calc-box {
   background: var(--card-bg);
   border: 1px solid var(--form-border);

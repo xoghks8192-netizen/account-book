@@ -30,14 +30,18 @@ function RateBar({ rate, max }) {
   )
 }
 
-function SavingList({ items }) {
-  if (!items.length) return <div className="empty-state"><div className="empty-state-icon">🏦</div><div className="empty-state-title">데이터가 없어요</div></div>
-  const maxRate = items[0]?.rate ?? 5
-  return items.map((item, i) => (
+function SavingList({ items, bankFilter }) {
+  const filtered = items.filter((p) => bankFilter === 'all' || p.bankType === bankFilter)
+  if (!filtered.length) return <div className="empty-state"><div className="empty-state-icon">🏦</div><div className="empty-state-title">데이터가 없어요</div></div>
+  const maxRate = filtered[0]?.rate ?? 5
+  return filtered.map((item, i) => (
     <div key={i} className="rate-card">
       <div className="rate-rank" style={i === 0 ? { color: '#f5c518' } : i === 1 ? { color: '#aaa' } : i === 2 ? { color: '#cd7f32' } : {}}>{i + 1}</div>
       <div className="rate-info">
-        <div className="rate-bank">{item.bankName}</div>
+        <div className="rate-bank">
+          {item.bankName}
+          <span className={`bank-badge ${item.bankType}`}>{item.bankType === 'bank' ? '은행' : '저축은행'}</span>
+        </div>
         <div className="rate-product">{item.productName}</div>
         <RateBar rate={item.rate} max={maxRate} />
         <div className="rate-meta">{item.joinWay}</div>
@@ -160,6 +164,7 @@ export default function SavingsRates() {
   const [mode, setMode] = useState('saving') // 'saving' | 'loan' | 'calc'
   const [savingTab, setSavingTab] = useState('deposit12')
   const [loanTab, setLoanTab] = useState('mortgage')
+  const [bankFilter, setBankFilter] = useState('all')
 
   async function load() {
     setLoading(true)
@@ -219,7 +224,14 @@ export default function SavingsRates() {
               </button>
             ))}
           </div>
-          <SavingList items={data?.[savingTab] ?? []} />
+          <div className="bank-filter-row">
+            {[['all','전체'],['bank','은행'],['saving','저축은행']].map(([id, label]) => (
+              <button key={id} className={`bank-filter-btn${bankFilter === id ? ' active' : ''}`} onClick={() => setBankFilter(id)}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <SavingList items={data?.[savingTab] ?? []} bankFilter={bankFilter} />
         </>
       )}
 
