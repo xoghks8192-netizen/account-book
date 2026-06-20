@@ -244,7 +244,7 @@ body {
   display: flex;
   justify-content: center;
   gap: 16px;
-  padding: 14px 16px 0;
+  padding: 14px 16px 12px;
 }
 
 .anniversary-item {
@@ -295,7 +295,7 @@ body {
 .owner-tabs {
   display: flex;
   gap: 8px;
-  padding: 16px 16px 8px;
+  padding: 12px 16px;
 }
 
 .owner-tabs button {
@@ -445,10 +445,6 @@ body {
   font-family: "Jua", sans-serif;
 }
 
-.owner-tabs {
-  padding-top: 4px;
-  padding-bottom: 12px;
-}
 
 .month-nav {
   display: flex;
@@ -684,7 +680,7 @@ body {
 .summary {
   display: flex;
   justify-content: space-between;
-  padding: 8px 16px 16px;
+  padding: 0 16px 12px;
   gap: 8px;
 }
 
