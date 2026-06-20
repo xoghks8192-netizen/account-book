@@ -214,6 +214,11 @@ export default function RealEstate({ user, transactions = [] }) {
             <span>{selected?.name} · {dealLabel} {currentItems.length}건</span>
             <span className="re-result-sub">최근 5개월 실거래 (전체 {totalCount}건 로드)</span>
           </div>
+          {data._debug && (
+            <div style={{ fontSize: 11, color: 'var(--text-sub)', background: 'var(--bg-root)', borderRadius: 8, padding: '8px 12px', marginBottom: 10 }}>
+              Raw: 아파트매매 {data._debug.rawCounts.aptTrade}건 · 아파트전월세 {data._debug.rawCounts.aptRent}건 · 빌라매매 {data._debug.rawCounts.villaTrade}건 · 빌라전월세 {data._debug.rawCounts.villaRent}건 · 파싱후 {data._debug.parsedTotal}건 · 조회월 {data._debug.months?.join(',')}
+            </div>
+          )}
 
           {currentItems.length === 0 ? (
             <div className="empty-state">

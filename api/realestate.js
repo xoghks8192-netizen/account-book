@@ -12,9 +12,13 @@ async function fetchItems(endpoint, lawdCd, dealYmd) {
   const url = `${BASE}/${endpoint}?serviceKey=${encodeURIComponent(GOV_KEY)}&LAWD_CD=${lawdCd}&DEAL_YMD=${dealYmd}&numOfRows=100&pageNo=1&_type=json`
   const res = await fetch(url)
   if (!res.ok) throw new Error(`API ${res.status}`)
-  const json = await res.json()
-  const items = json?.response?.body?.items?.item
-  if (!items) return []
+  const text = await res.text()
+  let json
+  try { json = JSON.parse(text) } catch { throw new Error(`JSON parse fail: ${text.slice(0, 200)}`) }
+  const body = json?.response?.body
+  const totalCount = body?.totalCount ?? 0
+  const items = body?.items?.item
+  if (!items || totalCount === 0) return []
   return Array.isArray(items) ? items : [items]
 }
 
@@ -100,15 +104,27 @@ export default async function handler(req, res) {
       ...parseRent(villaRentItems,   'villa'),
     ]
 
-    return res.status(200).json({
-      'apt-trade':   sortByDate(all.filter(t => t.propType === 'apt'   && t.dealType === 'trade'  )).slice(0, 60),
-      'apt-jeonse':  sortByDate(all.filter(t => t.propType === 'apt'   && t.dealType === 'jeonse' )).slice(0, 60),
-      'apt-monthly': sortByDate(all.filter(t => t.propType === 'apt'   && t.dealType === 'monthly')).slice(0, 60),
+    const result = {
+      'apt-trade':     sortByDate(all.filter(t => t.propType === 'apt'   && t.dealType === 'trade'  )).slice(0, 60),
+      'apt-jeonse':    sortByDate(all.filter(t => t.propType === 'apt'   && t.dealType === 'jeonse' )).slice(0, 60),
+      'apt-monthly':   sortByDate(all.filter(t => t.propType === 'apt'   && t.dealType === 'monthly')).slice(0, 60),
       'villa-trade':   sortByDate(all.filter(t => t.propType === 'villa' && t.dealType === 'trade'  )).slice(0, 60),
       'villa-jeonse':  sortByDate(all.filter(t => t.propType === 'villa' && t.dealType === 'jeonse' )).slice(0, 60),
       'villa-monthly': sortByDate(all.filter(t => t.propType === 'villa' && t.dealType === 'monthly')).slice(0, 60),
       fetchedAt: new Date().toISOString(),
-    })
+      _debug: {
+        rawCounts: {
+          aptTrade: aptTradeItems.length,
+          aptRent: aptRentItems.length,
+          villaTrade: villaTradeItems.length,
+          villaRent: villaRentItems.length,
+        },
+        parsedTotal: all.length,
+        months,
+        code,
+      },
+    }
+    return res.status(200).json(result)
   } catch (e) {
     return res.status(500).json({ error: e.message })
   }
