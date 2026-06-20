@@ -20,6 +20,7 @@ import { STOCK_CATEGORIES } from './assetMeta'
 import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from './categories'
 import PinLock from './components/PinLock'
 import SavingsRates from './components/SavingsRates'
+import RealEstate from './components/RealEstate'
 import { useCountUp } from './hooks/useCountUp'
 
 const PAGE_KEY = 'household-budget-page'
@@ -79,7 +80,7 @@ export default function App() {
   }, [])
   const [page, setPage] = useState(() => localStorage.getItem(PAGE_KEY) || 'transactions')
   const [slideDir, setSlideDir] = useState(null)
-  const PAGE_ORDER = ['transactions', 'assets', 'info']
+  const PAGE_ORDER = ['transactions', 'assets', 'info', 'realestate']
   function navigateTo(next) {
     if (next === page) return
     const dir = PAGE_ORDER.indexOf(next) > PAGE_ORDER.indexOf(page) ? 'left' : 'right'
@@ -704,7 +705,11 @@ export default function App() {
         onTouchStart={handleMonthSwipeStart}
         onTouchEnd={handleMonthSwipeEnd}
       >
-      {page === 'info' ? (
+      {page === 'realestate' ? (
+        <div className="info-page">
+          <RealEstate user={user} assets={assets} transactions={transactions} />
+        </div>
+      ) : page === 'info' ? (
         <div className="info-page">
           <SavingsRates />
         </div>
@@ -1027,6 +1032,11 @@ export default function App() {
           <span className="tab-icon">🏦</span>
           <span className="tab-label">금리</span>
           {page === 'info' && <span className="tab-pill" />}
+        </button>
+        <button className={page === 'realestate' ? 'active' : ''} onClick={() => navigateTo('realestate')}>
+          <span className="tab-icon">🏡</span>
+          <span className="tab-label">부동산</span>
+          {page === 'realestate' && <span className="tab-pill" />}
         </button>
       </div>
 

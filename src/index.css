@@ -2827,3 +2827,228 @@ body {
   font-family: "Jua", sans-serif;
   color: var(--balance-color);
 }
+
+/* ===== 부동산 탭 ===== */
+.re-wrap {
+  padding: 0 16px 100px;
+}
+.re-header {
+  padding: 16px 0 12px;
+}
+.re-title {
+  font-family: "Jua", sans-serif;
+  font-size: 20px;
+  color: var(--text-heading);
+}
+.re-subtitle {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+.re-search-wrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+.re-search-row {
+  display: flex;
+  gap: 8px;
+}
+.re-search-input {
+  flex: 1;
+  padding: 11px 14px;
+  border: 1.5px solid var(--input-border);
+  border-radius: 12px;
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+.re-search-input:focus { border-color: var(--focus-border); }
+.re-search-btn {
+  padding: 11px 18px;
+  border: none;
+  border-radius: 12px;
+  background: var(--active-gradient);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.re-search-btn:disabled { opacity: 0.5; }
+.re-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--form-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px var(--card-shadow);
+  z-index: 100;
+  overflow: hidden;
+}
+.re-suggestion-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--form-border);
+  font-size: 13px;
+  color: var(--text-main);
+  cursor: pointer;
+}
+.re-suggestion-item:last-child { border-bottom: none; }
+.re-suggestion-item:hover { background: var(--tab-bg); }
+.re-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.re-filter-row {
+  display: flex;
+  gap: 8px;
+}
+.re-filter-btn {
+  flex: 1;
+  padding: 8px 6px;
+  border: 1.5px solid var(--form-border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-sub);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.re-filter-btn.active {
+  background: var(--active-gradient);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 2px 8px var(--active-shadow);
+}
+.re-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: 10px;
+}
+.re-result-sub { font-size: 11px; color: var(--text-sub); font-weight: 400; }
+.re-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--form-border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px var(--card-shadow);
+}
+.re-rank {
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  color: var(--text-sub);
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.re-info { flex: 1; min-width: 0; }
+.re-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.re-meta {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+.re-date {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+.re-price {
+  text-align: right;
+  flex-shrink: 0;
+}
+.re-price.trade {
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  color: var(--balance-color);
+}
+.re-price.rent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.re-deposit {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: var(--income-color);
+}
+.re-monthly {
+  font-size: 12px;
+  color: var(--expense-color);
+  font-weight: 700;
+}
+.re-ai-section {
+  margin-top: 20px;
+  margin-bottom: 16px;
+}
+.re-ai-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: "Jua", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(102,126,234,0.4);
+}
+.re-ai-btn:disabled { opacity: 0.6; }
+.re-ai-result {
+  background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.05));
+  border: 1px solid rgba(102,126,234,0.25);
+  border-radius: 16px;
+  padding: 16px;
+}
+.re-ai-result-title {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: var(--text-heading);
+  margin-bottom: 10px;
+}
+.re-ai-result-body {
+  font-size: 13px;
+  color: var(--text-main);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.re-ai-refresh {
+  margin-top: 12px;
+  background: none;
+  border: 1px solid var(--form-border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--text-sub);
+  cursor: pointer;
+}
+.re-empty-guide {
+  text-align: center;
+  padding: 48px 16px;
+}

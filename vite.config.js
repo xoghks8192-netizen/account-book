@@ -2,6 +2,8 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fetchStockPrice } from './api/lib/fetchPrice.js'
 import savingsRatesHandler from './api/savings-rates.js'
+import realestateHandler from './api/realestate.js'
+import realestateAiHandler from './api/realestate-ai.js'
 import loginHandler from './api/login.js'
 import changePwHandler from './api/change-pw.js'
 import aiInsightHandler from './api/ai-insight.js'
@@ -95,6 +97,8 @@ export default defineConfig(({ mode }) => {
       jsonApi('/api/update-household', updateHouseholdHandler),
       jsonApi('/api/reset-password', resetPasswordHandler),
       getApi('/api/savings-rates', savingsRatesHandler),
+      getApi('/api/realestate', realestateHandler),
+      jsonApi('/api/realestate-ai', realestateAiHandler),
     ],
     server: {
       host: true,
