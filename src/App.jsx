@@ -282,7 +282,7 @@ export default function App() {
       setTransactions((prev) =>
         [...prev, data].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id)),
       )
-      setLastAddedTxId(data.id)
+      // setLastAddedTxId(data.id) — removed: caused jarring scroll after add
     }
     if (data.linked_asset_id) {
       await adjustAssetAmount(data.linked_asset_id, Number(data.amount))
