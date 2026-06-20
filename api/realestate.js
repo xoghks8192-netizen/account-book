@@ -2,7 +2,7 @@ const GOV_KEY = process.env.GOV_DATA_API_KEY
 const BASE = 'https://apis.data.go.kr/1613000'
 
 const ENDPOINTS = {
-  'apt-trade':  'RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade',
+  'apt-trade':  'RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev',
   'apt-rent':   'RTMSDataSvcAptRent/getRTMSDataSvcAptRent',
   'villa-trade':'RTMSDataSvcRHTrade/getRTMSDataSvcRHTrade',
   'villa-rent': 'RTMSDataSvcRHRent/getRTMSDataSvcRHRent',
