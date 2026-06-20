@@ -17,7 +17,13 @@ async function fetchSavings(type, topFinGrpNo) {
       productName: base.fin_prdt_nm,
       term: opt.save_trm,
       rate: parseFloat(opt.intr_rate2 || opt.intr_rate || 0),
+      baseRate: parseFloat(opt.intr_rate || 0),
       joinWay: base.join_way,
+      spclCnd: base.spcl_cnd || null,
+      mtrtInt: base.mtrt_int || null,
+      etcNote: base.etc_note || null,
+      joinDeny: base.join_deny || '1',
+      maxLimit: base.max_limit || null,
       bankType: topFinGrpNo === '020000' ? 'bank' : 'saving',
       type,
     }))
@@ -49,6 +55,9 @@ async function fetchLoans(loanType, topFinGrpNo) {
       rateMin: isFinite(minRate) ? minRate : 0,
       rateMax: isFinite(maxRate) ? maxRate : 0,
       joinWay: base.join_way,
+      spclCnd: base.spcl_cnd || null,
+      etcNote: base.etc_note || null,
+      bankType: topFinGrpNo === '020000' ? 'bank' : 'saving',
       loanType,
     }]
   }).filter((p) => p.rateMin > 0)
@@ -75,7 +84,7 @@ export default async function handler(req, res) {
            .sort((a, b) => b.rate - a.rate).slice(0, 50)
 
     const sortLoans = (items) =>
-      items.sort((a, b) => a.rateMin - b.rateMin).slice(0, 15)
+      items.sort((a, b) => a.rateMin - b.rateMin).slice(0, 30)
 
     return res.status(200).json({
       deposit12: byTerm(all.filter((p) => p.type === 'deposit'), 12),
