@@ -16,7 +16,7 @@ async function fetchSavings(type, topFinGrpNo) {
       bankName: base.kor_co_nm,
       productName: base.fin_prdt_nm,
       term: opt.save_trm,
-      rate: parseFloat(opt.intr_rate2 ?? opt.intr_rate ?? 0),
+      rate: parseFloat(opt.intr_rate2 || opt.intr_rate || 0),
       joinWay: base.join_way,
       bankType: topFinGrpNo === '020000' ? 'bank' : 'saving',
       type,
