@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { REGIONS, searchRegions } from '../regionCodes'
+import { searchRegions } from '../regionCodes'
 
 const PROPERTY_TYPES = [{ id: 'apt', label: '🏢 아파트' }, { id: 'villa', label: '🏠 빌라' }]
 const DEAL_TYPES = [{ id: 'trade', label: '매매' }, { id: 'jeonse', label: '전세' }, { id: 'monthly', label: '월세' }]
@@ -25,7 +25,7 @@ function TradeCard({ item, rank }) {
   )
 }
 
-function RentCard({ item, rank, deal }) {
+function RentCard({ item, rank }) {
   const py = (item.area / 3.305).toFixed(0)
   return (
     <div className="re-card">
@@ -36,16 +36,16 @@ function RentCard({ item, rank, deal }) {
         <div className="re-date">{item.dealYear}.{String(item.dealMonth).padStart(2,'0')} 거래</div>
       </div>
       <div className="re-price rent">
-        {deal === 'monthly'
+        {item.dealType === 'monthly'
           ? <><span className="re-deposit">{formatManwon(item.deposit)}</span><span className="re-monthly">월 {formatManwon(item.monthly)}</span></>
-          : <span>{formatManwon(item.deposit)}</span>
+          : <span className="re-deposit">{formatManwon(item.deposit)}</span>
         }
       </div>
     </div>
   )
 }
 
-export default function RealEstate({ user, assets = [], transactions = [] }) {
+export default function RealEstate({ user, transactions = [] }) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [selected, setSelected] = useState(null)
@@ -56,7 +56,6 @@ export default function RealEstate({ user, assets = [], transactions = [] }) {
   const [error, setError] = useState(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiText, setAiText] = useState(null)
-  const inputRef = useRef(null)
 
   function handleQueryChange(e) {
     const val = e.target.value
@@ -71,7 +70,6 @@ export default function RealEstate({ user, assets = [], transactions = [] }) {
     setSelected(region)
     setQuery(region.name)
     setSuggestions([])
-    setData(null)
     setAiText(null)
   }
 
@@ -79,7 +77,7 @@ export default function RealEstate({ user, assets = [], transactions = [] }) {
     if (!selected) return
     setLoading(true); setError(null); setData(null); setAiText(null)
     try {
-      const res = await fetch(`/api/realestate?code=${selected.code}&type=${propType}&deal=${dealType}`)
+      const res = await fetch(`/api/realestate?code=${selected.code}`)
       const json = await res.json()
       if (json.error) throw new Error(json.error)
       setData(json)
@@ -88,18 +86,14 @@ export default function RealEstate({ user, assets = [], transactions = [] }) {
   }
 
   async function analyzeAI() {
-    if (!data?.transactions?.length) return
+    if (!currentItems.length) return
     setAiLoading(true); setAiText(null)
 
-    // 재무 요약 계산
-    const activeAssets = (assets || []).filter(a => !a.deleted_at)
-    const totalAssets = activeAssets.reduce((s, a) => s + Number(a.amount), 0)
     const now = new Date()
     const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}`
     const monthTx = (transactions || []).filter(t => t.date?.startsWith(thisMonth))
     const monthlyIncome = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0)
     const monthlyExpense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
-    const emergencyFund = activeAssets.filter(a => a.category === '비상금').reduce((s, a) => s + Number(a.amount), 0)
 
     try {
       const res = await fetch('/api/realestate-ai', {
@@ -109,8 +103,8 @@ export default function RealEstate({ user, assets = [], transactions = [] }) {
           regionName: selected.name,
           deal: dealType,
           type: propType,
-          transactions: data.transactions,
-          financials: { totalAssets, monthlyIncome, monthlyExpense, emergencyFund },
+          transactions: currentItems,
+          financials: { totalAssets: 0, monthlyIncome, monthlyExpense, emergencyFund: 0 },
         }),
       })
       const json = await res.json()
@@ -120,7 +114,13 @@ export default function RealEstate({ user, assets = [], transactions = [] }) {
     finally { setAiLoading(false) }
   }
 
+  const currentKey = `${propType}-${dealType}`
+  const currentItems = data?.[currentKey] ?? []
   const dealLabel = DEAL_TYPES.find(d => d.id === dealType)?.label
+
+  const totalCount = data
+    ? Object.values(data).filter(v => Array.isArray(v)).reduce((s, arr) => s + arr.length, 0)
+    : 0
 
   return (
     <div className="re-wrap">
@@ -133,7 +133,6 @@ export default function RealEstate({ user, assets = [], transactions = [] }) {
       <div className="re-search-wrap">
         <div className="re-search-row">
           <input
-            ref={inputRef}
             className="re-search-input"
             placeholder="지역 검색 (예: 마포구, 강남구)"
             value={query}
@@ -155,50 +154,83 @@ export default function RealEstate({ user, assets = [], transactions = [] }) {
         )}
       </div>
 
-      {/* 필터 */}
-      <div className="re-filters">
-        <div className="re-filter-row">
-          {PROPERTY_TYPES.map((t) => (
-            <button key={t.id} className={`re-filter-btn${propType === t.id ? ' active' : ''}`}
-              onClick={() => { setPropType(t.id); setData(null) }}>{t.label}</button>
-          ))}
+      {/* 필터 탭 */}
+      {data && (
+        <div className="re-filters">
+          <div className="re-filter-row">
+            {PROPERTY_TYPES.map((t) => (
+              <button key={t.id}
+                className={`re-filter-btn${propType === t.id ? ' active' : ''}`}
+                onClick={() => { setPropType(t.id); setAiText(null) }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <div className="re-filter-row">
+            {DEAL_TYPES.map((t) => {
+              const cnt = data?.[`${propType}-${t.id}`]?.length ?? 0
+              return (
+                <button key={t.id}
+                  className={`re-filter-btn${dealType === t.id ? ' active' : ''}`}
+                  onClick={() => { setDealType(t.id); setAiText(null) }}>
+                  {t.label} {cnt > 0 && <span className="re-filter-count">{cnt}</span>}
+                </button>
+              )
+            })}
+          </div>
         </div>
-        <div className="re-filter-row">
-          {DEAL_TYPES.map((t) => (
-            <button key={t.id} className={`re-filter-btn${dealType === t.id ? ' active' : ''}`}
-              onClick={() => { setDealType(t.id); setData(null) }}>{t.label}</button>
-          ))}
+      )}
+
+      {/* 검색 전 필터 (데이터 없을 때도 보여주기) */}
+      {!data && !loading && (
+        <div className="re-filters">
+          <div className="re-filter-row">
+            {PROPERTY_TYPES.map((t) => (
+              <button key={t.id} className={`re-filter-btn${propType === t.id ? ' active' : ''}`}
+                onClick={() => setPropType(t.id)}>{t.label}</button>
+            ))}
+          </div>
+          <div className="re-filter-row">
+            {DEAL_TYPES.map((t) => (
+              <button key={t.id} className={`re-filter-btn${dealType === t.id ? ' active' : ''}`}
+                onClick={() => setDealType(t.id)}>{t.label}</button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {error && <div className="savings-error"><div>⚠️ {error}</div></div>}
+      {loading && (
+        <div className="savings-loading" style={{ padding: '32px 0' }}>
+          <div className="savings-spinner" />
+          <span>아파트·빌라 매매·전세·월세 전체 조회 중...</span>
+        </div>
+      )}
 
       {/* 결과 */}
       {data && (
         <>
           <div className="re-result-header">
-            <span>{selected?.name} · {dealLabel} {data.transactions.length}건</span>
-            <span className="re-result-sub">최근 3개월 실거래</span>
+            <span>{selected?.name} · {dealLabel} {currentItems.length}건</span>
+            <span className="re-result-sub">최근 5개월 실거래 (전체 {totalCount}건 로드)</span>
           </div>
 
-          {data.transactions.length === 0 ? (
+          {currentItems.length === 0 ? (
             <div className="empty-state">
               <div className="empty-state-icon">🏚️</div>
               <div className="empty-state-title">거래 내역이 없어요</div>
-              <div className="empty-state-sub">다른 지역이나 유형을 선택해보세요</div>
+              <div className="empty-state-sub">다른 유형을 선택해보세요</div>
             </div>
           ) : (
-            <>
-              {data.transactions.map((item, i) =>
-                dealType === 'trade'
-                  ? <TradeCard key={i} item={item} rank={i + 1} />
-                  : <RentCard key={i} item={item} rank={i + 1} deal={dealType} />
-              )}
-            </>
+            currentItems.map((item, i) =>
+              item.dealType === 'trade'
+                ? <TradeCard key={i} item={item} rank={i + 1} />
+                : <RentCard key={i} item={item} rank={i + 1} />
+            )
           )}
 
           {/* AI 분석 */}
-          {data.transactions.length > 0 && (
+          {currentItems.length > 0 && (
             <div className="re-ai-section">
               {!aiText && (
                 <button className="re-ai-btn" onClick={analyzeAI} disabled={aiLoading}>
@@ -215,7 +247,7 @@ export default function RealEstate({ user, assets = [], transactions = [] }) {
                 <div className="re-ai-result">
                   <div className="re-ai-result-title">🤖 AI 분석 결과</div>
                   <div className="re-ai-result-body">{aiText}</div>
-                  <button className="re-ai-refresh" onClick={() => { setAiText(null) }}>다시 분석</button>
+                  <button className="re-ai-refresh" onClick={() => setAiText(null)}>다시 분석</button>
                 </div>
               )}
             </div>
@@ -228,7 +260,7 @@ export default function RealEstate({ user, assets = [], transactions = [] }) {
           <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-heading)', marginBottom: 8 }}>지역을 검색해보세요</div>
           <div style={{ fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.6 }}>
-            원하는 지역의 아파트/빌라 실거래가를 확인하고<br/>AI가 우리 부부 재무상황에 맞는지 분석해드려요
+            검색 한 번으로 아파트·빌라의<br/>매매·전세·월세를 한꺼번에 불러와요
           </div>
         </div>
       )}

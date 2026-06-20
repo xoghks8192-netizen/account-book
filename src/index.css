@@ -2929,6 +2929,19 @@ body {
   color: #fff;
   box-shadow: 0 2px 8px var(--active-shadow);
 }
+.re-filter-count {
+  display: inline-block;
+  background: rgba(255,255,255,0.3);
+  border-radius: 99px;
+  font-size: 10px;
+  padding: 0 5px;
+  margin-left: 3px;
+  vertical-align: middle;
+}
+.re-filter-btn:not(.active) .re-filter-count {
+  background: var(--tab-bg);
+  color: var(--text-sub);
+}
 .re-result-header {
   display: flex;
   justify-content: space-between;
