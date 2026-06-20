@@ -1,12 +1,29 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fetchStockPrice } from './api/lib/fetchPrice.js'
+import savingsRatesHandler from './api/savings-rates.js'
 import loginHandler from './api/login.js'
 import changePwHandler from './api/change-pw.js'
 import aiInsightHandler from './api/ai-insight.js'
 import signupHandler from './api/signup.js'
 import updateHouseholdHandler from './api/update-household.js'
 import resetPasswordHandler from './api/reset-password.js'
+
+function getApi(path, handler) {
+  return {
+    name: `get-api-${path}`,
+    configureServer(server) {
+      server.middlewares.use(path, async (req, res) => {
+        res.setHeader('Content-Type', 'application/json')
+        const wrappedRes = {
+          status(code) { res.statusCode = code; return this },
+          json(obj) { res.end(JSON.stringify(obj)) },
+        }
+        await handler(req, wrappedRes)
+      })
+    },
+  }
+}
 
 function stockPriceApi() {
   return {
@@ -77,6 +94,7 @@ export default defineConfig(({ mode }) => {
       jsonApi('/api/signup', signupHandler),
       jsonApi('/api/update-household', updateHouseholdHandler),
       jsonApi('/api/reset-password', resetPasswordHandler),
+      getApi('/api/savings-rates', savingsRatesHandler),
     ],
     server: {
       host: true,

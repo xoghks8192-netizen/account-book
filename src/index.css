@@ -1985,6 +1985,179 @@ body {
   transform: scale(1.1);
 }
 
+/* ── 금리 탭 ── */
+.info-page {
+  padding: 16px;
+}
+.savings-rates {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.savings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.savings-title {
+  font-family: "Jua", sans-serif;
+  font-size: 18px;
+  color: var(--text-heading);
+  margin-bottom: 4px;
+}
+.savings-updated {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.savings-refresh {
+  border: none;
+  background: var(--tab-bg);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.savings-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.savings-tab {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 4px;
+  border: 1.5px solid var(--form-border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.savings-tab.active {
+  background: var(--active-gradient);
+  border-color: transparent;
+  color: #fff;
+}
+.savings-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 0;
+  color: var(--text-sub);
+  font-size: 13px;
+}
+.savings-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--form-border);
+  border-top-color: var(--balance-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.savings-error {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--expense-color);
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+.savings-error button {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 999px;
+  background: var(--tab-bg);
+  color: var(--text-sub);
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+.rate-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--form-border);
+  box-shadow: 0 2px 8px var(--card-shadow);
+}
+.rate-rank {
+  font-family: "Jua", sans-serif;
+  font-size: 18px;
+  color: var(--balance-color);
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.rate-rank:nth-child(1) { color: #f5c518; }
+.rate-info {
+  flex: 1;
+  min-width: 0;
+}
+.rate-bank {
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-bottom: 2px;
+}
+.rate-product {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rate-bar-bg {
+  height: 4px;
+  border-radius: 99px;
+  background: var(--form-border);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.rate-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--active-gradient);
+  transition: width 0.6s ease;
+}
+.rate-meta {
+  font-size: 10px;
+  color: var(--meta-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rate-value {
+  flex-shrink: 0;
+  text-align: right;
+}
+.rate-number {
+  font-family: "Jua", sans-serif;
+  font-size: 22px;
+  color: var(--income-color);
+  font-weight: 700;
+}
+.rate-unit {
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-left: 1px;
+}
+
 .pin-overlay {
   position: fixed;
   inset: 0;
