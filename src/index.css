@@ -3183,6 +3183,131 @@ body {
   white-space: nowrap;
 }
 
+/* 구매력 계산기 */
+.re-afford-wrap {
+  margin-bottom: 12px;
+  border-radius: 14px;
+  border: 1.5px solid var(--input-border);
+  overflow: hidden;
+}
+.re-afford-toggle {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--card-bg);
+  border: none;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-heading);
+  cursor: pointer;
+}
+.re-afford-form {
+  padding: 4px 16px 14px;
+  background: var(--card-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--input-border);
+}
+.re-afford-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.re-afford-row label {
+  font-size: 12px;
+  color: var(--text-sub);
+  white-space: nowrap;
+  min-width: 130px;
+}
+.re-afford-row select,
+.re-afford-row input[type="number"] {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 13px;
+  min-width: 0;
+}
+.re-afford-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.re-afford-input-wrap span {
+  font-size: 12px;
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+.re-afford-input-wrap input,
+.re-afford-input-wrap select {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 13px;
+}
+.re-afford-save {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: var(--active-gradient);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.re-afford-result {
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(102,126,234,0.07), rgba(118,75,162,0.04));
+  border-top: 1px solid var(--input-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.re-afford-result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.re-afford-label {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.re-afford-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+.re-afford-result-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--input-border);
+  margin-top: 2px;
+}
+.re-afford-result-total span:first-child {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+.re-afford-total-val {
+  font-family: "Jua", sans-serif;
+  font-size: 20px;
+  color: var(--balance-color);
+}
+
 /* 내 예산 배너 */
 .re-budget-banner {
   display: flex;
