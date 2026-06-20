@@ -206,9 +206,19 @@ body {
   font-size: 20px;
   color: #fff;
   letter-spacing: 0.5px;
-  flex: 1;
   text-align: center;
   text-shadow: 0 1px 6px rgba(0,0,0,0.15);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.brand-header-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .brand-header-actions {

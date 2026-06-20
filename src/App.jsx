@@ -591,12 +591,14 @@ export default function App() {
   return (
     <div>
       <div className="brand-header">
-        <button className="header-icon-btn" onClick={() => window.location.reload()} title="새로고침">🔄</button>
-        <h1>{user.members.length === 2 ? `${shortName(user.members[0])} ❤️ ${shortName(user.members[1])}` : shortName(user.members[0])}</h1>
-        <div className="brand-header-actions">
+        <div className="brand-header-left">
+          <button className="header-icon-btn" onClick={() => window.location.reload()} title="새로고침">🔄</button>
           <button className="header-icon-btn" onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))} title="테마 변경">
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
+        </div>
+        <h1>{user.members.length === 2 ? `${shortName(user.members[0])} ❤️ ${shortName(user.members[1])}` : shortName(user.members[0])}</h1>
+        <div className="brand-header-actions">
           <button className="header-icon-btn" onClick={() => setShowMoreMenu((prev) => !prev)} title="더보기">
             ☰
           </button>
