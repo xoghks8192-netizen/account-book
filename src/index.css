@@ -2158,6 +2158,131 @@ body {
   margin-left: 1px;
 }
 
+/* ── 금융상품 모드 탭 ── */
+.savings-mode-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  background: var(--tab-bg);
+  border-radius: 14px;
+  padding: 4px;
+}
+.savings-mode-tabs button {
+  flex: 1;
+  padding: 8px 4px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tab-text);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.savings-mode-tabs button.active {
+  background: var(--card-bg);
+  color: var(--balance-color);
+  box-shadow: 0 2px 8px var(--card-shadow);
+}
+
+/* ── 적금 계산기 ── */
+.calc-box {
+  background: var(--card-bg);
+  border: 1px solid var(--form-border);
+  border-radius: 18px;
+  padding: 20px 16px;
+  box-shadow: 0 2px 12px var(--card-shadow);
+}
+.calc-title {
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  color: var(--text-heading);
+  margin-bottom: 16px;
+}
+.calc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+.calc-row label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-sub);
+  flex-shrink: 0;
+  width: 60px;
+}
+.calc-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.calc-input-wrap input,
+.calc-input-wrap select {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1.5px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+.calc-input-wrap input:focus,
+.calc-input-wrap select:focus {
+  border-color: var(--focus-border);
+}
+.calc-unit {
+  font-size: 13px;
+  color: var(--text-sub);
+  flex-shrink: 0;
+}
+.calc-btn {
+  width: 100%;
+  padding: 13px;
+  margin-top: 4px;
+  border: none;
+  border-radius: 12px;
+  background: var(--active-gradient);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: "Jua", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--active-shadow);
+}
+.calc-result {
+  margin-top: 16px;
+  border-top: 1.5px solid var(--form-border);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.calc-result-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--text-main);
+}
+.calc-result-row span:first-child {
+  color: var(--text-sub);
+}
+.calc-result-row.total {
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  color: var(--text-heading);
+  padding-top: 8px;
+  border-top: 1.5px solid var(--form-border);
+}
+.calc-result-row.total span:last-child {
+  color: var(--balance-color);
+}
+
 .pin-overlay {
   position: fixed;
   inset: 0;
