@@ -14,9 +14,10 @@ function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory, onToast }, ref) {
+const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory, onAssetsChange, onToast }, ref) {
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
+  useEffect(() => { onAssetsChange?.(assets) }, [assets])
   const [error, setError] = useState(null)
   const [ownerFilter, setOwnerFilter] = useState('전체')
   const [summaryModal, setSummaryModal] = useState(null)

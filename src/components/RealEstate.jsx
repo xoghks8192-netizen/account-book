@@ -45,7 +45,7 @@ function RentCard({ item, rank }) {
   )
 }
 
-export default function RealEstate({ user, transactions = [] }) {
+export default function RealEstate({ user, transactions = [], assets = [] }) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [selected, setSelected] = useState(null)
@@ -104,7 +104,12 @@ export default function RealEstate({ user, transactions = [] }) {
           deal: dealType,
           type: propType,
           transactions: currentItems,
-          financials: { totalAssets: 0, monthlyIncome, monthlyExpense, emergencyFund: 0 },
+          financials: (() => {
+          const activeAssets = assets.filter(a => !a.deleted_at)
+          const totalAssets = activeAssets.reduce((s, a) => s + Number(a.amount), 0)
+          const emergencyFund = activeAssets.filter(a => a.category === '비상금').reduce((s, a) => s + Number(a.amount), 0)
+          return { totalAssets, monthlyIncome, monthlyExpense, emergencyFund }
+        })(),
         }),
       })
       const json = await res.json()
