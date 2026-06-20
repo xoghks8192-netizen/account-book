@@ -707,7 +707,7 @@ export default function App() {
       >
       {page === 'realestate' ? (
         <div className="info-page">
-          <RealEstate user={user} assets={assets} transactions={transactions} />
+          <RealEstate user={user} transactions={transactions} />
         </div>
       ) : page === 'info' ? (
         <div className="info-page">
