@@ -53,21 +53,6 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (!showMoreMenu) return
-    function handleOutside(e) {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target)) {
-        setShowMoreMenu(false)
-      }
-    }
-    document.addEventListener('mousedown', handleOutside)
-    document.addEventListener('touchstart', handleOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleOutside)
-      document.removeEventListener('touchstart', handleOutside)
-    }
-  }, [showMoreMenu])
-
-  useEffect(() => {
     function handleVisibility() {
       if (document.hidden) {
         hiddenAt.current = Date.now()
@@ -139,6 +124,7 @@ export default function App() {
   const [showMoreMenu, setShowMoreMenu] = useState(false)
   const moreMenuRef = useRef(null)
   const [showMonthPicker, setShowMonthPicker] = useState(false)
+
   const [summaryModal, setSummaryModal] = useState(null)
   const [expandedCategory, setExpandedCategory] = useState(null)
 
@@ -147,6 +133,21 @@ export default function App() {
   }
   const [toast, setToast] = useState('')
   const [formCloseToken, setFormCloseToken] = useState(0)
+
+  useEffect(() => {
+    if (!showMoreMenu) return
+    function handleOutside(e) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target)) {
+        setShowMoreMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleOutside)
+    document.addEventListener('touchstart', handleOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleOutside)
+      document.removeEventListener('touchstart', handleOutside)
+    }
+  }, [showMoreMenu])
 
   function showToast(msg) {
     setToast(msg)
