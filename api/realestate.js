@@ -6,19 +6,15 @@ const ENDPOINTS = {
   'apt-rent':     'RTMSDataSvcAptRent/getRTMSDataSvcAptRent',
   'villa-trade':  'RTMSDataSvcRHTrade/getRTMSDataSvcRHTrade',
   'villa-rent':   'RTMSDataSvcRHRent/getRTMSDataSvcRHRent',
-  'apt-presale':  'RTMSDataSvcSilvTrade/getRTMSDataSvcSilvTrade',
 }
 
-async function fetchItems(endpoint, lawdCd, dealYmd, { silent } = {}) {
+async function fetchItems(endpoint, lawdCd, dealYmd) {
   const url = `${BASE}/${endpoint}?serviceKey=${encodeURIComponent(GOV_KEY)}&LAWD_CD=${lawdCd}&DEAL_YMD=${dealYmd}&numOfRows=1000&pageNo=1&_type=json`
   const res = await fetch(url)
-  if (!res.ok) {
-    if (silent) return []
-    throw new Error(`API ${res.status}`)
-  }
+  if (!res.ok) throw new Error(`API ${res.status}`)
   const text = await res.text()
   let json
-  try { json = JSON.parse(text) } catch { if (silent) return []; throw new Error(`JSON parse fail: ${text.slice(0, 200)}`) }
+  try { json = JSON.parse(text) } catch { throw new Error(`JSON parse fail: ${text.slice(0, 200)}`) }
   const body = json?.response?.body
   const totalCount = body?.totalCount ?? 0
   const items = body?.items?.item
@@ -26,10 +22,10 @@ async function fetchItems(endpoint, lawdCd, dealYmd, { silent } = {}) {
   return Array.isArray(items) ? items : [items]
 }
 
-function recentMonths(n, startFrom = 1) {
+function recentMonths(n) {
   const now = new Date()
   const months = []
-  for (let i = startFrom; i <= startFrom + n - 1; i++) {
+  for (let i = 1; i <= n; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
     months.push(`${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}`)
   }
@@ -62,26 +58,6 @@ function parseTrade(items, propType) {
     .filter((t) => t.price > 0)
 }
 
-function parsePresale(items) {
-  return items
-    .filter((i) => {
-      const cancel = i.해제여부 || ''
-      return cancel.trim() !== 'O'
-    })
-    .map((i) => ({
-      propType: 'apt',
-      dealType: 'presale',
-      name: (i.아파트 || i.단지명 || '').trim(),
-      dong: (i.법정동 || '').trim(),
-      area: parseFloat(i.전용면적 || 0),
-      floor: String(i.층 || '').trim(),
-      price: parsePrice(i.거래금액),
-      builtYear: i.건축년도 || '-',
-      dealYear: i.년,
-      dealMonth: String(i.월 || '').trim(),
-    }))
-    .filter((t) => t.price > 0)
-}
 
 function parseRent(items, propType) {
   return items
@@ -119,17 +95,14 @@ export default async function handler(req, res) {
   const code = url.searchParams.get('code')
   if (!code) return res.status(400).json({ error: 'code required' })
 
-  // 일반 거래: 최근 5개월, 분양권: 최근 12개월 (신축 커버)
-  const months5 = recentMonths(5)
-  const months12 = recentMonths(12)
+  const months = recentMonths(5)
 
   try {
-    const [aptTradeItems, aptRentItems, villaTradeItems, villaRentItems, presaleItems] = await Promise.all([
-      Promise.all(months5.map((ym) => fetchItems(ENDPOINTS['apt-trade'],   code, ym))).then(r => r.flat()),
-      Promise.all(months5.map((ym) => fetchItems(ENDPOINTS['apt-rent'],    code, ym))).then(r => r.flat()),
-      Promise.all(months5.map((ym) => fetchItems(ENDPOINTS['villa-trade'], code, ym))).then(r => r.flat()),
-      Promise.all(months5.map((ym) => fetchItems(ENDPOINTS['villa-rent'],  code, ym))).then(r => r.flat()),
-      Promise.all(months12.map((ym) => fetchItems(ENDPOINTS['apt-presale'], code, ym, { silent: true }))).then(r => r.flat()),
+    const [aptTradeItems, aptRentItems, villaTradeItems, villaRentItems] = await Promise.all([
+      Promise.all(months.map((ym) => fetchItems(ENDPOINTS['apt-trade'],   code, ym))).then(r => r.flat()),
+      Promise.all(months.map((ym) => fetchItems(ENDPOINTS['apt-rent'],    code, ym))).then(r => r.flat()),
+      Promise.all(months.map((ym) => fetchItems(ENDPOINTS['villa-trade'], code, ym))).then(r => r.flat()),
+      Promise.all(months.map((ym) => fetchItems(ENDPOINTS['villa-rent'],  code, ym))).then(r => r.flat()),
     ])
 
     const all = [
@@ -138,7 +111,6 @@ export default async function handler(req, res) {
       ...parseTrade(villaTradeItems, 'villa'),
       ...parseRent(villaRentItems,   'villa'),
     ]
-    const presaleAll = parsePresale(presaleItems)
 
     const result = {
       'apt-trade':     sortByDate(all.filter(t => t.propType === 'apt'   && t.dealType === 'trade'  )).slice(0, 300),
@@ -147,7 +119,6 @@ export default async function handler(req, res) {
       'villa-trade':   sortByDate(all.filter(t => t.propType === 'villa' && t.dealType === 'trade'  )).slice(0, 300),
       'villa-jeonse':  sortByDate(all.filter(t => t.propType === 'villa' && t.dealType === 'jeonse' )).slice(0, 300),
       'villa-monthly': sortByDate(all.filter(t => t.propType === 'villa' && t.dealType === 'monthly')).slice(0, 300),
-      'apt-presale':   sortByDate(presaleAll).slice(0, 300),
       fetchedAt: new Date().toISOString(),
     }
     return res.status(200).json(result)
