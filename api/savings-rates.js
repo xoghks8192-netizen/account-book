@@ -79,9 +79,16 @@ export default async function handler(req, res) {
     ])
 
     const all = [...depositBank, ...depositSaving, ...savingBank, ...savingSaving]
-    const byTerm = (items, term) =>
-      items.filter((p) => p.rate > 0 && String(p.term) === String(term))
-           .sort((a, b) => b.rate - a.rate).slice(0, 50)
+    const byTerm = (items, term) => {
+      const filtered = items.filter((p) => p.rate > 0 && String(p.term) === String(term))
+      // deduplicate by bank+product, keep highest rate
+      const map = new Map()
+      for (const p of filtered) {
+        const key = `${p.bankName}__${p.productName}`
+        if (!map.has(key) || p.rate > map.get(key).rate) map.set(key, p)
+      }
+      return [...map.values()].sort((a, b) => b.rate - a.rate).slice(0, 50)
+    }
 
     const sortLoans = (items) =>
       items.sort((a, b) => a.rateMin - b.rateMin).slice(0, 30)
