@@ -38,37 +38,43 @@ function parsePrice(str) {
 
 function parseTrade(items, propType) {
   return items
-    .filter((i) => !i.해제여부 || i.해제여부.trim() !== 'O')
+    .filter((i) => {
+      const cancel = i.해제여부 || i.cdealType || ''
+      return cancel.trim() !== 'O'
+    })
     .map((i) => ({
       propType,
       dealType: 'trade',
-      name: (i.아파트 || i.연립다세대 || '').trim(),
-      dong: (i.법정동 || '').trim(),
-      area: parseFloat(i.전용면적 || 0),
-      floor: String(i.층 || '').trim(),
-      price: parsePrice(i.거래금액),
-      builtYear: i.건축년도,
-      dealYear: i.년,
-      dealMonth: String(i.월 || '').trim(),
+      name: (i.아파트 || i.aptNm || i.연립다세대 || i.houseNm || i.mhouseNm || '').trim(),
+      dong: (i.법정동 || i.umdNm || '').trim(),
+      area: parseFloat(i.전용면적 || i.excluUseAr || 0),
+      floor: String(i.층 || i.floor || '').trim(),
+      price: parsePrice(i.거래금액 || i.dealAmount),
+      builtYear: i.건축년도 || i.buildYear,
+      dealYear: i.년 || i.dealYear,
+      dealMonth: String(i.월 || i.dealMonth || '').trim(),
     }))
     .filter((t) => t.price > 0)
 }
 
 function parseRent(items, propType) {
   return items
-    .map((i) => ({
-      propType,
-      dealType: parsePrice(i.월세금액) > 0 ? 'monthly' : 'jeonse',
-      name: (i.아파트 || i.연립다세대 || '').trim(),
-      dong: (i.법정동 || '').trim(),
-      area: parseFloat(i.전용면적 || 0),
-      floor: String(i.층 || '').trim(),
-      deposit: parsePrice(i.보증금액),
-      monthly: parsePrice(i.월세금액),
-      builtYear: i.건축년도,
-      dealYear: i.년,
-      dealMonth: String(i.월 || '').trim(),
-    }))
+    .map((i) => {
+      const monthly = parsePrice(i.월세금액 || i.monthlyRent || i.monthlyRnt)
+      return {
+        propType,
+        dealType: monthly > 0 ? 'monthly' : 'jeonse',
+        name: (i.아파트 || i.aptNm || i.연립다세대 || i.houseNm || i.mhouseNm || '').trim(),
+        dong: (i.법정동 || i.umdNm || '').trim(),
+        area: parseFloat(i.전용면적 || i.excluUseAr || 0),
+        floor: String(i.층 || i.floor || '').trim(),
+        deposit: parsePrice(i.보증금액 || i.deposit),
+        monthly,
+        builtYear: i.건축년도 || i.buildYear,
+        dealYear: i.년 || i.dealYear,
+        dealMonth: String(i.월 || i.dealMonth || '').trim(),
+      }
+    })
     .filter((t) => t.deposit > 0)
 }
 
