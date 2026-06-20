@@ -32,8 +32,9 @@ function recentMonths(n) {
   return months
 }
 
-function parsePrice(str) {
-  return parseInt((str || '0').replace(/,/g, '')) || 0
+function parsePrice(val) {
+  if (val == null) return 0
+  return parseInt(String(val).replace(/,/g, '')) || 0
 }
 
 function parseTrade(items, propType) {
