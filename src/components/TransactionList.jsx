@@ -43,6 +43,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
   const [saving, setSaving] = useState(false)
   const [showMore, setShowMore] = useState(false)
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const [collapsedDates, setCollapsedDates] = useState(new Set())
   const itemRefs = useRef({})
 
   useEffect(() => {
@@ -115,6 +116,14 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
     groups[groups.length - 1].items.push(tx)
   })
 
+  function toggleDate(date) {
+    setCollapsedDates((prev) => {
+      const next = new Set(prev)
+      next.has(date) ? next.delete(date) : next.add(date)
+      return next
+    })
+  }
+
   return (
     <>
       {confirmDeleteId && (
@@ -179,10 +188,19 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
         </Modal>
       )}
 
-      {groups.map(({ date, items }) => (
+      {groups.map(({ date, items }) => {
+        const collapsed = collapsedDates.has(date)
+        const dayTotal = items.reduce((s, t) => s + (t.type === 'expense' ? -t.amount : t.amount), 0)
+        return (
         <div key={date}>
-          <div className="tx-date-header">{formatDate(date)}</div>
-          {items.map((tx) => (
+          <div className="tx-date-header" onClick={() => toggleDate(date)} style={{ cursor: 'pointer', userSelect: 'none' }}>
+            <span>{formatDate(date)}</span>
+            <span className="tx-date-meta">
+              <span className={`tx-date-total ${dayTotal >= 0 ? 'pos' : 'neg'}`}>{dayTotal >= 0 ? '+' : ''}{dayTotal.toLocaleString('ko-KR')}원</span>
+              <span className="tx-date-chevron">{collapsed ? '▸' : '▾'}</span>
+            </span>
+          </div>
+          {!collapsed && items.map((tx) => (
             <div
               className={`tx-item${swipedId === tx.id ? ' swiped' : ''}`}
               key={tx.id}
@@ -224,7 +242,8 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
             </div>
           ))}
         </div>
-      ))}
+        )
+      })}
     </>
   )
 }

@@ -170,6 +170,10 @@ body {
   margin: 0;
   font-family: "Gowun Dodum", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   background: var(--bg-gradient);
+  background-image:
+    var(--bg-gradient),
+    radial-gradient(circle, rgba(180,150,255,0.12) 1px, transparent 1px);
+  background-size: auto, 22px 22px;
   color: var(--text-main);
   transition: background 0.2s ease, color 0.2s ease;
 }
@@ -924,6 +928,24 @@ body {
   padding: 10px 4px 4px;
   border-bottom: 1px solid var(--form-border);
   margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tx-date-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tx-date-total {
+  font-size: 11px;
+  font-weight: 700;
+}
+.tx-date-total.pos { color: var(--income-color); }
+.tx-date-total.neg { color: var(--expense-color); }
+.tx-date-chevron {
+  font-size: 11px;
+  color: var(--text-sub);
 }
 
 .tx-item {
