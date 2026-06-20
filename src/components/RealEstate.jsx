@@ -45,7 +45,7 @@ function RentCard({ item, rank, deal }) {
   )
 }
 
-export default function RealEstate({ user, assets, transactions }) {
+export default function RealEstate({ user, assets = [], transactions = [] }) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [selected, setSelected] = useState(null)
@@ -92,13 +92,14 @@ export default function RealEstate({ user, assets, transactions }) {
     setAiLoading(true); setAiText(null)
 
     // 재무 요약 계산
-    const totalAssets = assets?.filter(a => !a.deleted_at).reduce((s, a) => s + Number(a.amount), 0) || 0
+    const activeAssets = (assets || []).filter(a => !a.deleted_at)
+    const totalAssets = activeAssets.reduce((s, a) => s + Number(a.amount), 0)
     const now = new Date()
     const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}`
-    const monthTx = transactions?.filter(t => t.date?.startsWith(thisMonth)) || []
+    const monthTx = (transactions || []).filter(t => t.date?.startsWith(thisMonth))
     const monthlyIncome = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0)
     const monthlyExpense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
-    const emergencyFund = assets?.filter(a => !a.deleted_at && a.category === '비상금').reduce((s, a) => s + Number(a.amount), 0) || 0
+    const emergencyFund = activeAssets.filter(a => a.category === '비상금').reduce((s, a) => s + Number(a.amount), 0)
 
     try {
       const res = await fetch('/api/realestate-ai', {
