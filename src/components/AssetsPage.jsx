@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { useCountUp } from '../hooks/useCountUp'
 import { supabase } from '../lib/supabase'
 import { defaultLiquidity } from '../assetMeta'
 import AssetForm from './AssetForm'
@@ -188,6 +189,11 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
   const liquidTotal = liquidAssets.reduce((s, a) => s + Number(a.amount), 0)
   const nonLiquidTotal = nonLiquidAssets.reduce((s, a) => s + Number(a.amount), 0)
 
+  const animatedTotal = useCountUp(total)
+  const animatedEmergency = useCountUp(emergencyTotal)
+  const animatedLiquid = useCountUp(liquidTotal)
+  const animatedNonLiquid = useCountUp(nonLiquidTotal)
+
   const liquidGrouped = groupByCategory(liquidAssets)
   const nonLiquidGrouped = groupByCategory(nonLiquidAssets)
 
@@ -266,7 +272,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
       <div className="summary">
         <div className="summary-item balance clickable" onClick={() => setSummaryModal('총자산')}>
           <div className="label">총 자산</div>
-          <div className="value">{formatAmount(total)}</div>
+          <div className="value">{formatAmount(animatedTotal)}</div>
           {lastMonthTotal !== null && (
             <div style={{ fontSize: 11, fontWeight: 700, color: householdTotal >= lastMonthTotal ? '#ff5c5c' : '#6cb6ff', marginTop: 2 }}>
               {householdTotal >= lastMonthTotal ? '+' : ''}{formatAmount(householdTotal - lastMonthTotal)}원
@@ -275,18 +281,18 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
         </div>
         <div className="summary-item income clickable" onClick={() => setSummaryModal('비상금')}>
           <div className="label">비상금</div>
-          <div className="value">{formatAmount(emergencyTotal)}</div>
+          <div className="value">{formatAmount(animatedEmergency)}</div>
         </div>
       </div>
 
       <div className="summary">
         <div className="summary-item income clickable" onClick={() => setSummaryModal('유동자산')}>
           <div className="label">유동자산</div>
-          <div className="value">{formatAmount(liquidTotal)}</div>
+          <div className="value">{formatAmount(animatedLiquid)}</div>
         </div>
         <div className="summary-item expense clickable" onClick={() => setSummaryModal('비유동자산')}>
           <div className="label">비유동자산</div>
-          <div className="value">{formatAmount(nonLiquidTotal)}</div>
+          <div className="value">{formatAmount(animatedNonLiquid)}</div>
         </div>
       </div>
 
