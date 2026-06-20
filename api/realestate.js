@@ -9,13 +9,16 @@ const ENDPOINTS = {
   'apt-presale':  'RTMSDataSvcSilvTrade/getRTMSDataSvcSilvTrade',
 }
 
-async function fetchItems(endpoint, lawdCd, dealYmd) {
+async function fetchItems(endpoint, lawdCd, dealYmd, { silent } = {}) {
   const url = `${BASE}/${endpoint}?serviceKey=${encodeURIComponent(GOV_KEY)}&LAWD_CD=${lawdCd}&DEAL_YMD=${dealYmd}&numOfRows=1000&pageNo=1&_type=json`
   const res = await fetch(url)
-  if (!res.ok) throw new Error(`API ${res.status}`)
+  if (!res.ok) {
+    if (silent) return []
+    throw new Error(`API ${res.status}`)
+  }
   const text = await res.text()
   let json
-  try { json = JSON.parse(text) } catch { throw new Error(`JSON parse fail: ${text.slice(0, 200)}`) }
+  try { json = JSON.parse(text) } catch { if (silent) return []; throw new Error(`JSON parse fail: ${text.slice(0, 200)}`) }
   const body = json?.response?.body
   const totalCount = body?.totalCount ?? 0
   const items = body?.items?.item
@@ -126,7 +129,7 @@ export default async function handler(req, res) {
       Promise.all(months5.map((ym) => fetchItems(ENDPOINTS['apt-rent'],    code, ym))).then(r => r.flat()),
       Promise.all(months5.map((ym) => fetchItems(ENDPOINTS['villa-trade'], code, ym))).then(r => r.flat()),
       Promise.all(months5.map((ym) => fetchItems(ENDPOINTS['villa-rent'],  code, ym))).then(r => r.flat()),
-      Promise.all(months12.map((ym) => fetchItems(ENDPOINTS['apt-presale'], code, ym))).then(r => r.flat()),
+      Promise.all(months12.map((ym) => fetchItems(ENDPOINTS['apt-presale'], code, ym, { silent: true }))).then(r => r.flat()),
     ])
 
     const all = [
