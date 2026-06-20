@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
-import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from '../categories'
+import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY, CATEGORY_EMOJI } from '../categories'
 import CategoryManager from './CategoryManager'
 
 function todayStr() {
@@ -90,32 +90,37 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
       </div>
 
       <div className="form-row">
-        <label>카테고리</label>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ flex: 1 }}>
-            {categories[type].map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+        <div className="category-grid-header">
+          <label>카테고리</label>
           <button
             type="button"
             onClick={() => setShowCategoryManager((prev) => !prev)}
             style={{
-              flexShrink: 0,
               border: '1.5px solid #e8e3f7',
-              borderRadius: 12,
+              borderRadius: 10,
               background: showCategoryManager ? '#b896ff' : '#fdeef3',
               color: showCategoryManager ? '#fff' : '#b88a9c',
               fontWeight: 600,
-              fontSize: 13,
-              padding: '0 12px',
+              fontSize: 12,
+              padding: '2px 10px',
               cursor: 'pointer',
             }}
           >
             수정
           </button>
+        </div>
+        <div className="category-icon-grid">
+          {categories[type].map((c) => (
+            <button
+              key={c}
+              type="button"
+              className={`cat-icon-btn${category === c ? ' selected' : ''}`}
+              onClick={() => setCategory(c)}
+            >
+              <span className="cat-icon-emoji">{CATEGORY_EMOJI[c] || '📌'}</span>
+              <span className="cat-icon-label">{c}</span>
+            </button>
+          ))}
         </div>
         {showCategoryManager && (
           <CategoryManager

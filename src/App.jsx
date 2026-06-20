@@ -121,6 +121,7 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'light')
   const [colorTheme, setColorTheme] = useState(() => localStorage.getItem(COLOR_KEY) || 'purple')
   const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [showMonthPicker, setShowMonthPicker] = useState(false)
   const [summaryModal, setSummaryModal] = useState(null)
   const [expandedCategory, setExpandedCategory] = useState(null)
 
@@ -698,12 +699,34 @@ export default function App() {
         <div className={`month-content${monthSlideDir ? ` slide-${monthSlideDir}` : ''}`}>
           <div className="month-nav">
             <button className="month-nav-arrow" onClick={() => changeMonth(-1)}>‹</button>
-            <div className="month-nav-pill">
+            <button className="month-nav-pill" onClick={() => setShowMonthPicker((p) => !p)}>
               <span className="month-nav-month">{cursor.month + 1}월</span>
               <span className="month-nav-year">{cursor.year}</span>
-            </div>
+            </button>
             <button className="month-nav-arrow" onClick={() => changeMonth(1)}>›</button>
           </div>
+          {showMonthPicker && (
+            <div className="month-picker-overlay" onClick={() => setShowMonthPicker(false)}>
+              <div className="month-picker" onClick={(e) => e.stopPropagation()}>
+                <div className="month-picker-year-row">
+                  <button onClick={() => setCursor((c) => ({ ...c, year: c.year - 1 }))}>‹</button>
+                  <span>{cursor.year}년</span>
+                  <button onClick={() => setCursor((c) => ({ ...c, year: c.year + 1 }))}>›</button>
+                </div>
+                <div className="month-picker-grid">
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <button
+                      key={i}
+                      className={`month-picker-cell${cursor.month === i ? ' selected' : ''}`}
+                      onClick={() => { setCursor((c) => ({ ...c, month: i })); setShowMonthPicker(false) }}
+                    >
+                      {i + 1}월
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="owner-tabs">
             {['전체', ...owners].map((o) => (

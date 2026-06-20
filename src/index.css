@@ -447,6 +447,10 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 
 .month-nav-month {
@@ -923,9 +927,9 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  border-radius: 14px;
+  padding: 9px 12px;
+  margin-bottom: 5px;
+  border-radius: 12px;
   background: var(--card-bg);
 }
 
@@ -1093,13 +1097,13 @@ body {
 }
 
 .tx-info .category {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-heading);
 }
 
 .tx-info .meta {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--meta-text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1747,6 +1751,117 @@ body {
   justify-content: center;
   font-size: 14px;
   flex-shrink: 0;
+}
+
+/* ── 카테고리 아이콘 그리드 ── */
+.category-grid-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.category-grid-header label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+.category-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.cat-icon-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: var(--card-bg);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cat-icon-btn.selected {
+  border-color: var(--focus-border);
+  background: var(--hover-bg);
+}
+.cat-icon-emoji {
+  font-size: 22px;
+  line-height: 1;
+}
+.cat-icon-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-sub);
+  text-align: center;
+  word-break: keep-all;
+}
+.cat-icon-btn.selected .cat-icon-label {
+  color: var(--balance-color);
+}
+
+/* ── 월 피커 ── */
+.month-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 300;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 120px;
+}
+.month-picker {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 20px;
+  width: 280px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.month-picker-year-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.month-picker-year-row span {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-heading);
+}
+.month-picker-year-row button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: var(--text-sub);
+  cursor: pointer;
+  padding: 0 8px;
+  line-height: 1;
+}
+.month-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.month-picker-cell {
+  padding: 10px 0;
+  border: none;
+  border-radius: 12px;
+  background: var(--form-bg);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.month-picker-cell.selected {
+  background: var(--active-gradient);
+  color: #fff;
+}
+.month-picker-cell:hover:not(.selected) {
+  background: var(--hover-bg);
 }
 
 .more-menu-color-section {
