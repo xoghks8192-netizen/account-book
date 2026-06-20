@@ -119,17 +119,6 @@ export default async function handler(req, res) {
       'villa-jeonse':  sortByDate(all.filter(t => t.propType === 'villa' && t.dealType === 'jeonse' )).slice(0, 60),
       'villa-monthly': sortByDate(all.filter(t => t.propType === 'villa' && t.dealType === 'monthly')).slice(0, 60),
       fetchedAt: new Date().toISOString(),
-      _debug: {
-        rawCounts: {
-          aptTrade: aptTradeItems.length,
-          aptRent: aptRentItems.length,
-          villaTrade: villaTradeItems.length,
-          villaRent: villaRentItems.length,
-        },
-        parsedTotal: all.length,
-        months,
-        code,
-      },
     }
     return res.status(200).json(result)
   } catch (e) {
