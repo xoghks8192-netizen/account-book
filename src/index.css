@@ -2362,6 +2362,72 @@ body {
   white-space: pre-wrap;
 }
 
+/* Favorites */
+.fav-section {
+  margin-bottom: 12px;
+}
+.fav-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 6px;
+  padding-left: 2px;
+}
+.rate-card.fav {
+  border-left: 3px solid #f5c518;
+}
+.rate-fav-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.rate-fav-btn.modal {
+  font-size: 22px;
+}
+
+/* Rate diff badge */
+.rate-diff {
+  font-size: 11px;
+  font-weight: 700;
+  display: block;
+  text-align: right;
+}
+.rate-diff.up { color: var(--income-color); }
+.rate-diff.down { color: var(--expense-color); }
+
+/* Rate change alerts */
+.rate-alerts {
+  background: linear-gradient(135deg, rgba(255,200,0,0.12), rgba(255,160,0,0.07));
+  border: 1px solid rgba(255,190,0,0.3);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.rate-alerts-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: 6px;
+}
+.rate-alert-item {
+  font-size: 12px;
+  color: var(--text-main);
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,190,0,0.15);
+}
+.rate-alert-item:last-child { border-bottom: none; }
+
+/* Calc note */
+.calc-note {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-bottom: 14px;
+  margin-top: -8px;
+}
+
 /* Calculator preset badge */
 .calc-preset-badge {
   background: var(--bg-root);
