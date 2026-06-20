@@ -992,10 +992,12 @@ export default function App() {
         <button className={page === 'transactions' ? 'active' : ''} onClick={() => navigateTo('transactions')}>
           <span className="tab-icon">📋</span>
           <span className="tab-label">내역</span>
+          {page === 'transactions' && <span className="tab-pill" />}
         </button>
         <button className={page === 'assets' ? 'active' : ''} onClick={() => navigateTo('assets')}>
           <span className="tab-icon">💰</span>
           <span className="tab-label">자산</span>
+          {page === 'assets' && <span className="tab-pill" />}
         </button>
       </div>
 
