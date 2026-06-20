@@ -3065,3 +3065,104 @@ body {
   text-align: center;
   padding: 48px 16px;
 }
+
+/* 즐겨찾기 칩 */
+.re-favs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.re-fav-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid var(--input-border);
+  background: var(--card-bg);
+  color: var(--text-sub);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.re-fav-chip.active {
+  background: var(--active-gradient);
+  color: #fff;
+  border-color: transparent;
+}
+.re-fav-btn {
+  padding: 0 12px;
+  background: none;
+  border: 1.5px solid var(--input-border);
+  border-radius: 10px;
+  font-size: 18px;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-right: 4px;
+}
+.re-fav-btn.active { color: #f5a623; border-color: #f5a623; }
+
+/* 가격 요약 배너 */
+.re-summary {
+  display: flex;
+  align-items: center;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 12px 0;
+  margin-bottom: 8px;
+}
+.re-summary-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.re-summary-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--input-border);
+}
+.re-summary-label {
+  font-size: 10px;
+  color: var(--text-sub);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.re-summary-val {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+}
+.re-summary-val.avg { color: var(--balance-color); }
+.re-summary-val.low { color: var(--income-color); }
+.re-summary-val.high { color: var(--expense-color); }
+
+/* 평수·정렬 서브 필터 */
+.re-sub-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.re-sub-filter-row {
+  display: flex;
+  gap: 6px;
+}
+.re-sub-btn {
+  flex: 1;
+  padding: 6px 0;
+  border-radius: 8px;
+  border: 1.5px solid var(--input-border);
+  background: var(--card-bg);
+  color: var(--text-sub);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.re-sub-btn.active {
+  background: var(--active-gradient);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 2px 8px var(--active-shadow);
+}
