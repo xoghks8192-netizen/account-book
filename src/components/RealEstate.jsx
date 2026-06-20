@@ -109,12 +109,14 @@ function AptDetailModal({ name, items, dealType, onClose }) {
   )
 }
 
-function TradeCard({ item, onClick }) {
+function TradeCard({ item, onClick, totalAssets }) {
   const perPy = pricePerPy(item.price, item.area)
+  const affordable = totalAssets > 0 && item.price <= totalAssets
+  const tooExpensive = totalAssets > 0 && item.price > totalAssets
   return (
-    <div className="re-card" onClick={onClick} style={{ cursor: 'pointer' }}>
+    <div className={`re-card${affordable ? ' re-card-ok' : tooExpensive ? ' re-card-over' : ''}`} onClick={onClick} style={{ cursor: 'pointer' }}>
       <div className="re-info">
-        <div className="re-name">{item.name || '(이름없음)'}</div>
+        <div className="re-name">{item.name || '(이름없음)'}{affordable && <span className="re-budget-badge">✓ 가능</span>}</div>
         <div className="re-meta">{item.dong} · {toPy(item.area)}평({item.area}㎡) · {item.floor}층 · {item.builtYear}년</div>
         <div className="re-date">{item.dealYear}.{String(item.dealMonth).padStart(2,'0')} 거래</div>
       </div>
@@ -126,11 +128,13 @@ function TradeCard({ item, onClick }) {
   )
 }
 
-function RentCard({ item, onClick }) {
+function RentCard({ item, onClick, totalAssets }) {
+  const affordable = totalAssets > 0 && item.deposit <= totalAssets
+  const tooExpensive = totalAssets > 0 && item.deposit > totalAssets
   return (
-    <div className="re-card" onClick={onClick} style={{ cursor: 'pointer' }}>
+    <div className={`re-card${affordable ? ' re-card-ok' : tooExpensive ? ' re-card-over' : ''}`} onClick={onClick} style={{ cursor: 'pointer' }}>
       <div className="re-info">
-        <div className="re-name">{item.name || '(이름없음)'}</div>
+        <div className="re-name">{item.name || '(이름없음)'}{affordable && <span className="re-budget-badge">✓ 가능</span>}</div>
         <div className="re-meta">{item.dong} · {toPy(item.area)}평({item.area}㎡) · {item.floor}층 · {item.builtYear}년</div>
         <div className="re-date">{item.dealYear}.{String(item.dealMonth).padStart(2,'0')} 거래</div>
       </div>
@@ -270,6 +274,11 @@ export default function RealEstate({ user, transactions = [], assets = [] }) {
     ? Object.values(data).filter(v => Array.isArray(v)).reduce((s, arr) => s + arr.length, 0)
     : 0
 
+  const totalAssets = assets.filter(a => !a.deleted_at).reduce((s, a) => s + Number(a.amount), 0)
+  const affordableCount = totalAssets > 0
+    ? displayItems.filter(i => (dealType === 'trade' ? i.price : i.deposit) <= totalAssets).length
+    : 0
+
   return (
     <div className="re-wrap">
       <div className="re-header">
@@ -367,6 +376,18 @@ export default function RealEstate({ user, transactions = [], assets = [] }) {
             <span className="re-result-sub">최근 5개월 실거래 (전체 {totalCount}건)</span>
           </div>
 
+          {/* 내 예산 안내 */}
+          {totalAssets > 0 && (
+            <div className="re-budget-banner">
+              <span className="re-budget-banner-text">
+                💰 내 총자산 {formatManwon(totalAssets)} 기준
+              </span>
+              <span className="re-budget-banner-count">
+                {affordableCount}건 가능 · {displayItems.length - affordableCount}건 초과
+              </span>
+            </div>
+          )}
+
           {/* 평균/최저/최고 요약 */}
           <PriceSummary items={filtered} dealType={dealType} />
 
@@ -422,8 +443,8 @@ export default function RealEstate({ user, transactions = [], assets = [] }) {
           ) : (
             displayItems.map((item, i) =>
               item.dealType === 'trade'
-                ? <TradeCard key={i} item={item} onClick={() => openAptModal(item.name)} />
-                : <RentCard key={i} item={item} onClick={() => openAptModal(item.name)} />
+                ? <TradeCard key={i} item={item} onClick={() => openAptModal(item.name)} totalAssets={totalAssets} />
+                : <RentCard key={i} item={item} onClick={() => openAptModal(item.name)} totalAssets={totalAssets} />
             )
           )}
 

@@ -3183,6 +3183,47 @@ body {
   white-space: nowrap;
 }
 
+/* 내 예산 배너 */
+.re-budget-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(90,168,239,0.12), rgba(139,108,240,0.08));
+  border: 1.5px solid rgba(139,108,240,0.2);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+.re-budget-banner-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+.re-budget-banner-count {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+/* 예산 가능/초과 카드 */
+.re-card-ok {
+  border: 2px solid #4caf7d;
+  background: linear-gradient(135deg, rgba(76,175,125,0.06), rgba(76,175,125,0.02));
+}
+.re-card-over {
+  opacity: 0.45;
+}
+.re-budget-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: #4caf7d;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
 /* 단지명 검색 인풋 */
 .re-name-search {
   width: 100%;
