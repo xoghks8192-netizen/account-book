@@ -1002,7 +1002,12 @@ export default function App() {
       </div>
 
       {!isOnline && <div className="offline-banner">📡 오프라인 상태예요 — 데이터가 저장되지 않을 수 있어요</div>}
-      {toast && <div className="toast">{toast}</div>}
+      {toast && (
+        <div className="toast">
+          <span className="toast-bar" />
+          <span className="toast-text">{toast}</span>
+        </div>
+      )}
     </div>
   )
 }
