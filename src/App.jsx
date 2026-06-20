@@ -95,6 +95,7 @@ export default function App() {
   const [transactions, setTransactions] = useState([])
   const [prevTransactions, setPrevTransactions] = useState([])
   const [lastAddedTxId, setLastAddedTxId] = useState(null)
+  const [sharedAssets, setSharedAssets] = useState([])
   const [showPinSetup, setShowPinSetup] = useState(false)
   const [hasPin, setHasPin] = useState(!!localStorage.getItem('app_pin'))
   const [loading, setLoading] = useState(true)
@@ -161,6 +162,11 @@ export default function App() {
   }
 
   const householdId = user?.householdId
+  useEffect(() => {
+    if (!householdId) return
+    supabase.from('assets').select('*').eq('household_id', householdId)
+      .then(({ data }) => { if (data) setSharedAssets(data) })
+  }, [householdId])
   const myName = user?.displayName
   const owners = [...(user?.members ?? []), '공동']
   const rawCategories = { ...DEFAULT_CATEGORIES, ...(user?.categories ?? {}) }
@@ -707,7 +713,7 @@ export default function App() {
       >
       {page === 'realestate' ? (
         <div className="info-page">
-          <RealEstate user={user} transactions={transactions} />
+          <RealEstate user={user} transactions={transactions} assets={sharedAssets} />
         </div>
       ) : page === 'info' ? (
         <div className="info-page">
@@ -722,6 +728,7 @@ export default function App() {
           onAddCategory={(name) => handleAddCategory('asset', name)}
           onRemoveCategory={(name) => handleRemoveCategory('asset', name)}
           onMoveCategory={(name, direction) => handleMoveCategory('asset', name, direction)}
+          onAssetsChange={setSharedAssets}
           onToast={showToast}
         />
       ) : (
