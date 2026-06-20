@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { DEFAULT_CATEGORIES } from '../categories'
+import { DEFAULT_CATEGORIES, CATEGORY_EMOJI } from '../categories'
 import CategorySelect from './CategorySelect'
 import Modal from './Modal'
 import ConfirmDialog from './ConfirmDialog'
@@ -197,7 +197,10 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
             >
               <div className="tx-inner">
                 <div className="tx-info">
-                  <span className="category"><Highlight text={tx.category} query={search} /></span>
+                  <span className="category">
+                    {CATEGORY_EMOJI[tx.category] && <span className="cat-emoji">{CATEGORY_EMOJI[tx.category]}</span>}
+                    <Highlight text={tx.category} query={search} />
+                  </span>
                   <span className="meta">
                     {tx.owner ? tx.owner : ''}
                     {tx.memo ? <>{tx.owner ? ' · ' : ''}<Highlight text={tx.memo} query={search} /></> : ''}
