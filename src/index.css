@@ -1,6 +1,6 @@
 :root {
   --bg-gradient: linear-gradient(135deg, #eef1ff 0%, #f4eeff 45%, #eaf5ff 100%);
-  --bg-root: #ffffff;
+  --bg-root: linear-gradient(180deg, #f0ebff 0%, #f8f5ff 40%, #eef3ff 100%);
   --shadow-root: rgba(150, 140, 220, 0.18);
   --text-main: #5c5570;
   --text-heading: #4d4570;
@@ -14,7 +14,7 @@
   --tab-text: #9b8fc0;
   --active-gradient: linear-gradient(135deg, #93b4ff, #b88bf5);
   --active-shadow: rgba(139, 108, 240, 0.35);
-  --card-bg: rgba(255,255,255,0.72);
+  --card-bg: rgba(255,255,255,0.65);
   --card-shadow: rgba(150, 140, 220, 0.1);
   --label-text: #a89cc4;
   --income-color: #5aa8ef;
@@ -39,7 +39,7 @@
 
 [data-theme="dark"] {
   --bg-gradient: linear-gradient(135deg, #1a1825 0%, #1f1b2e 45%, #181c28 100%);
-  --bg-root: #181c28;
+  --bg-root: linear-gradient(180deg, #1e1830 0%, #181c28 50%, #1a2030 100%);
   --shadow-root: rgba(0, 0, 0, 0.5);
   --text-main: #d8d3e8;
   --text-heading: #f0ecff;
@@ -179,43 +179,40 @@ body {
   margin: 0 auto;
   min-height: 100vh;
   padding-bottom: calc(72px + env(safe-area-inset-bottom));
-  background-color: var(--bg-root);
+  background: var(--bg-root);
   box-shadow: 0 0 30px var(--shadow-root);
-  transition: background 0.2s ease;
+  transition: background 0.3s ease;
   position: relative;
-  isolation: isolate;
 }
 #root::before {
   content: '';
-  position: fixed;
-  top: -120px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 340px;
-  height: 340px;
+  position: absolute;
+  top: -60px;
+  left: -60px;
+  width: 320px;
+  height: 320px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(184,139,245,0.18) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(184,139,245,0.35) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
 #root::after {
   content: '';
-  position: fixed;
-  bottom: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 280px;
-  height: 280px;
+  position: absolute;
+  top: 200px;
+  right: -80px;
+  width: 260px;
+  height: 260px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(147,180,255,0.14) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(147,180,255,0.28) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
 [data-theme="dark"] #root::before {
-  background: radial-gradient(circle, rgba(140,90,220,0.22) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(140,90,220,0.3) 0%, transparent 70%);
 }
 [data-theme="dark"] #root::after {
-  background: radial-gradient(circle, rgba(80,120,220,0.18) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(80,120,220,0.25) 0%, transparent 70%);
 }
 
 .container {
