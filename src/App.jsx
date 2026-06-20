@@ -808,9 +808,9 @@ export default function App() {
             )
           })()}
 
-          <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} />
-
           <ExpenseChart transactions={ownedTransactions} />
+
+          <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} />
 
           <Collapsible title="전월 대비">
             <MonthComparison

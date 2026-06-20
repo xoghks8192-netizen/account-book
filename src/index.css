@@ -170,10 +170,6 @@ body {
   margin: 0;
   font-family: "Gowun Dodum", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   background: var(--bg-gradient);
-  background-image:
-    var(--bg-gradient),
-    radial-gradient(circle, rgba(180,150,255,0.12) 1px, transparent 1px);
-  background-size: auto, 22px 22px;
   color: var(--text-main);
   transition: background 0.2s ease, color 0.2s ease;
 }
@@ -183,9 +179,14 @@ body {
   margin: 0 auto;
   min-height: 100vh;
   padding-bottom: calc(72px + env(safe-area-inset-bottom));
-  background: var(--bg-root);
+  background-color: var(--bg-root);
+  background-image: radial-gradient(circle, rgba(180,150,255,0.18) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
   box-shadow: 0 0 30px var(--shadow-root);
   transition: background 0.2s ease;
+}
+[data-theme="dark"] #root {
+  background-image: radial-gradient(circle, rgba(120,90,200,0.15) 1.5px, transparent 1.5px);
 }
 
 .container {
