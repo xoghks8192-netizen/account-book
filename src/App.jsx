@@ -769,7 +769,14 @@ export default function App() {
           {error && <div className="container" style={{ color: '#e0524c' }}>오류: {error}</div>}
 
           {loading ? (
-            <div className="container">불러오는 중...</div>
+            <div className="skeleton-list">
+              {[1,2,3,4,5].map((i) => (
+                <div key={i} className="skeleton-item">
+                  <div className="skeleton-line short" />
+                  <div className="skeleton-line long" />
+                </div>
+              ))}
+            </div>
           ) : (
             <Collapsible
               title="내역"

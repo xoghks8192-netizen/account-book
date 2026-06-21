@@ -152,17 +152,48 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
     const swapIdx = direction === 'up' ? idx - 1 : idx + 1
     const newIds = [...ids]
     ;[newIds[idx], newIds[swapIdx]] = [newIds[swapIdx], newIds[idx]]
-    const allIds = assets.filter((a) => !a.deleted_at).map((a) => a.id)
-    const orderMap = new Map(assetOrder.map((id, i) => [id, i]))
-    // Rebuild full order: replace positions for this group
-    const newOrder = allIds.map((aid) => {
-      const groupPos = newIds.indexOf(aid)
-      return groupPos !== -1 ? aid : aid
-    })
-    // Just store the group's new order, merged with existing
     const merged = [...assetOrder.filter((oid) => !ids.includes(oid)), ...newIds]
     setAssetOrder(merged)
     localStorage.setItem(`asset_order_${householdId}`, JSON.stringify(merged))
+  }
+
+  function saveGroupOrder(newIds) {
+    const merged = [...assetOrder.filter((oid) => !newIds.includes(oid)), ...newIds]
+    setAssetOrder(merged)
+    localStorage.setItem(`asset_order_${householdId}`, JSON.stringify(merged))
+  }
+
+  const dragState = useRef({ id: null, startY: 0, currentIdx: 0, items: [] })
+  const [dragId, setDragId] = useState(null)
+
+  function handleDragStart(e, asset, sorted) {
+    const touch = e.touches[0]
+    dragState.current = { id: asset.id, startY: touch.clientY, currentIdx: sorted.findIndex((a) => a.id === asset.id), items: sorted.map((a) => a.id) }
+    setDragId(asset.id)
+  }
+
+  function handleDragMove(e) {
+    if (!dragState.current.id) return
+    e.preventDefault()
+    const touch = e.touches[0]
+    const dy = touch.clientY - dragState.current.startY
+    const step = Math.round(dy / 56)
+    const { currentIdx, items } = dragState.current
+    const origIdx = items.indexOf(dragState.current.id)
+    const newIdx = Math.max(0, Math.min(items.length - 1, origIdx + step))
+    if (newIdx !== currentIdx) {
+      const newItems = [...items]
+      newItems.splice(origIdx, 1)
+      newItems.splice(newIdx, 0, dragState.current.id)
+      dragState.current = { ...dragState.current, items: newItems, currentIdx: newIdx }
+    }
+  }
+
+  function handleDragEnd() {
+    if (!dragState.current.id) return
+    saveGroupOrder(dragState.current.items)
+    dragState.current = { id: null, startY: 0, currentIdx: 0, items: [] }
+    setDragId(null)
   }
 
   function sortByOrder(items) {
@@ -365,12 +396,14 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
                     <h3>
                       {category} · {formatAmount(items.reduce((s, a) => s + Number(a.amount), 0))}원
                     </h3>
-                    {sorted.map((asset, idx) => reordering ? (
-                      <div key={asset.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
-                          <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'up', sorted)} disabled={idx === 0}>▲</button>
-                          <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'down', sorted)} disabled={idx === sorted.length - 1}>▼</button>
-                        </div>
+                    {sorted.map((asset) => reordering ? (
+                      <div key={asset.id} className={`drag-row${dragId === asset.id ? ' dragging' : ''}`}>
+                        <span
+                          className="drag-handle"
+                          onTouchStart={(e) => handleDragStart(e, asset, sorted)}
+                          onTouchMove={handleDragMove}
+                          onTouchEnd={handleDragEnd}
+                        >☰</span>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <AssetItem asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
                         </div>
@@ -393,12 +426,14 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
                     <h3>
                       {category} · {formatAmount(items.reduce((s, a) => s + Number(a.amount), 0))}원
                     </h3>
-                    {sorted.map((asset, idx) => reordering ? (
-                      <div key={asset.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
-                          <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'up', sorted)} disabled={idx === 0}>▲</button>
-                          <button className="reorder-btn" onClick={() => moveAsset(asset.id, 'down', sorted)} disabled={idx === sorted.length - 1}>▼</button>
-                        </div>
+                    {sorted.map((asset) => reordering ? (
+                      <div key={asset.id} className={`drag-row${dragId === asset.id ? ' dragging' : ''}`}>
+                        <span
+                          className="drag-handle"
+                          onTouchStart={(e) => handleDragStart(e, asset, sorted)}
+                          onTouchMove={handleDragMove}
+                          onTouchEnd={handleDragEnd}
+                        >☰</span>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <AssetItem asset={asset} owners={owners} onUpdate={handleUpdate} onDelete={handleDelete} />
                         </div>

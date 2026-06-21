@@ -1179,6 +1179,25 @@ body {
   cursor: default;
 }
 
+.drag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.15s;
+}
+.drag-row.dragging {
+  opacity: 0.5;
+}
+.drag-handle {
+  font-size: 18px;
+  color: var(--text-sub);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  padding: 8px 4px;
+  flex-shrink: 0;
+}
+
 .swipe-hint {
   display: flex;
   flex-direction: column;
@@ -1863,6 +1882,32 @@ body {
 
 .summary-item.clickable {
   cursor: pointer;
+}
+
+.skeleton-list {
+  padding: 0 16px;
+}
+.skeleton-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 8px;
+  border-radius: 16px;
+  background: var(--form-bg);
+  border: 1px solid var(--form-border);
+}
+.skeleton-line {
+  height: 14px;
+  border-radius: 8px;
+  background: var(--form-border);
+  animation: shimmer 1.2s ease-in-out infinite alternate;
+}
+.skeleton-line.short { width: 30%; }
+.skeleton-line.long { flex: 1; }
+@keyframes shimmer {
+  from { opacity: 0.4; }
+  to { opacity: 0.8; }
 }
 
 .summary-diff {
