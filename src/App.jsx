@@ -153,6 +153,7 @@ export default function App() {
 
   function showToast(msg) {
     setToast(msg)
+    navigator.vibrate?.(40)
     setTimeout(() => setToast(''), 2500)
   }
 
@@ -497,8 +498,8 @@ export default function App() {
         </div>
         <h1>{user.members.length === 2 ? `${shortName(user.members[0])} ❤️ ${shortName(user.members[1])}` : shortName(user.members[0])}</h1>
         <div className="brand-header-actions">
-          <button className="header-icon-btn" onClick={() => setShowMoreMenu((prev) => !prev)} title="더보기">
-            ☰
+          <button className="header-icon-btn" onClick={() => setShowMoreMenu((prev) => !prev)} title="설정">
+            ⚙️
           </button>
         </div>
         {showMoreMenu && (
