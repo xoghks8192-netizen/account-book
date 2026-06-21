@@ -320,7 +320,19 @@ function AiResultBody({ text }) {
   const paragraphs = text.split(/\n+/).filter(Boolean)
   return (
     <div className="re-ai-result-body">
-      {paragraphs.map((p, i) => <p key={i} style={{ margin: '0 0 8px' }}>{p}</p>)}
+      {paragraphs.map((p, i) => {
+        // **볼드** 파싱
+        const parts = p.split(/(\*\*[^*]+\*\*)/)
+        return (
+          <p key={i} style={{ margin: '0 0 10px' }}>
+            {parts.map((part, j) =>
+              part.startsWith('**') && part.endsWith('**')
+                ? <strong key={j}>{part.slice(2, -2)}</strong>
+                : part
+            )}
+          </p>
+        )
+      })}
     </div>
   )
 }
@@ -408,6 +420,7 @@ export default function RealEstate({ user, transactions = [], assets = [] }) {
           regionName: selected.name, deal: dealType, type: propType,
           transactions: displayItems,
           financials: { totalAssets, monthlyIncome, monthlyExpense, emergencyFund },
+          profile,
         }),
       })
       const json = await res.json()
@@ -561,6 +574,28 @@ export default function RealEstate({ user, transactions = [], assets = [] }) {
                     onClick={() => setSortBy(s.id)}>{s.label}</button>
                 ))}
               </div>
+
+              {/* AI 버튼 — 정렬 필터 바로 아래 */}
+              <div className="re-ai-section" style={{ marginTop: 10 }}>
+                {!aiText && (
+                  <button className="re-ai-btn" onClick={analyzeAI} disabled={aiLoading}>
+                    {aiLoading ? '🤖 AI 분석 중...' : '🤖 내 상황에서 AI 분석하기'}
+                  </button>
+                )}
+                {aiLoading && (
+                  <div className="savings-loading" style={{ padding: '12px 0' }}>
+                    <div className="savings-spinner" />
+                    <span>AI가 재무 상황을 분석하고 있어요...</span>
+                  </div>
+                )}
+                {aiText && (
+                  <div className="re-ai-result">
+                    <div className="re-ai-result-title">🤖 AI 분석 결과</div>
+                    <AiResultBody text={aiText} />
+                    <button className="re-ai-refresh" onClick={() => setAiText(null)}>다시 분석</button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -578,28 +613,6 @@ export default function RealEstate({ user, transactions = [], assets = [] }) {
             )
           )}
 
-          {displayItems.length > 0 && (
-            <div className="re-ai-section">
-              {!aiText && (
-                <button className="re-ai-btn" onClick={analyzeAI} disabled={aiLoading}>
-                  {aiLoading ? '🤖 AI 분석 중...' : '🤖 내 상황에서 AI 분석하기'}
-                </button>
-              )}
-              {aiLoading && (
-                <div className="savings-loading" style={{ padding: '16px 0' }}>
-                  <div className="savings-spinner" />
-                  <span>AI가 재무 상황을 분석하고 있어요...</span>
-                </div>
-              )}
-              {aiText && (
-                <div className="re-ai-result">
-                  <div className="re-ai-result-title">🤖 AI 분석 결과</div>
-                  <AiResultBody text={aiText} />
-                  <button className="re-ai-refresh" onClick={() => setAiText(null)}>다시 분석</button>
-                </div>
-              )}
-            </div>
-          )}
         </>
       )}
 
