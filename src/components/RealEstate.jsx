@@ -117,24 +117,15 @@ function PriceSummary({ items, dealType }) {
 // 구매력 계산기 패널
 function AffordabilityPanel({ assets, profile, onProfileChange }) {
   const [open, setOpen] = useState(false)
-  const [local, setLocal] = useState(profile)
 
-  function set(key, val) { setLocal(p => ({ ...p, [key]: val })) }
-
-  function save() {
-    onProfileChange(local)
-    setOpen(false)
-  }
+  function set(key, val) { onProfileChange(p => ({ ...p, [key]: val })) }
 
   const activeAssets = assets.filter(a => !a.deleted_at)
   const totalWon = activeAssets.reduce((s, a) => s + Number(a.amount), 0)
   const emergencyWon = activeAssets.filter(a => a.category === '비상금').reduce((s, a) => s + Number(a.amount), 0)
-
-  // 월 저축액 추정 (총자산 기준 단순 계산은 어려우므로 소득-지출로)
   const equityNow = wonToManwon(totalWon - emergencyWon)
-  const monthlySaving = profile.monthlyIncome - (profile.monthlyIncome * 0.6) // 대략 소득의 40%
-  const equityFuture = equityNow + Math.max(0, Math.floor(monthlySaving * profile.targetMonths))
-
+  const monthlySavingEst = Math.max(0, profile.monthlyIncome - profile.existingLoan - Math.floor(profile.monthlyIncome * 0.5))
+  const equityFuture = equityNow + Math.floor(monthlySavingEst * profile.targetMonths)
   const equity = profile.targetMonths > 0 ? equityFuture : equityNow
   const ltv = getLTV(profile.hasHome, profile.isFirstBuyer, profile.zone)
   const maxLoan = calcMaxLoan(profile.monthlyIncome, profile.existingLoan)
@@ -150,29 +141,30 @@ function AffordabilityPanel({ assets, profile, onProfileChange }) {
         <div className="re-afford-form">
           <div className="re-afford-row">
             <label>직업</label>
-            <select value={local.job} onChange={e => set('job', e.target.value)}>
+            <select value={profile.job} onChange={e => set('job', e.target.value)}>
               {['직장인','공무원','자영업자','기타'].map(v => <option key={v}>{v}</option>)}
             </select>
           </div>
           <div className="re-afford-row">
             <label>부부 합산 월소득</label>
             <div className="re-afford-input-wrap">
-              <input type="number" value={local.monthlyIncome} onChange={e => set('monthlyIncome', Number(e.target.value))} />
+              <input type="number" value={profile.monthlyIncome || ''} placeholder="0"
+                onChange={e => set('monthlyIncome', Number(e.target.value))} />
               <span>만원</span>
             </div>
           </div>
           <div className="re-afford-row">
             <label>주택 소유</label>
-            <select value={local.hasHome} onChange={e => set('hasHome', e.target.value)}>
+            <select value={profile.hasHome} onChange={e => set('hasHome', e.target.value)}>
               <option value="none">무주택</option>
               <option value="one">1주택</option>
               <option value="two">2주택 이상</option>
             </select>
           </div>
-          {local.hasHome === 'none' && (
+          {profile.hasHome === 'none' && (
             <div className="re-afford-row">
               <label>생애최초 여부</label>
-              <select value={local.isFirstBuyer ? 'yes' : 'no'} onChange={e => set('isFirstBuyer', e.target.value === 'yes')}>
+              <select value={profile.isFirstBuyer ? 'yes' : 'no'} onChange={e => set('isFirstBuyer', e.target.value === 'yes')}>
                 <option value="yes">예</option>
                 <option value="no">아니오</option>
               </select>
@@ -180,7 +172,7 @@ function AffordabilityPanel({ assets, profile, onProfileChange }) {
           )}
           <div className="re-afford-row">
             <label>지역 규제</label>
-            <select value={local.zone} onChange={e => set('zone', e.target.value)}>
+            <select value={profile.zone} onChange={e => set('zone', e.target.value)}>
               <option value="normal">비규제</option>
               <option value="adjustment">조정대상</option>
               <option value="regulated">투기과열</option>
@@ -189,14 +181,15 @@ function AffordabilityPanel({ assets, profile, onProfileChange }) {
           <div className="re-afford-row">
             <label>기존 대출 월상환액</label>
             <div className="re-afford-input-wrap">
-              <input type="number" value={local.existingLoan} onChange={e => set('existingLoan', Number(e.target.value))} />
+              <input type="number" value={profile.existingLoan || ''} placeholder="0"
+                onChange={e => set('existingLoan', Number(e.target.value))} />
               <span>만원</span>
             </div>
           </div>
           <div className="re-afford-row">
             <label>자산 기준 시점</label>
             <div className="re-afford-input-wrap">
-              <select value={local.targetMonths} onChange={e => set('targetMonths', Number(e.target.value))}>
+              <select value={profile.targetMonths} onChange={e => set('targetMonths', Number(e.target.value))}>
                 <option value={0}>현재</option>
                 <option value={6}>6개월 후</option>
                 <option value={12}>1년 후</option>
@@ -205,11 +198,10 @@ function AffordabilityPanel({ assets, profile, onProfileChange }) {
               </select>
             </div>
           </div>
-          <button className="re-afford-save" onClick={save}>적용하기</button>
         </div>
       )}
 
-      {/* 결과 요약 */}
+      {/* 결과 요약 — 항상 표시 */}
       {profile.monthlyIncome > 0 && (
         <div className="re-afford-result">
           <div className="re-afford-result-row">
@@ -217,12 +209,12 @@ function AffordabilityPanel({ assets, profile, onProfileChange }) {
             <span className="re-afford-val">{formatManwon(equity)}</span>
           </div>
           <div className="re-afford-result-row">
-            <span className="re-afford-label">최대 대출 (DSR 40%, 금리 3.5%, 30년)</span>
+            <span className="re-afford-label">최대 대출 (DSR 40% · 3.5% · 30년)</span>
             <span className="re-afford-val">{ltv === 0 ? '불가' : formatManwon(maxLoan)}</span>
           </div>
           <div className="re-afford-result-row">
-            <span className="re-afford-label">LTV {Math.round(ltv * 100)}%</span>
-            <span className="re-afford-val">적용</span>
+            <span className="re-afford-label">LTV {Math.round(ltv * 100)}% 적용</span>
+            <span className="re-afford-val">{ltv === 0 ? '대출 불가' : `한도 ${formatManwon(Math.floor(equity / (1 - ltv) * ltv))}`}</span>
           </div>
           <div className="re-afford-result-total">
             <span>최대 매입 가능</span>
@@ -464,7 +456,7 @@ export default function RealEstate({ user, transactions = [], assets = [] }) {
       </div>
 
       {/* 구매력 계산기 */}
-      <AffordabilityPanel assets={assets} profile={profile} onProfileChange={setProfile} />
+      <AffordabilityPanel assets={assets} profile={profile} onProfileChange={updater => setProfile(p => typeof updater === 'function' ? updater(p) : updater)} />
 
       {/* 즐겨찾기 */}
       {favorites.length > 0 && (

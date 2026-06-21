@@ -22,6 +22,7 @@ import PinLock from './components/PinLock'
 import SavingsRates from './components/SavingsRates'
 import RealEstate from './components/RealEstate'
 import { useCountUp } from './hooks/useCountUp'
+import { useTransactions } from './hooks/useTransactions'
 
 const PAGE_KEY = 'household-budget-page'
 const THEME_KEY = 'household-budget-theme'
@@ -92,13 +93,10 @@ export default function App() {
     const now = new Date()
     return { year: now.getFullYear(), month: now.getMonth() }
   })
-  const [transactions, setTransactions] = useState([])
-  const [prevTransactions, setPrevTransactions] = useState([])
   const [lastAddedTxId, setLastAddedTxId] = useState(null)
   const [sharedAssets, setSharedAssets] = useState([])
   const [showPinSetup, setShowPinSetup] = useState(false)
   const [hasPin, setHasPin] = useState(!!localStorage.getItem('app_pin'))
-  const [loading, setLoading] = useState(true)
   const [formOpenToken, setFormOpenToken] = useState(0)
   const formRef = useRef(null)
   const assetsPageRef = useRef(null)
@@ -110,7 +108,6 @@ export default function App() {
     window.addEventListener('offline', off)
     return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) }
   }, [])
-  const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [amountMin, setAmountMin] = useState('')
@@ -169,6 +166,8 @@ export default function App() {
   }, [householdId])
   const myName = user?.displayName
   const owners = [...(user?.members ?? []), '공동']
+  const { start, end } = useMemo(() => monthRange(cursor.year, cursor.month), [cursor])
+  const { start: prevStart, end: prevEnd } = useMemo(() => monthRange(cursor.year, cursor.month - 1), [cursor])
   const rawCategories = { ...DEFAULT_CATEGORIES, ...(user?.categories ?? {}) }
   const categories = {
     ...rawCategories,
@@ -177,11 +176,10 @@ export default function App() {
       : [...rawCategories.income, TRANSFER_CATEGORY],
   }
 
-  const { start, end } = useMemo(() => monthRange(cursor.year, cursor.month), [cursor])
-  const { start: prevStart, end: prevEnd } = useMemo(
-    () => monthRange(cursor.year, cursor.month - 1),
-    [cursor],
-  )
+  const {
+    transactions, prevTransactions, loading, error, setError,
+    handleAdd: _handleAdd, handleDelete, handleUpdate: handleUpdateTransaction,
+  } = useTransactions({ householdId, start, end, prevStart, prevEnd, owners, myName })
 
   useEffect(() => {
     localStorage.setItem(PAGE_KEY, page)
@@ -236,145 +234,19 @@ export default function App() {
     }
   }, [page, householdId])
 
-  useEffect(() => {
-    if (!householdId) return
-    let cancelled = false
-    async function load() {
-      setLoading(true)
-      setError(null)
-      const { data, error } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('household_id', householdId)
-        .gte('date', start)
-        .lt('date', end)
-        .order('date', { ascending: false })
-        .order('id', { ascending: false })
-      if (cancelled) return
-      if (error) {
-        setError(error.message)
-      } else {
-        setTransactions(data)
-      }
-      setLoading(false)
-    }
-    load()
-    return () => {
-      cancelled = true
-    }
-  }, [start, end, householdId])
-
-  useEffect(() => {
-    if (!householdId) return
-    let cancelled = false
-    async function load() {
-      const { data, error } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('household_id', householdId)
-        .gte('date', prevStart)
-        .lt('date', prevEnd)
-      if (cancelled) return
-      if (!error) setPrevTransactions(data)
-    }
-    load()
-    return () => {
-      cancelled = true
-    }
-  }, [prevStart, prevEnd, householdId])
-
-  async function adjustAssetAmount(assetId, delta) {
-    if (!assetId || !delta) return
-    const { data } = await supabase.from('assets').select('amount').eq('id', assetId).single()
-    if (!data) return
-    await supabase
-      .from('assets')
-      .update({ amount: Number(data.amount) + delta, updated_at: new Date().toISOString() })
-      .eq('id', assetId)
-  }
-
   async function handleAdd(tx) {
-    const { data, error } = await supabase
-      .from('transactions')
-      .insert({ ...tx, author: tx.author || myName, household_id: householdId })
-      .select()
-      .single()
-    if (error) {
-      setError(error.message)
-      return null
-    }
-    if (tx.date >= start && tx.date < end) {
-      setTransactions((prev) =>
-        [...prev, data].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id)),
-      )
-      // setLastAddedTxId(data.id) — removed: caused jarring scroll after add
-    }
-    if (data.linked_asset_id) {
-      await adjustAssetAmount(data.linked_asset_id, Number(data.amount))
-    }
-
-    if (data.category === TRANSFER_CATEGORY && data.type === 'expense') {
-      const partner = owners.find((o) => o !== '공동' && o !== data.owner)
-      if (partner) {
-        const { data: counterData } = await supabase
-          .from('transactions')
-          .insert({
-            date: data.date,
-            type: 'income',
-            category: TRANSFER_CATEGORY,
-            amount: data.amount,
-            owner: partner,
-            memo: data.memo,
-            author: data.author,
-            household_id: householdId,
-          })
-          .select()
-          .single()
-        if (counterData && counterData.date >= start && counterData.date < end) {
-          setTransactions((prev) =>
-            [...prev, counterData].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id)),
-          )
-        }
-      }
-    }
-
-    return data
+    return _handleAdd(tx)
   }
 
-  async function handleDelete(id) {
-    const target = transactions.find((t) => t.id === id)
-    const { error } = await supabase.from('transactions').delete().eq('id', id)
-    if (error) {
-      setError(error.message)
-      return
-    }
-    setTransactions((prev) => prev.filter((t) => t.id !== id))
-    if (target?.linked_asset_id) {
-      await adjustAssetAmount(target.linked_asset_id, -Number(target.amount))
-    }
-    showToast('🗑 내역이 삭제되었습니다')
+  async function wrappedDelete(id) {
+    const ok = await handleDelete(id)
+    if (ok !== false) showToast('🗑 내역이 삭제되었습니다')
   }
 
-  async function handleUpdateTransaction(id, fields) {
-    const old = transactions.find((t) => t.id === id)
-    const { data, error } = await supabase.from('transactions').update(fields).eq('id', id).select().single()
-    if (error) {
-      setError(error.message)
-      return false
-    }
-    setTransactions((prev) =>
-      prev
-        .map((t) => (t.id === id ? data : t))
-        .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id)),
-    )
-    if (old?.linked_asset_id) {
-      await adjustAssetAmount(old.linked_asset_id, -Number(old.amount))
-    }
-    if (data.linked_asset_id) {
-      await adjustAssetAmount(data.linked_asset_id, Number(data.amount))
-    }
-    showToast('✓ 내역이 수정되었습니다')
-    return true
+  async function wrappedUpdate(id, fields) {
+    const ok = await handleUpdateTransaction(id, fields)
+    if (ok) showToast('✓ 내역이 수정되었습니다')
+    return ok
   }
 
   const [monthSlideDir, setMonthSlideDir] = useState(null)
@@ -958,8 +830,8 @@ export default function App() {
               </div>
               <TransactionList
                 transactions={filteredTransactions}
-                onDelete={handleDelete}
-                onUpdate={handleUpdateTransaction}
+                onDelete={wrappedDelete}
+                onUpdate={wrappedUpdate}
                 assets={linkableAssets}
                 owners={owners}
                 categories={categories}
@@ -979,7 +851,7 @@ export default function App() {
             categories={categories}
             onAddCategory={handleAddCategory}
             onRemoveCategory={handleRemoveCategory}
-            onUndo={handleDelete}
+            onUndo={wrappedDelete}
             onToast={showToast}
             currentMonthTransactions={transactions}
             onQuickAdd={(t) =>
@@ -1001,7 +873,7 @@ export default function App() {
               transactions={ownedTransactions}
               year={cursor.year}
               month={cursor.month}
-              onDeleteDate={handleDelete}
+              onDeleteDate={wrappedDelete}
               onChangeMonth={changeMonth}
             />
           </Collapsible>
