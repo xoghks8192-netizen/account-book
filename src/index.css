@@ -447,6 +447,7 @@ body {
 
 
 .month-nav {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -466,6 +467,21 @@ body {
   transition: color 0.15s;
 }
 .month-nav-arrow:hover { color: var(--text-main); }
+
+.month-nav-today {
+  position: absolute;
+  right: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: 1.5px solid var(--accent);
+  border-radius: 20px;
+  padding: 2px 10px;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.month-nav-today:hover { opacity: 1; }
 
 .month-nav-pill {
   display: flex;

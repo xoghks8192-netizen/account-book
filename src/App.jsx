@@ -19,6 +19,7 @@ import { loadSession, saveSession, clearSession } from './users'
 import { STOCK_CATEGORIES } from './assetMeta'
 import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from './categories'
 import PinLock from './components/PinLock'
+import ConfirmDialog from './components/ConfirmDialog'
 import SavingsRates from './components/SavingsRates'
 import RealEstate from './components/RealEstate'
 import { useCountUp } from './hooks/useCountUp'
@@ -124,6 +125,7 @@ export default function App() {
   const moreMenuRef = useRef(null)
   const [showMonthPicker, setShowMonthPicker] = useState(false)
 
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [summaryModal, setSummaryModal] = useState(null)
   const [expandedCategory, setExpandedCategory] = useState(null)
 
@@ -448,7 +450,6 @@ export default function App() {
   }
 
   function handleLogout() {
-    if (!window.confirm('로그아웃 하시겠습니까?')) return
     clearSession()
     setUser(null)
   }
@@ -547,7 +548,7 @@ export default function App() {
             </div>
             <div className="more-menu-divider" />
             <div className="more-menu-group">
-              <button className="more-menu-item" onClick={handleLogout}>
+              <button className="more-menu-item" onClick={() => { setShowMoreMenu(false); setShowLogoutConfirm(true) }}>
                 <span className="more-menu-icon" style={{ background: '#fff0f3', color: '#ff6b8a' }}>🚪</span>
                 로그아웃
               </button>
@@ -567,6 +568,15 @@ export default function App() {
             saveSession(next)
             setUser(next)
           }}
+        />
+      )}
+
+      {showLogoutConfirm && (
+        <ConfirmDialog
+          message="로그아웃 하시겠습니까?"
+          confirmLabel="로그아웃"
+          onConfirm={handleLogout}
+          onCancel={() => setShowLogoutConfirm(false)}
         />
       )}
 
@@ -612,6 +622,9 @@ export default function App() {
               <span className="month-nav-year">{cursor.year}</span>
             </button>
             <button className="month-nav-arrow" onClick={() => changeMonth(1)}>›</button>
+            {(() => { const now = new Date(); return (cursor.year !== now.getFullYear() || cursor.month !== now.getMonth()) ? (
+              <button className="month-nav-today" onClick={() => setCursor({ year: now.getFullYear(), month: now.getMonth() })}>오늘</button>
+            ) : null })()}
           </div>
           {showMonthPicker && (
             <div className="month-picker-overlay" onClick={() => setShowMonthPicker(false)}>
