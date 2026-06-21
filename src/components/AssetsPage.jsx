@@ -274,9 +274,9 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
         <div className="summary-item balance clickable" onClick={() => setSummaryModal('총자산')}>
           <div className="label">총 자산</div>
           <div className="value">{formatAmount(animatedTotal)}</div>
-          {lastMonthTotal !== null && (
-            <div style={{ fontSize: 11, fontWeight: 700, color: householdTotal >= lastMonthTotal ? '#ff5c5c' : '#6cb6ff', marginTop: 2 }}>
-              {householdTotal >= lastMonthTotal ? '+' : ''}{formatAmount(householdTotal - lastMonthTotal)}원
+          {lastMonthTotal !== null && householdTotal !== lastMonthTotal && (
+            <div style={{ fontSize: 11, fontWeight: 700, color: householdTotal > lastMonthTotal ? '#4caf83' : '#ff5c5c', marginTop: 2 }}>
+              {householdTotal > lastMonthTotal ? '▲ +' : '▼ '}{formatAmount(Math.abs(householdTotal - lastMonthTotal))}
             </div>
           )}
         </div>
