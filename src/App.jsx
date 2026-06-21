@@ -616,15 +616,18 @@ export default function App() {
       ) : (
         <div className={`month-content${monthSlideDir ? ` slide-${monthSlideDir}` : ''}`}>
           <div className="month-nav">
+            <div className="month-nav-side" />
             <button className="month-nav-arrow" onClick={() => changeMonth(-1)}>‹</button>
             <button className="month-nav-pill" onClick={() => setShowMonthPicker((p) => !p)}>
               <span className="month-nav-month">{cursor.month + 1}월</span>
               <span className="month-nav-year">{cursor.year}</span>
             </button>
             <button className="month-nav-arrow" onClick={() => changeMonth(1)}>›</button>
-            {(() => { const now = new Date(); return (cursor.year !== now.getFullYear() || cursor.month !== now.getMonth()) ? (
-              <button className="month-nav-today" onClick={() => setCursor({ year: now.getFullYear(), month: now.getMonth() })}>오늘</button>
-            ) : null })()}
+            <div className="month-nav-side">
+              {(() => { const now = new Date(); return (cursor.year !== now.getFullYear() || cursor.month !== now.getMonth()) ? (
+                <button className="month-nav-today" onClick={() => setCursor({ year: now.getFullYear(), month: now.getMonth() })}>오늘</button>
+              ) : null })()}
+            </div>
           </div>
           {showMonthPicker && (
             <div className="month-picker-overlay" onClick={() => setShowMonthPicker(false)}>

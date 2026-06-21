@@ -450,8 +450,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   padding: 14px 16px 8px;
+}
+.month-nav-side {
+  width: 44px;
+  display: flex;
+  justify-content: center;
 }
 
 .month-nav-arrow {
