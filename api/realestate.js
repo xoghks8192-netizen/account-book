@@ -46,8 +46,8 @@ function parseTrade(items, propType) {
     .map((i) => ({
       propType,
       dealType: 'trade',
-      name: (i.아파트 || i.aptNm || i.연립다세대 || i.houseNm || i.mhouseNm || '').trim(),
-      dong: (i.법정동 || i.umdNm || '').trim(),
+      name: String(i.아파트 || i.aptNm || i.연립다세대 || i.houseNm || i.mhouseNm || '').trim(),
+      dong: String(i.법정동 || i.umdNm || '').trim(),
       area: parseFloat(i.전용면적 || i.excluUseAr || 0),
       floor: String(i.층 || i.floor || '').trim(),
       price: parsePrice(i.거래금액 || i.dealAmount),
@@ -66,8 +66,8 @@ function parseRent(items, propType) {
       return {
         propType,
         dealType: monthly > 0 ? 'monthly' : 'jeonse',
-        name: (i.아파트 || i.aptNm || i.연립다세대 || i.houseNm || i.mhouseNm || '').trim(),
-        dong: (i.법정동 || i.umdNm || '').trim(),
+        name: String(i.아파트 || i.aptNm || i.연립다세대 || i.houseNm || i.mhouseNm || '').trim(),
+        dong: String(i.법정동 || i.umdNm || '').trim(),
         area: parseFloat(i.전용면적 || i.excluUseAr || 0),
         floor: String(i.층 || i.floor || '').trim(),
         deposit: parsePrice(i.보증금액 || i.deposit),
