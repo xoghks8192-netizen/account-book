@@ -24,7 +24,11 @@ function wonToManwon(won) { return Math.floor(won / 10000) }
 
 function formatManwon(n) {
   if (!n) return '-'
-  if (n >= 10000) return `${(n / 10000).toFixed(1)}억`
+  if (n >= 10000) {
+    const uk = Math.floor(n / 10000)
+    const man = n % 10000
+    return man > 0 ? `${uk}억 ${man.toLocaleString('ko-KR')}만` : `${uk}억`
+  }
   return `${n.toLocaleString('ko-KR')}만`
 }
 
