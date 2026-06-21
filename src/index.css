@@ -434,6 +434,39 @@ body {
   margin-top: 2px;
 }
 
+.more-tabs-popup {
+  position: fixed;
+  bottom: calc(70px + env(safe-area-inset-bottom));
+  right: 16px;
+  max-width: 480px;
+  background: var(--card-bg);
+  border: 1px solid var(--form-border);
+  border-radius: 16px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+  padding: 8px;
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.more-tabs-popup button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: none;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: "Jua", sans-serif;
+  color: var(--text-main);
+  cursor: pointer;
+  border-radius: 12px;
+}
+.more-tabs-popup button:hover {
+  background: var(--form-border);
+}
+
 .tab-icon {
   font-size: 20px;
   line-height: 1;
@@ -1252,6 +1285,7 @@ body {
 
 .asset-chart {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 20px;
   margin: 0 16px 16px;
@@ -1260,6 +1294,29 @@ body {
   background: var(--form-bg);
   border: 1px solid var(--form-border);
   box-shadow: 0 4px 16px var(--form-shadow);
+}
+
+.chart-mode-tabs {
+  width: 100%;
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.chart-mode-tabs button {
+  flex: 1;
+  border: none;
+  border-radius: 999px;
+  padding: 5px 0;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: "Jua", sans-serif;
+  cursor: pointer;
+  background: var(--form-border);
+  color: var(--text-sub);
+}
+.chart-mode-tabs button.active {
+  background: var(--active-gradient);
+  color: #fff;
 }
 
 .donut {
@@ -1801,6 +1858,14 @@ body {
 .summary-item.clickable {
   cursor: pointer;
 }
+
+.summary-diff {
+  font-size: 10px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.summary-diff.up { color: #4caf83; }
+.summary-diff.down { color: #ff5c5c; }
 
 .more-menu {
   position: absolute;

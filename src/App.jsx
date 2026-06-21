@@ -7,7 +7,6 @@ import AnniversaryBanner from './components/AnniversaryBanner'
 import AssetsPage from './components/AssetsPage'
 import ExpenseChart from './components/ExpenseChart'
 import RecurringTemplates from './components/RecurringTemplates'
-import MonthComparison from './components/MonthComparison'
 import ChangePassword from './components/ChangePassword'
 import Collapsible from './components/Collapsible'
 import TransactionInsight from './components/TransactionInsight'
@@ -88,6 +87,7 @@ export default function App() {
     const dir = PAGE_ORDER.indexOf(next) > PAGE_ORDER.indexOf(page) ? 'left' : 'right'
     setSlideDir(dir)
     setPage(next)
+    setShowMoreTabs(false)
     setTimeout(() => setSlideDir(null), 350)
   }
   const [cursor, setCursor] = useState(() => {
@@ -124,6 +124,7 @@ export default function App() {
   const [showMoreMenu, setShowMoreMenu] = useState(false)
   const moreMenuRef = useRef(null)
   const [showMonthPicker, setShowMonthPicker] = useState(false)
+  const [showMoreTabs, setShowMoreTabs] = useState(false)
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [summaryModal, setSummaryModal] = useState(null)
@@ -664,6 +665,9 @@ export default function App() {
             <div className="summary-item income clickable" onClick={() => setSummaryModal('수입')}>
               <div className="label">수입</div>
               <div className="value">{formatAmount(animatedIncome)}</div>
+              {prevIncome > 0 && (() => { const d = totalIncome - prevIncome; return d !== 0 ? (
+                <div className={`summary-diff ${d > 0 ? 'up' : 'down'}`}>{d > 0 ? '▲' : '▼'} {formatAmount(Math.abs(d))}</div>
+              ) : null })()}
               {transferReceived > 0 && ownerFilter !== '전체' && (
                 <div className="sub-label">💸 이체 +{formatAmount(transferReceived)}</div>
               )}
@@ -671,6 +675,9 @@ export default function App() {
             <div className="summary-item expense clickable" onClick={() => setSummaryModal('지출')}>
               <div className="label">지출</div>
               <div className="value">{formatAmount(animatedExpense)}</div>
+              {prevExpense > 0 && (() => { const d = totalExpense - prevExpense; return d !== 0 ? (
+                <div className={`summary-diff ${d > 0 ? 'down' : 'up'}`}>{d > 0 ? '▲' : '▼'} {formatAmount(Math.abs(d))}</div>
+              ) : null })()}
               {transferSent > 0 && (
                 <div className="sub-label">💸 이체 -{formatAmount(transferSent)}</div>
               )}
@@ -678,6 +685,9 @@ export default function App() {
             <div className="summary-item balance">
               <div className="label">합계</div>
               <div className="value">{formatAmount(animatedBalance)}</div>
+              {(prevIncome > 0 || prevExpense > 0) && (() => { const d = balance - prevBalance; return d !== 0 ? (
+                <div className={`summary-diff ${d > 0 ? 'up' : 'down'}`}>{d > 0 ? '▲' : '▼'} {formatAmount(Math.abs(d))}</div>
+              ) : null })()}
             </div>
           </div>
 
@@ -735,13 +745,6 @@ export default function App() {
           <ExpenseChart transactions={ownedTransactions} />
 
           <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} />
-
-          <Collapsible title="전월 대비">
-            <MonthComparison
-              current={{ income: totalIncome, expense: totalExpense, balance }}
-              previous={{ income: prevIncome, expense: prevExpense, balance: prevBalance }}
-            />
-          </Collapsible>
 
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
             <Collapsible title="내역 추가" forceClose={formCloseToken} forceOpen={formOpenToken}>
@@ -923,17 +926,22 @@ export default function App() {
           <span className="tab-label">자산</span>
           {page === 'assets' && <span className="tab-pill" />}
         </button>
-        <button className={page === 'info' ? 'active' : ''} onClick={() => navigateTo('info')}>
-          <span className="tab-icon">🏦</span>
-          <span className="tab-label">금리</span>
-          {page === 'info' && <span className="tab-pill" />}
-        </button>
-        <button className={page === 'realestate' ? 'active' : ''} onClick={() => navigateTo('realestate')}>
-          <span className="tab-icon">🏡</span>
-          <span className="tab-label">부동산</span>
-          {page === 'realestate' && <span className="tab-pill" />}
+        <button className={(page === 'info' || page === 'realestate') ? 'active' : ''} onClick={() => setShowMoreTabs((p) => !p)}>
+          <span className="tab-icon">⋯</span>
+          <span className="tab-label">더보기</span>
+          {(page === 'info' || page === 'realestate') && <span className="tab-pill" />}
         </button>
       </div>
+      {showMoreTabs && (
+        <div className="more-tabs-popup">
+          <button onClick={() => { navigateTo('info'); setShowMoreTabs(false) }}>
+            <span>🏦</span> 금리
+          </button>
+          <button onClick={() => { navigateTo('realestate'); setShowMoreTabs(false) }}>
+            <span>🏡</span> 부동산
+          </button>
+        </div>
+      )}
 
       {!isOnline && <div className="offline-banner">📡 오프라인 상태예요 — 데이터가 저장되지 않을 수 있어요</div>}
       {toast && (
