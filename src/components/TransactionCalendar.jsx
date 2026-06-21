@@ -104,7 +104,10 @@ export default function TransactionCalendar({ transactions, year, month, onDelet
               </div>
             ))
           ) : (
-            <div className="empty">내역이 없습니다.</div>
+            <div className="empty-state" style={{ padding: '20px 0' }}>
+              <div className="empty-state-icon">📅</div>
+              <div className="empty-state-title">내역이 없어요</div>
+            </div>
           )}
         </div>
       )}

@@ -395,7 +395,13 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
         </div>
       )}
 
-      {visibleTemplates.length === 0 && !showForm && <div className="empty">등록된 항목이 없습니다.</div>}
+      {visibleTemplates.length === 0 && !showForm && (
+        <div className="empty-state" style={{ padding: '24px 0' }}>
+          <div className="empty-state-icon">📋</div>
+          <div className="empty-state-title">등록된 항목이 없어요</div>
+          <div className="empty-state-desc">자주 반복되는 지출/수입을 등록해보세요</div>
+        </div>
+      )}
 
       {editingId && visibleTemplates.find((t) => t.id === editingId) && (
         <Modal title="고정 항목 수정" onClose={() => setEditingId(null)}>

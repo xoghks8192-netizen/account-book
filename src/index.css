@@ -434,6 +434,12 @@ body {
   margin-top: 2px;
 }
 
+.more-tabs-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
 .more-tabs-popup {
   position: fixed;
   bottom: calc(70px + env(safe-area-inset-bottom));
@@ -1509,7 +1515,7 @@ body {
 
 .toast {
   position: fixed;
-  top: 80px;
+  bottom: calc(80px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   background: var(--card-bg);
@@ -1543,12 +1549,12 @@ body {
 }
 
 @keyframes toastDrop {
-  0%   { opacity: 0; transform: translateX(-50%) translateY(-30px) scale(0.88); }
-  10%  { opacity: 1; transform: translateX(-50%) translateY(6px)   scale(1.04); }
-  18%  { opacity: 1; transform: translateX(-50%) translateY(-3px)  scale(0.98); }
+  0%   { opacity: 0; transform: translateX(-50%) translateY(30px) scale(0.88); }
+  10%  { opacity: 1; transform: translateX(-50%) translateY(-6px)  scale(1.04); }
+  18%  { opacity: 1; transform: translateX(-50%) translateY(3px)   scale(0.98); }
   25%  { opacity: 1; transform: translateX(-50%) translateY(0)     scale(1); }
   75%  { opacity: 1; transform: translateX(-50%) translateY(0)     scale(1); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(-8px)  scale(0.96); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(8px)   scale(0.96); }
 }
 
 .budget-row {

@@ -435,11 +435,11 @@ export default function App() {
 
   if (!splashDone) {
     return (
-      <div style={{ position: 'fixed', inset: 0, background: '#fbfaff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, zIndex: 99999 }}>
+      <div style={{ position: 'fixed', inset: 0, background: 'var(--bg-gradient)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, zIndex: 99999 }}>
         <div style={{ fontSize: 56, lineHeight: 1 }}>💜</div>
-        <div style={{ fontFamily: '"Jua", sans-serif', fontSize: 22, color: '#b896ff', letterSpacing: '0.02em' }}>우리 가계부</div>
-        <div style={{ width: 40, height: 3, borderRadius: 99, background: '#e8deff', overflow: 'hidden', marginTop: 8 }}>
-          <div style={{ height: '100%', width: '100%', background: 'linear-gradient(90deg,#b896ff,#d4b8ff)', borderRadius: 99, animation: 'splashBar 1s ease-in-out infinite alternate' }} />
+        <div style={{ fontFamily: '"Jua", sans-serif', fontSize: 22, color: 'var(--balance-color)', letterSpacing: '0.02em' }}>우리 가계부</div>
+        <div style={{ width: 40, height: 3, borderRadius: 99, background: 'var(--form-border)', overflow: 'hidden', marginTop: 8 }}>
+          <div style={{ height: '100%', width: '100%', background: 'var(--active-gradient)', borderRadius: 99, animation: 'splashBar 1s ease-in-out infinite alternate' }} />
         </div>
         <style>{`@keyframes splashBar { from { transform: translateX(-100%) } to { transform: translateX(100%) } }`}</style>
       </div>
@@ -700,7 +700,10 @@ export default function App() {
             return (
               <Modal title={summaryModal} onClose={() => { setSummaryModal(null); setExpandedCategory(null) }}>
                 {Object.keys(byCategory).length === 0 ? (
-                  <div className="empty">{summaryModal} 내역이 없습니다.</div>
+                  <div className="empty-state" style={{ padding: '24px 0' }}>
+                    <div className="empty-state-icon">🌿</div>
+                    <div className="empty-state-title">{summaryModal} 내역이 없어요</div>
+                  </div>
                 ) : (
                   Object.entries(byCategory)
                     .sort((a, b) => b[1] - a[1])
@@ -933,14 +936,17 @@ export default function App() {
         </button>
       </div>
       {showMoreTabs && (
-        <div className="more-tabs-popup">
-          <button onClick={() => { navigateTo('info'); setShowMoreTabs(false) }}>
-            <span>🏦</span> 금리
-          </button>
-          <button onClick={() => { navigateTo('realestate'); setShowMoreTabs(false) }}>
-            <span>🏡</span> 부동산
-          </button>
-        </div>
+        <>
+          <div className="more-tabs-overlay" onClick={() => setShowMoreTabs(false)} />
+          <div className="more-tabs-popup">
+            <button onClick={() => { navigateTo('info'); setShowMoreTabs(false) }}>
+              <span>🏦</span> 금리
+            </button>
+            <button onClick={() => { navigateTo('realestate'); setShowMoreTabs(false) }}>
+              <span>🏡</span> 부동산
+            </button>
+          </div>
+        </>
       )}
 
       {!isOnline && <div className="offline-banner">📡 오프라인 상태예요 — 데이터가 저장되지 않을 수 있어요</div>}
