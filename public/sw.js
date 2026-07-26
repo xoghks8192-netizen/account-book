@@ -1,4 +1,4 @@
-const CACHE_NAME = 'household-budget-v2'
+const CACHE_NAME = 'household-budget-v3'
 const PRECACHE_URLS = ['/manifest.json', '/icon-192.png', '/icon-512.png']
 
 // 캐시도 없고 네트워크도 실패했을 때 마지막으로 돌려줄 안전한 응답
@@ -30,6 +30,9 @@ self.addEventListener('fetch', (event) => {
   const { request } = event
   if (request.method !== 'GET') return
   const url = new URL(request.url)
+  // 우리 사이트(같은 origin) 요청만 처리한다.
+  // Supabase 등 외부(cross-origin) API 호출은 절대 가로채지 않고 그대로 통과시킨다.
+  if (url.origin !== self.location.origin) return
   if (url.pathname.startsWith('/api/')) return
 
   // HTML 페이지는 항상 최신 버전을 우선 받아온다 (오래된 캐시가 새 빌드의
@@ -45,7 +48,6 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(async () => {
           const cached = await caches.match(request)
-          // 캐시에도 없으면 index.html이라도 반환 시도, 그마저 없으면 오프라인 응답
           return cached || (await caches.match('/index.html')) || offlineFallback()
         })
     )
