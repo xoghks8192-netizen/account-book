@@ -1,6 +1,15 @@
 const CACHE_NAME = 'household-budget-v2'
 const PRECACHE_URLS = ['/manifest.json', '/icon-192.png', '/icon-512.png']
 
+// 캐시도 없고 네트워크도 실패했을 때 마지막으로 돌려줄 안전한 응답
+function offlineFallback() {
+  return new Response('오프라인 상태입니다. 네트워크 연결을 확인해주세요.', {
+    status: 503,
+    statusText: 'Offline',
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  })
+}
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
@@ -34,7 +43,11 @@ self.addEventListener('fetch', (event) => {
           }
           return response
         })
-        .catch(() => caches.match(request))
+        .catch(async () => {
+          const cached = await caches.match(request)
+          // 캐시에도 없으면 index.html이라도 반환 시도, 그마저 없으면 오프라인 응답
+          return cached || (await caches.match('/index.html')) || offlineFallback()
+        })
     )
     return
   }
@@ -48,7 +61,7 @@ self.addEventListener('fetch', (event) => {
           }
           return response
         })
-        .catch(() => cached)
+        .catch(() => cached || offlineFallback())
       return cached || fetchPromise
     })
   )
