@@ -6,7 +6,6 @@ import AssetForm from './AssetForm'
 import AssetItem from './AssetItem'
 import AssetChart from './AssetChart'
 import Collapsible from './Collapsible'
-import AssetForecast from './AssetForecast'
 import NetWorthChart from './NetWorthChart'
 import Modal from './Modal'
 
@@ -502,13 +501,6 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
         </div>
       )}
 
-      <AssetForecast
-        total={total}
-        liquidTotal={liquidTotal}
-        nonLiquidTotal={nonLiquidTotal}
-        chartData={chartData}
-        householdId={householdId}
-      />
     </div>
   )
 })

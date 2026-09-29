@@ -7,18 +7,18 @@
   --text-sub: #786fa0;
   --brand-gradient: linear-gradient(135deg, #a3bdff, #c6a8ff);
   --anniversary-bg: #f4f1ff;
-  --anniversary-text: #9089a8;
+  --anniversary-text: #706681;
   --anniversary-value: #8b6cf0;
   --shadow-soft: rgba(150, 140, 220, 0.14);
   --tab-bg: #f1eefb;
-  --tab-text: #9b8fc0;
+  --tab-text: #706087;
   --active-gradient: linear-gradient(135deg, #93b4ff, #b88bf5);
   --active-shadow: rgba(139, 108, 240, 0.35);
   --card-bg: #f7f5fd;
   --card-shadow: rgba(150, 140, 220, 0.1);
-  --label-text: #a89cc4;
-  --income-color: #5aa8ef;
-  --expense-color: #ff7aa2;
+  --label-text: #736783;
+  --income-color: #2377b5;
+  --expense-color: #bd3c66;
   --balance-color: #8b6cf0;
   --form-bg: #ffffff;
   --form-border: #efebfa;
@@ -28,10 +28,10 @@
   --input-text: #5c5570;
   --focus-border: #b88bf5;
   --submit-shadow: rgba(139, 108, 240, 0.3);
-  --meta-text: #ada1c8;
-  --icon-muted: #d4cce8;
+  --meta-text: #766983;
+  --icon-muted: #847591;
   --icon-hover: #8b6cf0;
-  --empty-text: #cbc2e4;
+  --empty-text: #786b89;
   --income-gradient: linear-gradient(135deg, #7ec0ff, #5aa8ef);
   --expense-gradient: linear-gradient(135deg, #ff9bb8, #ff7aa2);
   --date-icon-filter: invert(0.5) sepia(1) saturate(3) hue-rotate(220deg);
@@ -55,7 +55,7 @@
   --active-shadow: rgba(0, 0, 0, 0.4);
   --card-bg: #352f48;
   --card-shadow: rgba(0, 0, 0, 0.25);
-  --label-text: #9087b0;
+  --label-text: #c4bad8;
   --income-color: #7ec0ff;
   --expense-color: #ff9bb8;
   --balance-color: #c0a8ff;
@@ -67,10 +67,10 @@
   --input-text: #d8d3e8;
   --focus-border: #b88bf5;
   --submit-shadow: rgba(0, 0, 0, 0.4);
-  --meta-text: #8d83ad;
-  --icon-muted: #4a4560;
+  --meta-text: #beb3d2;
+  --icon-muted: #b0a4c6;
   --icon-hover: #c0a8ff;
-  --empty-text: #5a5470;
+  --empty-text: #b6aacb;
   --income-gradient: linear-gradient(135deg, #5a9fd8, #4a7fc0);
   --expense-gradient: linear-gradient(135deg, #d87a98, #c05a7a);
   --date-icon-filter: invert(0.85) sepia(1) saturate(2) hue-rotate(220deg);
@@ -3596,29 +3596,22 @@ body {
   animation: none;
 }
 
-.analysis-panel > .collapsible-body > .form,
-.analysis-panel > .collapsible-body > .asset-chart {
-  margin: 18px 0 0;
-  padding: 18px 0 0;
-  border: 0;
-  border-top: 1px solid var(--form-border);
-  border-radius: 0;
-  background: transparent;
-}
-
-.analysis-section h4 {
-  margin: 0 0 12px;
-  font-size: 13px;
-  color: var(--text-sub);
-}
-
-.analysis-panel .comparison-item {
-  min-width: 0;
-}
-
-.analysis-panel .comparison-item .diff {
-  font-size: clamp(11px, 3vw, 14px);
-  overflow-wrap: anywhere;
+.tx-info { min-width: 0; }
+.tx-info .category { font-size: 15px; line-height: 1.45; }
+.tx-info .meta { font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.tx-amount .amount { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.summary-item { min-width: 0; }
+.summary-item .label { font-size: 13px; }
+.summary-item .value { font-size: clamp(15px, 4.5vw, 20px); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.summary-diff, .summary-item .sub-label { font-size: 12px; line-height: 1.5; }
+.collapsible-toggle { min-height: 36px; font-size: 13px; }
+.header-icon-btn { min-width: 36px; min-height: 36px; }
+.owner-tabs button { min-height: 40px; }
+.swipe-hint { opacity: 0.65; }
+.form-row label { line-height: 1.5; }
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {
