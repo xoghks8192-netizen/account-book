@@ -6,6 +6,7 @@ import Login from './components/Login'
 import AnniversaryBanner from './components/AnniversaryBanner'
 import AssetsPage from './components/AssetsPage'
 import ExpenseChart from './components/ExpenseChart'
+import MonthComparison from './components/MonthComparison'
 import RecurringTemplates from './components/RecurringTemplates'
 import ChangePassword from './components/ChangePassword'
 import Collapsible from './components/Collapsible'
@@ -666,9 +667,6 @@ export default function App() {
             <div className="summary-item income clickable" onClick={() => setSummaryModal('수입')}>
               <div className="label">수입</div>
               <div className="value">{formatAmount(animatedIncome)}</div>
-              {prevIncome > 0 && (() => { const d = totalIncome - prevIncome; return d !== 0 ? (
-                <div className={`summary-diff ${d > 0 ? 'up' : 'down'}`}>{d > 0 ? '▲' : '▼'} {formatAmount(Math.abs(d))}</div>
-              ) : null })()}
               {transferReceived > 0 && ownerFilter !== '전체' && (
                 <div className="sub-label">💸 이체 +{formatAmount(transferReceived)}</div>
               )}
@@ -676,9 +674,6 @@ export default function App() {
             <div className="summary-item expense clickable" onClick={() => setSummaryModal('지출')}>
               <div className="label">지출</div>
               <div className="value">{formatAmount(animatedExpense)}</div>
-              {prevExpense > 0 && (() => { const d = totalExpense - prevExpense; return d !== 0 ? (
-                <div className={`summary-diff ${d > 0 ? 'down' : 'up'}`}>{d > 0 ? '▲' : '▼'} {formatAmount(Math.abs(d))}</div>
-              ) : null })()}
               {transferSent > 0 && (
                 <div className="sub-label">💸 이체 -{formatAmount(transferSent)}</div>
               )}
@@ -686,9 +681,6 @@ export default function App() {
             <div className="summary-item balance">
               <div className="label">합계</div>
               <div className="value">{formatAmount(animatedBalance)}</div>
-              {(prevIncome > 0 || prevExpense > 0) && (() => { const d = balance - prevBalance; return d !== 0 ? (
-                <div className={`summary-diff ${d > 0 ? 'up' : 'down'}`}>{d > 0 ? '▲' : '▼'} {formatAmount(Math.abs(d))}</div>
-              ) : null })()}
             </div>
           </div>
 
@@ -746,10 +738,6 @@ export default function App() {
             )
           })()}
 
-          <ExpenseChart transactions={ownedTransactions} />
-
-          <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} />
-
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
             <Collapsible title="내역 추가" forceClose={formCloseToken} forceOpen={formOpenToken}>
               <TransactionForm
@@ -781,6 +769,7 @@ export default function App() {
           ) : (
             <Collapsible
               title="내역"
+              defaultOpen
               headerExtra={
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   <input
@@ -873,6 +862,25 @@ export default function App() {
             </Collapsible>
           )}
 
+          <Collapsible title="분석 보기" className="form analysis-panel">
+            <section className="analysis-section" aria-label="전월 비교">
+              <h4>{cursor.year}년 {cursor.month + 1}월 · 전월 비교</h4>
+              <MonthComparison
+                current={{ income: totalIncome, expense: totalExpense, balance }}
+                previous={{ income: prevIncome, expense: prevExpense, balance: prevBalance }}
+              />
+            </section>
+            <ExpenseChart transactions={ownedTransactions} />
+            <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} defaultOpen />
+            <TransactionInsight
+              transactions={ownedTransactions}
+              totalIncome={totalIncome}
+              totalExpense={totalExpense}
+              balance={balance}
+              monthLabel={`${cursor.year}년 ${cursor.month + 1}월`}
+            />
+          </Collapsible>
+
           <RecurringTemplates
             currentUser={myName}
             owners={owners}
@@ -908,13 +916,6 @@ export default function App() {
             />
           </Collapsible>
 
-          <TransactionInsight
-            transactions={ownedTransactions}
-            totalIncome={totalIncome}
-            totalExpense={totalExpense}
-            balance={balance}
-            monthLabel={`${cursor.year}년 ${cursor.month + 1}월`}
-          />
         </div>
       )}
       </div>

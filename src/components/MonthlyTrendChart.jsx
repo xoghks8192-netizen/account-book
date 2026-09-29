@@ -7,7 +7,7 @@ function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
 }
 
-export default function MonthlyTrendChart({ householdId, ownerFilter, owners }) {
+export default function MonthlyTrendChart({ householdId, ownerFilter, owners, defaultOpen = false }) {
   const [data, setData] = useState([])
   const [hovered, setHovered] = useState(null)
   const hideTimer = useRef(null)
@@ -57,7 +57,7 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners }) 
   const h = hovered !== null ? data[hovered] : null
 
   return (
-    <Collapsible title="월별 추이">
+    <Collapsible title="월별 추이" defaultOpen={defaultOpen}>
       <div className="trend-chart">
         {data.map(({ label, expense, income }, i) => (
           <div

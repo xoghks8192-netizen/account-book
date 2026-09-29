@@ -23,16 +23,16 @@ export default function MonthComparison({ current, previous }) {
   return (
     <div className="comparison">
       <div className="comparison-item">
-        <div className="label">수입 (전월 대비)</div>
-        <DiffValue diff={incomeDiff} />
+        <div className="label">수입</div>
+        <DiffValue diff={incomeDiff} invert />
       </div>
       <div className="comparison-item">
-        <div className="label">지출 (전월 대비)</div>
-        <DiffValue diff={expenseDiff} invert />
+        <div className="label">지출</div>
+        <DiffValue diff={expenseDiff} />
       </div>
       <div className="comparison-item">
-        <div className="label">합계 (전월 대비)</div>
-        <DiffValue diff={balanceDiff} />
+        <div className="label">합계</div>
+        <DiffValue diff={balanceDiff} invert />
       </div>
     </div>
   )
