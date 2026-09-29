@@ -45,7 +45,7 @@ export default function Login({ onLogin }) {
 
   return (
     <div>
-      <div className="brand-header" style={{ borderRadius: '0 0 28px 28px', paddingBottom: 24 }}>
+      <div className="brand-header auth-header">
         <h1>가계부</h1>
         <span>로그인</span>
       </div>
@@ -71,7 +71,7 @@ export default function Login({ onLogin }) {
               width: '100%',
               border: 'none',
               background: 'none',
-              color: '#b896ff',
+              color: 'var(--text-sub)',
               cursor: 'pointer',
               fontSize: 13,
               fontWeight: 600,

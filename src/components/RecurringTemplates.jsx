@@ -344,7 +344,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
       </div>
       <div style={{ display: 'flex', gap: 6, padding: '0 0 10px' }}>
         {[['unadded', '미추가순'], ['name', '이름순'], ['amount', '금액순']].map(([mode, label]) => (
-          <button key={mode} onClick={() => setSortMode(mode)} style={{ border: 'none', borderRadius: 999, padding: '4px 12px', fontSize: 12, fontWeight: 700, fontFamily: '"Jua", sans-serif', cursor: 'pointer', background: sortMode === mode ? 'var(--active-gradient)' : 'var(--form-border)', color: sortMode === mode ? '#fff' : 'var(--text-sub)' }}>
+          <button key={mode} onClick={() => setSortMode(mode)} style={{ border: 'none', borderRadius: 999, padding: '4px 12px', fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer', background: sortMode === mode ? 'var(--active-gradient)' : 'var(--form-border)', color: sortMode === mode ? '#fff' : 'var(--text-sub)' }}>
             {label}
           </button>
         ))}
@@ -440,7 +440,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
             <button onClick={() => handleUpdate(editingId)} className="submit-btn" style={{ flex: 1 }}>저장</button>
-            <button onClick={() => setEditingId(null)} style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: '"Jua", sans-serif', cursor: 'pointer' }}>취소</button>
+            <button onClick={() => setEditingId(null)} style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
           </div>
         </Modal>
       )}
@@ -595,7 +595,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
                 color: '#b88a9c',
                 fontSize: 15,
                 fontWeight: 700,
-                fontFamily: '"Jua", sans-serif',
+                fontFamily: 'var(--font-ui)',
                 cursor: 'pointer',
               }}
             >

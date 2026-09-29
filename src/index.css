@@ -1,4 +1,5 @@
 :root {
+  --font-ui: "Noto Sans KR", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --bg-gradient: linear-gradient(135deg, #eef1ff 0%, #f4eeff 45%, #eaf5ff 100%);
   --bg-root: #ffffff;
   --shadow-root: rgba(150, 140, 220, 0.18);
@@ -168,7 +169,7 @@ body, #root, .card, .tx-item, .collapsible-header, .collapsible-body,
 
 body {
   margin: 0;
-  font-family: "Gowun Dodum", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-family: var(--font-ui);
   background: var(--bg-gradient);
   color: var(--text-main);
   transition: background 0.2s ease, color 0.2s ease;
@@ -203,7 +204,7 @@ body {
 
 .brand-header h1 {
   margin: 0;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 20px;
   color: var(--text-heading);
   letter-spacing: 0.5px;
@@ -268,7 +269,7 @@ body {
 .anniversary-item .value {
   font-weight: 700;
   color: var(--anniversary-value);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   line-height: 1;
 }
 
@@ -388,7 +389,7 @@ body {
   text-align: center;
   font-size: 13px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   padding: 10px 16px;
   z-index: 9999;
 }
@@ -465,7 +466,7 @@ body {
   padding: 12px 20px;
   font-size: 15px;
   font-weight: 600;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   color: var(--text-main);
   cursor: pointer;
   border-radius: 12px;
@@ -482,7 +483,7 @@ body {
 .tab-label {
   font-size: 11px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
 }
 
 
@@ -537,7 +538,7 @@ body {
 }
 
 .month-nav-month {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 26px;
   font-weight: 700;
   color: var(--text-heading);
@@ -547,7 +548,7 @@ body {
 .month-nav-year {
   font-size: 11px;
   color: var(--text-sub);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
 }
 
 .trend-badge {
@@ -621,7 +622,7 @@ body {
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   padding: 5px 12px;
   cursor: pointer;
 }
@@ -663,7 +664,7 @@ body {
 .tx-month-balance {
   font-size: 16px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   color: var(--balance-color);
 }
 
@@ -701,7 +702,7 @@ body {
 .empty-state-title {
   font-size: 17px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   color: var(--text-heading);
   margin-bottom: 8px;
 }
@@ -772,7 +773,7 @@ body {
 .summary-item .value {
   font-size: 20px;
   font-weight: 800;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   letter-spacing: -0.5px;
 }
 
@@ -800,7 +801,7 @@ body {
 .form h3 {
   margin: 0 0 14px;
   font-size: 15px;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   color: var(--text-heading);
 }
 
@@ -842,7 +843,7 @@ body {
 }
 
 .section-collapsible .collapsible-header h3 {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 15px;
   color: var(--text-heading);
   padding-bottom: 6px;
@@ -952,7 +953,7 @@ body {
   color: #fff;
   font-size: 15px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   cursor: pointer;
   margin-top: 4px;
   box-shadow: 0 4px 12px var(--submit-shadow);
@@ -967,7 +968,7 @@ body {
 }
 
 .section-title {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 15px;
   color: var(--text-heading);
   margin: 20px 0 4px;
@@ -1007,7 +1008,7 @@ body {
   padding: 4px 10px;
   font-size: 12px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   cursor: pointer;
 }
 .reorder-toggle-btn.active {
@@ -1335,7 +1336,7 @@ body {
   padding: 5px 0;
   font-size: 13px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   cursor: pointer;
   background: var(--form-border);
   color: var(--text-sub);
@@ -1376,7 +1377,7 @@ body {
   font-size: 12px;
   font-weight: 700;
   color: var(--text-heading);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
 }
 
 .search-highlight {
@@ -1662,7 +1663,7 @@ body {
 .comparison-item .diff {
   font-size: 14px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
 }
 
 .comparison-item .diff.up {
@@ -1871,7 +1872,7 @@ body {
 }
 
 .calendar-detail-title {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   color: var(--text-heading);
   margin-bottom: 8px;
@@ -1949,7 +1950,7 @@ body {
   color: var(--text-main);
   font-size: 14px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   padding: 8px 10px;
   border-radius: 10px;
   text-align: left;
@@ -2138,7 +2139,7 @@ body {
   margin-bottom: 16px;
 }
 .savings-title {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 18px;
   color: var(--text-heading);
   margin-bottom: 4px;
@@ -2233,7 +2234,7 @@ body {
   box-shadow: 0 2px 8px var(--card-shadow);
 }
 .rate-rank {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 18px;
   color: var(--balance-color);
   width: 24px;
@@ -2284,7 +2285,7 @@ body {
   text-align: right;
 }
 .rate-number {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 22px;
   color: var(--income-color);
   font-weight: 700;
@@ -2443,7 +2444,7 @@ body {
   margin-bottom: 16px;
 }
 .rate-modal-num {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 40px;
   color: var(--balance-color);
   line-height: 1;
@@ -2610,7 +2611,7 @@ body {
   box-shadow: 0 2px 12px var(--card-shadow);
 }
 .calc-title {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 16px;
   color: var(--text-heading);
   margin-bottom: 16px;
@@ -2666,7 +2667,7 @@ body {
   color: #fff;
   font-size: 15px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   cursor: pointer;
   box-shadow: 0 4px 12px var(--active-shadow);
 }
@@ -2688,7 +2689,7 @@ body {
   color: var(--text-sub);
 }
 .calc-result-row.total {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 17px;
   color: var(--text-heading);
   padding-top: 8px;
@@ -2780,7 +2781,7 @@ body {
   color: var(--text-main);
   font-size: 24px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   transition: background 0.1s, transform 0.1s;
@@ -2804,7 +2805,7 @@ body {
   color: var(--text-sub);
   font-size: 14px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   cursor: pointer;
   padding: 4px 0 12px;
 }
@@ -2838,7 +2839,7 @@ body {
   border-radius: 999px;
   font-size: 15px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   cursor: pointer;
 }
 
@@ -2883,7 +2884,7 @@ body {
 
 .modal-header h3 {
   margin: 0;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 16px;
   color: var(--text-heading);
 }
@@ -2938,7 +2939,7 @@ body {
 
 .modal-row .modal-row-amount {
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   color: var(--text-heading);
   flex-shrink: 0;
 }
@@ -2955,7 +2956,7 @@ body {
 }
 
 .modal-total-row .modal-row-amount {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   color: var(--balance-color);
 }
 
@@ -2967,7 +2968,7 @@ body {
   padding: 16px 0 12px;
 }
 .re-title {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 20px;
   color: var(--text-heading);
 }
@@ -3095,7 +3096,7 @@ body {
   box-shadow: 0 2px 8px var(--card-shadow);
 }
 .re-rank {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   color: var(--text-sub);
   width: 22px;
@@ -3126,7 +3127,7 @@ body {
   flex-shrink: 0;
 }
 .re-price.trade {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 17px;
   color: var(--balance-color);
 }
@@ -3137,7 +3138,7 @@ body {
   gap: 2px;
 }
 .re-deposit {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 15px;
   color: var(--income-color);
 }
@@ -3159,7 +3160,7 @@ body {
   color: #fff;
   font-size: 15px;
   font-weight: 700;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(102,126,234,0.4);
 }
@@ -3171,7 +3172,7 @@ body {
   padding: 16px;
 }
 .re-ai-result-title {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 15px;
   color: var(--text-heading);
   margin-bottom: 10px;
@@ -3263,7 +3264,7 @@ body {
   letter-spacing: 0.03em;
 }
 .re-summary-val {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 15px;
 }
 .re-summary-val.avg { color: var(--balance-color); }
@@ -3434,7 +3435,7 @@ body {
   color: var(--text-heading);
 }
 .re-afford-total-val {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 20px;
   color: var(--balance-color);
 }
@@ -3520,7 +3521,7 @@ body {
   padding: 18px 20px 4px;
 }
 .re-modal-title {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 17px;
   color: var(--text-heading);
 }
@@ -3577,7 +3578,7 @@ body {
   gap: 2px;
 }
 .re-modal-price {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-ui);
   font-size: 15px;
   color: var(--balance-color);
 }
@@ -3621,4 +3622,124 @@ button:focus-visible, input:focus-visible, select:focus-visible {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Shared reading surfaces: neutral cards, restrained theme accents. */
+:root {
+  --active-gradient: linear-gradient(135deg, #6657b8, #7650ad);
+}
+[data-color="pink"] { --active-gradient: linear-gradient(135deg, #ac3e70, #b43c64); }
+[data-color="mint"] { --active-gradient: linear-gradient(135deg, #267650, #24735c); }
+[data-color="blue"] { --active-gradient: linear-gradient(135deg, #326ab0, #3460a0); }
+[data-color="coral"] { --active-gradient: linear-gradient(135deg, #b65039, #ad4539); }
+
+.auth-header { flex-direction: column; gap: 6px; }
+.auth-header h1 { position: static; transform: none; font-size: 24px; }
+.auth-header > span { color: var(--text-sub); font-size: 13px; }
+
+:root {
+  --bg-root: #f7f8fb;
+  --bg-gradient: #f7f8fb;
+  --text-main: #364152;
+  --text-heading: #202939;
+  --text-sub: #647084;
+  --label-text: #647084;
+  --meta-text: #647084;
+  --card-bg: #f2f4f8;
+  --form-bg: #ffffff;
+  --form-border: #dfe4ed;
+  --input-bg: #f8f9fc;
+  --input-border: #d4dbe6;
+  --input-text: #283548;
+  --tab-bg: #eaeef5;
+  --tab-text: #536078;
+  --anniversary-bg: #edf0f6;
+  --anniversary-text: #647084;
+  --income-color: #176c91;
+  --expense-color: #b9435a;
+}
+
+[data-theme="dark"] {
+  --bg-root: #171c26;
+  --bg-gradient: #171c26;
+  --text-main: #d9e0eb;
+  --text-heading: #f2f5fa;
+  --text-sub: #adb9cc;
+  --label-text: #adb9cc;
+  --meta-text: #adb9cc;
+  --card-bg: #2b3546;
+  --form-bg: #222b3a;
+  --form-border: #3c4960;
+  --input-bg: #1b2432;
+  --input-border: #4b5870;
+  --input-text: #e0e7f1;
+  --tab-bg: #303c50;
+  --tab-text: #c0cbe0;
+  --anniversary-bg: #222b3a;
+  --anniversary-text: #adb9cc;
+  --income-color: #7bc6e8;
+  --expense-color: #f49bab;
+}
+
+body {
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: -0.025em;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font-family: var(--font-ui); }
+button { -webkit-tap-highlight-color: transparent; }
+button:disabled { cursor: default; }
+#root { box-shadow: none; }
+.brand-header { background: var(--form-bg); padding-top: 22px; padding-bottom: 22px; border-radius: 0 0 20px 20px; }
+.brand-header h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.04em; }
+.header-icon-btn { border-radius: 12px; font-size: 17px; }
+.anniversary-item { box-shadow: none; border-radius: 10px; }
+.anniversary-item .value { font-weight: 700; }
+.owner-tabs { gap: 6px; }
+.owner-tabs button { border-radius: 12px; font-weight: 600; font-size: 13px; }
+.summary { gap: 8px; padding-bottom: 16px; }
+.summary-item { background: var(--form-bg); padding: 16px 6px; border-radius: 16px; }
+.summary-item .label { margin-bottom: 8px; font-weight: 500; }
+.summary-item .value { font-weight: 800; letter-spacing: -0.04em; line-height: 1.35; }
+.summary-item .sub-label { opacity: 1; }
+.form, .asset-chart { border-radius: 16px; padding: 18px 16px; }
+.form h3, .section-collapsible .collapsible-header h3 { font-size: 15px; font-weight: 700; }
+.section-collapsible .collapsible-header h3 { padding-left: 0; padding-bottom: 0; border-bottom: 0; }
+.section-collapsible .collapsible-header h3::before { display: none; }
+.collapsible-toggle { border-radius: 10px; font-weight: 600; padding: 6px 10px; }
+.collapsible-body { margin-top: 18px; }
+.collapsible-body h3 { font-size: 13px; margin-top: 18px; margin-bottom: 10px; }
+.tx-item { padding: 12px; margin-bottom: 8px; border-radius: 12px; }
+.tx-info .category { font-weight: 600; }
+.tx-info .meta { display: block; margin-top: 4px; }
+.tx-amount .amount { font-size: 15px; font-weight: 700; letter-spacing: -0.03em; }
+.tx-date-header { padding-top: 16px; padding-bottom: 10px; font-weight: 600; }
+.tx-date-total { font-size: 12px; }
+.form-row label { font-size: 13px; font-weight: 600; color: var(--text-main); }
+.form-row input, .form-row select { min-height: 46px; border-radius: 12px; }
+.submit-btn { min-height: 46px; border-radius: 12px; font-size: 15px; font-weight: 700; }
+.cat-icon-btn { border-radius: 12px; min-height: 68px; }
+.cat-icon-label { font-size: 12px; font-weight: 500; line-height: 1.4; }
+.cat-icon-btn.selected .cat-icon-label { font-weight: 700; }
+.bottom-tab-bar { background: var(--form-bg); gap: 8px; }
+.bottom-tab-bar button { min-height: 48px; }
+.bottom-tab-bar button.active { background: var(--tab-bg); font-weight: 700; }
+.tab-label { font-size: 12px; }
+.tab-pill { display: none; }
+.fab { border-radius: 18px; }
+.modal-content, .confirm-dialog { border: 1px solid var(--form-border); border-radius: 20px; padding: 22px; }
+.modal-header h3 { font-size: 17px; font-weight: 700; }
+.confirm-btn { border-radius: 12px; }
+.toast { font-size: 13px; font-weight: 600; border-radius: 14px; white-space: normal; width: max-content; max-width: calc(100vw - 40px); }
+.more-menu { background: var(--form-bg); border: 1px solid var(--form-border); }
+.more-menu-item { min-height: 42px; font-size: 13px; font-weight: 500; }
+
+@media (max-width: 360px) {
+  .brand-header h1 { font-size: 16px; }
+  .brand-header { padding-left: 10px; padding-right: 10px; }
+  .header-icon-btn { min-width: 32px; padding: 4px; }
+  .summary-item .value { font-size: 15px; }
+  .form, .asset-chart { padding-left: 12px; padding-right: 12px; }
+  .tx-amount .amount { font-size: 13px; }
 }

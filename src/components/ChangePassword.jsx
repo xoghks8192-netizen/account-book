@@ -134,7 +134,7 @@ export default function ChangePassword({ user, onClose, onUpdateSession }) {
           color: '#b88a9c',
           fontSize: 15,
           fontWeight: 700,
-          fontFamily: '"Jua", sans-serif',
+          fontFamily: 'var(--font-ui)',
           cursor: 'pointer',
           padding: 13,
         }}

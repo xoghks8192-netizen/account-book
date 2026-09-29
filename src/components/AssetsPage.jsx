@@ -470,7 +470,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
                       color: '#b88a9c',
                       fontSize: 13,
                       fontWeight: 700,
-                      fontFamily: '"Jua", sans-serif',
+                      fontFamily: 'var(--font-ui)',
                       padding: '6px 14px',
                       cursor: 'pointer',
                     }}
@@ -487,7 +487,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
                       color: '#e0524c',
                       fontSize: 13,
                       fontWeight: 700,
-                      fontFamily: '"Jua", sans-serif',
+                      fontFamily: 'var(--font-ui)',
                       padding: '6px 14px',
                       cursor: 'pointer',
                     }}

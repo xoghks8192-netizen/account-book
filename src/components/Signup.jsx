@@ -54,7 +54,7 @@ export default function Signup({ onDone }) {
 
   return (
     <div>
-      <div className="brand-header" style={{ borderRadius: '0 0 28px 28px', paddingBottom: 24 }}>
+      <div className="brand-header auth-header">
         <h1>회원가입</h1>
         <span>나와 상대방 정보를 입력해주세요</span>
       </div>
@@ -110,7 +110,7 @@ export default function Signup({ onDone }) {
                 color: '#b88a9c',
                 fontSize: 15,
                 fontWeight: 700,
-                fontFamily: '"Jua", sans-serif',
+                fontFamily: 'var(--font-ui)',
                 cursor: 'pointer',
               }}
             >

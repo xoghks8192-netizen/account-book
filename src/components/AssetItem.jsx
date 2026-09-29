@@ -142,7 +142,7 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
             <button onClick={handleSave} disabled={saving} className="submit-btn" style={{ flex: 1 }}>저장</button>
-            <button onClick={handleCancel} style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: '"Jua", sans-serif', cursor: 'pointer' }}>취소</button>
+            <button onClick={handleCancel} style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
           </div>
         </Modal>
       )}
