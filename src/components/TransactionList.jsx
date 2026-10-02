@@ -128,13 +128,17 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
     <>
       {confirmDeleteId && (
         <ConfirmDialog
-          message="이 내역을 삭제할까요?"
+          message={transactions.find(t => t.id === confirmDeleteId)?.transfer_id
+            ? '이체를 삭제하면 배우자 쪽 내역도 함께 삭제됩니다. 삭제할까요?'
+            : '이 내역을 삭제할까요?'}
           onConfirm={() => { onDelete(confirmDeleteId); setConfirmDeleteId(null); setSwipedId(null) }}
           onCancel={() => setConfirmDeleteId(null)}
         />
       )}
       {editingTx && (
         <Modal title="내역 수정" onClose={() => setEditingId(null)}>
+          {editingTx.transfer_id && <p style={{ color: 'var(--text-sub)', fontSize: 13 }}>연결된 이체입니다. 금액과 날짜는 배우자 내역에도 함께 반영됩니다. 구분·카테고리·소유자를 바꾸려면 삭제 후 다시 입력해주세요.</p>}
+          {!editingTx.transfer_id && editingTx.category === '배우자 이체' && <p style={{ color: 'var(--text-sub)', fontSize: 13 }}>기존에 입력한 이체는 자동 연결되지 않습니다. 상대방 내역은 별도로 확인해주세요.</p>}
           <div className="type-toggle">
             <button type="button" className={`income ${editType === 'income' ? 'active' : ''}`} onClick={() => handleEditTypeChange('income')}>수입</button>
             <button type="button" className={`expense ${editType === 'expense' ? 'active' : ''}`} onClick={() => handleEditTypeChange('expense')}>지출</button>

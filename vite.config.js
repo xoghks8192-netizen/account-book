@@ -1,107 +1,47 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
-import { fetchStockPrice } from './api/lib/fetchPrice.js'
-import savingsRatesHandler from './api/savings-rates.js'
-import realestateHandler from './api/realestate.js'
-import realestateAiHandler from './api/realestate-ai.js'
-import loginHandler from './api/login.js'
-import changePwHandler from './api/change-pw.js'
-import aiInsightHandler from './api/ai-insight.js'
-import signupHandler from './api/signup.js'
-import updateHouseholdHandler from './api/update-household.js'
-import resetPasswordHandler from './api/reset-password.js'
+import login from './api/login.js'
+import signup from './api/signup.js'
+import changePw from './api/change-pw.js'
+import updateHousehold from './api/update-household.js'
+import aiInsight from './api/ai-insight.js'
+import stockPrice from './api/stock-price.js'
+import data from './api/data.js'
+import transactions from './api/transactions.js'
+import resetPassword from './api/reset-password.js'
+import savingsRates from './api/savings-rates.js'
+import realestate from './api/realestate.js'
+import realestateAi from './api/realestate-ai.js'
 
-function getApi(path, handler) {
-  return {
-    name: `get-api-${path}`,
-    configureServer(server) {
-      server.middlewares.use(path, async (req, res) => {
-        res.setHeader('Content-Type', 'application/json')
-        const wrappedRes = {
-          status(code) { res.statusCode = code; return this },
-          json(obj) { res.end(JSON.stringify(obj)) },
+function apiRoute(path, handler) {
+  return { name: 'api-'+path, configureServer(server) {
+    server.middlewares.use(path, async (req, res) => {
+      res.setHeader('Content-Type', 'application/json')
+      const wrapped = {
+        setHeader(name,value) { res.setHeader(name,value); return this },
+        status(code) { res.statusCode=code; return this },
+        json(value) { res.end(JSON.stringify(value)) },
+      }
+      try {
+        req.query=Object.fromEntries(new URL(req.url,'http://localhost').searchParams)
+        const chunks=[]; let size=0
+        for await (const chunk of req) {
+          size+=chunk.length
+          if(size>1000000) return wrapped.status(413).json({error:'입력 내용이 너무 큽니다.'})
+          chunks.push(chunk)
         }
-        await handler(req, wrappedRes)
-      })
-    },
-  }
+        const raw=Buffer.concat(chunks).toString('utf8')
+        try { req.body=raw ? JSON.parse(raw) : {} }
+        catch { return wrapped.status(400).json({error:'입력 형식을 확인해주세요.'}) }
+        await handler(req,wrapped)
+      } catch { wrapped.status(500).json({error:'요청을 처리하지 못했습니다.'}) }
+    })
+  } }
 }
-
-function stockPriceApi() {
-  return {
-    name: 'stock-price-api',
-    configureServer(server) {
-      server.middlewares.use('/api/stock-price', async (req, res) => {
-        const url = new URL(req.url, 'http://localhost')
-        const code = url.searchParams.get('code')
-        res.setHeader('Content-Type', 'application/json')
-        if (!code) {
-          res.statusCode = 400
-          res.end(JSON.stringify({ error: '종목코드가 필요합니다.' }))
-          return
-        }
-        try {
-          const price = await fetchStockPrice(code)
-          res.end(JSON.stringify({ price }))
-        } catch (e) {
-          res.statusCode = 500
-          res.end(JSON.stringify({ error: e.message }))
-        }
-      })
-    },
-  }
-}
-
-function jsonApi(path, handler) {
-  return {
-    name: `json-api-${path}`,
-    configureServer(server) {
-      server.middlewares.use(path, async (req, res) => {
-        if (req.method !== 'POST') {
-          res.statusCode = 405
-          res.end()
-          return
-        }
-        const chunks = []
-        for await (const chunk of req) chunks.push(chunk)
-        const body = Buffer.concat(chunks).toString('utf-8')
-        req.body = body ? JSON.parse(body) : {}
-        res.setHeader('Content-Type', 'application/json')
-        const wrappedRes = {
-          status(code) {
-            res.statusCode = code
-            return this
-          },
-          json(obj) {
-            res.end(JSON.stringify(obj))
-          },
-        }
-        await handler(req, wrappedRes)
-      })
-    },
-  }
-}
-
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
-  Object.assign(process.env, env)
-
-  return {
-    plugins: [
-      react(),
-      stockPriceApi(),
-      jsonApi('/api/login', loginHandler),
-      jsonApi('/api/change-pw', changePwHandler),
-      jsonApi('/api/ai-insight', aiInsightHandler),
-      jsonApi('/api/signup', signupHandler),
-      jsonApi('/api/update-household', updateHouseholdHandler),
-      jsonApi('/api/reset-password', resetPasswordHandler),
-      getApi('/api/savings-rates', savingsRatesHandler),
-      getApi('/api/realestate', realestateHandler),
-      jsonApi('/api/realestate-ai', realestateAiHandler),
-    ],
-    server: {
-      host: true,
-    },
-  }
+export default defineConfig(({mode}) => {
+  Object.assign(process.env,loadEnv(mode,process.cwd(),''))
+  const routes={login,signup,'change-pw':changePw,'update-household':updateHousehold,
+    'ai-insight':aiInsight,'stock-price':stockPrice,data,transactions,
+    'reset-password':resetPassword,'savings-rates':savingsRates,realestate,'realestate-ai':realestateAi}
+  return {plugins:[react(),...Object.entries(routes).map(([path,handler])=>apiRoute('/api/'+path,handler))],server:{host:true}}
 })

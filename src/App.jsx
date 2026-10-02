@@ -15,7 +15,7 @@ import TransactionCalendar from './components/TransactionCalendar'
 import Modal from './components/Modal'
 import MonthlyTrendChart from './components/MonthlyTrendChart'
 import { toCSV, downloadCSV } from './lib/csv'
-import { loadSession, saveSession, clearSession } from './users'
+import { saveSession, clearSession } from './users'
 import { STOCK_CATEGORIES } from './assetMeta'
 import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from './categories'
 import PinLock from './components/PinLock'
@@ -63,7 +63,25 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [])
 
-  const [user, setUser] = useState(() => loadSession())
+  const [user, setUser] = useState(null)
+  const [authReady, setAuthReady] = useState(false)
+  const [authError, setAuthError] = useState('')
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/login', { credentials:'same-origin', cache:'no-store' })
+      .then(async res => {
+        if (res.status === 401) { clearSession(); return null }
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || '로그인 상태를 확인하지 못했습니다.')
+        return data
+      })
+      .then(data => { if (!cancelled && data) { saveSession(data); setUser(data) } })
+      .catch(() => { if (!cancelled) setAuthError('서버에 연결하지 못했어요. 연결 상태를 확인한 뒤 다시 시도해주세요.') })
+      .finally(() => { if (!cancelled) setAuthReady(true) })
+    const expired = () => { clearSession(); setUser(null); setShowPasswordForm(false) }
+    window.addEventListener('hb-session-expired', expired)
+    return () => { cancelled = true; window.removeEventListener('hb-session-expired', expired) }
+  }, [])
   const isReload = performance.getEntriesByType('navigation')[0]?.type === 'reload'
   const [splashDone, setSplashDone] = useState(isReload)
 
@@ -175,17 +193,19 @@ export default function App() {
 
   useEffect(() => {
     if (!householdId || !user) return
+    let cancelled = false
     supabase
       .from('households')
       .select('categories, dating_start, wedding_date')
       .eq('id', householdId)
       .single()
       .then(({ data }) => {
-        if (!data) return
+        if (cancelled || !data) return
         const next = { ...user, categories: data.categories ?? {}, datingStart: data.dating_start, weddingDate: data.wedding_date }
         saveSession(next)
         setUser(next)
       })
+    return () => { cancelled = true }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [householdId])
 
@@ -204,6 +224,7 @@ export default function App() {
   }, [colorTheme])
 
   useEffect(() => {
+    setLinkableAssets([])
     if (!householdId) return
     let cancelled = false
     async function load() {
@@ -229,6 +250,7 @@ export default function App() {
   async function wrappedDelete(id) {
     const ok = await handleDelete(id)
     if (ok !== false) showToast('🗑 내역이 삭제되었습니다')
+    return ok
   }
 
   async function wrappedUpdate(id, fields) {
@@ -414,6 +436,9 @@ export default function App() {
     }
   }
 
+  if (!authReady || authError) {
+    return <div className="container" role="status"><p>{authError || '로그인 확인 중…'}</p>{authError && <button className="submit-btn" onClick={() => window.location.reload()}>다시 시도</button>}</div>
+  }
   if (!user) {
     return <Login onLogin={setUser} />
   }
@@ -435,9 +460,14 @@ export default function App() {
     return <PinLock mode="unlock" onUnlock={unlockPin} />
   }
 
-  function handleLogout() {
-    clearSession()
-    setUser(null)
+  async function handleLogout() {
+    try {
+      const res = await fetch('/api/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout'})})
+      if (!res.ok) throw new Error()
+      clearSession()
+      setUser(null)
+      setShowPasswordForm(false)
+    } catch { showToast('로그아웃하지 못했어요. 다시 시도해주세요.') }
   }
 
   async function updateCategoryList(type, nextList) {

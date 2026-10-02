@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { TRANSFER_CATEGORY } from '../categories'
 
 function sortTx(list) {
   return [...list].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id))
@@ -12,9 +11,12 @@ export function useTransactions({ householdId, start, end, prevStart, prevEnd, o
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const pendingRequests = useRef(new Map())
+  const activeContext = useRef(null)
+  activeContext.current = { householdId, start, end, prevStart, prevEnd }
   // 이번 달 내역
   useEffect(() => {
-    if (!householdId) return
+    if (!householdId) { setTransactions([]); setPrevTransactions([]); setLoading(false); return }
     let cancelled = false
     async function load() {
       setLoading(true); setError(null)
@@ -34,7 +36,7 @@ export function useTransactions({ householdId, start, end, prevStart, prevEnd, o
 
   // 지난 달 내역
   useEffect(() => {
-    if (!householdId) return
+    if (!householdId) { setTransactions([]); setPrevTransactions([]); setLoading(false); return }
     let cancelled = false
     async function load() {
       const { data, error } = await supabase
@@ -48,59 +50,59 @@ export function useTransactions({ householdId, start, end, prevStart, prevEnd, o
     return () => { cancelled = true }
   }, [prevStart, prevEnd, householdId])
 
-  async function adjustAssetAmount(assetId, delta) {
-    if (!assetId || !delta) return
-    const { data } = await supabase.from('assets').select('amount').eq('id', assetId).single()
-    if (!data) return
-    await supabase.from('assets').update({ amount: Number(data.amount) + delta, updated_at: new Date().toISOString() }).eq('id', assetId)
+  async function mutate(action, id, fields = {}) {
+    const cleaned = Object.fromEntries(Object.entries(fields).filter(([key]) =>
+      ['type','date','category','amount','memo','owner','linked_asset_id'].includes(key)))
+    const signature = JSON.stringify({householdId,action,id,fields:cleaned})
+    let pending = pendingRequests.current.get(signature)
+    if (pending?.inFlight) return null
+    if (!pending) {
+      pending = { requestId:crypto.randomUUID(), inFlight:false }
+      pendingRequests.current.set(signature,pending)
+    }
+    pending.inFlight = true
+    setError(null)
+    try {
+      const res = await fetch('/api/transactions', {
+        method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action,id,fields:cleaned,requestId:pending.requestId}),
+      })
+      const result = await res.json()
+      if (res.status === 401) window.dispatchEvent(new Event('hb-session-expired'))
+      if (!res.ok) {
+        // Keep the request ID on uncertain/network/server failures for safe retries.
+        if (res.status < 500) pendingRequests.current.delete(signature)
+        throw new Error(result.error || '내역을 저장하지 못했습니다.')
+      }
+      const touched = new Set([...(result.removedIds || []), ...(result.rows || []).map(r => r.id)])
+      const reconcile = (list, from, to) => sortTx([
+        ...list.filter(t => !touched.has(t.id)),
+        ...(result.rows || []).filter(t => t.date >= from && t.date < to),
+      ])
+      const active = activeContext.current
+      if (active.householdId === householdId) {
+        setTransactions(prev => reconcile(prev,active.start,active.end))
+        setPrevTransactions(prev => reconcile(prev,active.prevStart,active.prevEnd))
+      }
+      pendingRequests.current.delete(signature)
+      return result
+    } catch(e) {
+      if (activeContext.current.householdId === householdId) {
+        setError(e.message || '처리 결과를 확인하지 못했습니다. 연결을 확인하고 다시 시도해주세요.')
+      }
+      return null
+    } finally { pending.inFlight = false }
   }
 
   async function handleAdd(tx) {
-    const { data, error } = await supabase
-      .from('transactions')
-      .insert({ ...tx, author: tx.author || myName, household_id: householdId })
-      .select().single()
-    if (error) { setError(error.message); return null }
-    if (tx.date >= start && tx.date < end) {
-      setTransactions(prev => sortTx([...prev, data]))
-    }
-    if (data.linked_asset_id) {
-      await adjustAssetAmount(data.linked_asset_id, Number(data.amount))
-    }
-    if (data.category === TRANSFER_CATEGORY && data.type === 'expense') {
-      const partner = owners.find(o => o !== '공동' && o !== data.owner)
-      if (partner) {
-        const { data: counterData } = await supabase
-          .from('transactions')
-          .insert({ date: data.date, type: 'income', category: TRANSFER_CATEGORY, amount: data.amount, owner: partner, memo: data.memo, author: data.author, household_id: householdId })
-          .select().single()
-        if (counterData && counterData.date >= start && counterData.date < end) {
-          setTransactions(prev => sortTx([...prev, counterData]))
-        }
-      }
-    }
-    return data
+    const result = await mutate('add',null,tx)
+    return result?.primary || null
   }
-
   async function handleDelete(id) {
-    const target = transactions.find(t => t.id === id)
-    const { error } = await supabase.from('transactions').delete().eq('id', id)
-    if (error) { setError(error.message); return false }
-    setTransactions(prev => prev.filter(t => t.id !== id))
-    if (target?.linked_asset_id) {
-      await adjustAssetAmount(target.linked_asset_id, -Number(target.amount))
-    }
-    return true
+    return !!await mutate('delete',id)
   }
-
-  async function handleUpdate(id, fields) {
-    const old = transactions.find(t => t.id === id)
-    const { data, error } = await supabase.from('transactions').update(fields).eq('id', id).select().single()
-    if (error) { setError(error.message); return false }
-    setTransactions(prev => sortTx(prev.map(t => t.id === id ? data : t)))
-    if (old?.linked_asset_id) await adjustAssetAmount(old.linked_asset_id, -Number(old.amount))
-    if (data.linked_asset_id) await adjustAssetAmount(data.linked_asset_id, Number(data.amount))
-    return true
+  async function handleUpdate(id,fields) {
+    return !!await mutate('update',id,fields)
   }
 
   return { transactions, prevTransactions, loading, error, setError, handleAdd, handleDelete, handleUpdate }

@@ -1,7 +1,14 @@
+import { requireSession, rateLimit, apiError, fail } from '../server/auth.js'
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const { messages } = req.body
+  try {
+    const {db,user} = await requireSession(req)
+    await rateLimit(db,'ai:' + user.username,10)
+    if (JSON.stringify(req.body || {}).length > 30000) throw fail(400,'분석 내용이 너무 깁니다.')
+  } catch(e) { return apiError(res,e) }
+  const { messages } = req.body || {}
   if (!messages) return res.status(400).json({ error: 'messages가 필요합니다.' })
 
   const OPENAI_KEY = process.env.OPENAI_API_KEY

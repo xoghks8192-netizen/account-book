@@ -199,7 +199,8 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   }
 
   async function handleDelete(id) {
-    await supabase.from('recurring_templates').delete().eq('id', id)
+    const { error } = await supabase.from('recurring_templates').delete().eq('id', id)
+    if (error) { onToast?.('삭제하지 못했습니다. 다시 시도해주세요.'); return }
     setTemplates((prev) => prev.filter((t) => t.id !== id))
     onToast?.('🗑 고정 항목이 삭제되었습니다')
   }
@@ -293,7 +294,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   async function handleUndo(templateId) {
     const txId = lastAdded[templateId]
     if (!txId) return
-    await onUndo(txId)
+    if (!await onUndo(txId)) return
     setLastAdded((prev) => {
       const next = { ...prev }
       delete next[templateId]

@@ -10,6 +10,7 @@ export default function Signup({ onDone }) {
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [partnerName, setPartnerName] = useState('')
+  const [inviteCode, setInviteCode] = useState('')
   const [anniversaryType, setAnniversaryType] = useState('dating')
   const [anniversaryDate, setAnniversaryDate] = useState(todayStr())
   const [error, setError] = useState('')
@@ -30,6 +31,7 @@ export default function Signup({ onDone }) {
           password,
           displayName,
           partnerName,
+          inviteCode,
           anniversaryType,
           anniversaryDate,
         }),
@@ -44,6 +46,7 @@ export default function Signup({ onDone }) {
       setPassword('')
       setDisplayName('')
       setPartnerName('')
+      setInviteCode('')
       setAnniversaryDate(todayStr())
     } catch {
       setError('회원가입 중 오류가 발생했습니다.')
@@ -66,7 +69,7 @@ export default function Signup({ onDone }) {
           </div>
           <div className="form-row">
             <label>비밀번호</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input type="password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           <div className="form-row">
             <label>내 이름</label>
@@ -87,8 +90,14 @@ export default function Signup({ onDone }) {
             <label>기념일 날짜</label>
             <input type="date" value={anniversaryDate} onChange={(e) => setAnniversaryDate(e.target.value)} required />
             <div style={{ marginTop: 6, fontSize: 12, color: '#a89cc4' }}>
-              ⓘ 상대방과 입력한 정보가 정확히 일치하면 자동으로 상대방과 연결됩니다.
+              ⓘ 배우자와 연결하려면 상대방의 설정 → 내 정보 변경에서 발급한 초대 코드를 입력해주세요.
             </div>
+          </div>
+
+          <div className="form-row">
+            <label>배우자 초대 코드 (선택)</label>
+            <input type="text" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} autoComplete="off" />
+            <small>코드가 없으면 별도의 가계부로 가입됩니다. 기존 부부 연결은 그대로 유지됩니다.</small>
           </div>
 
           {error && <div style={{ color: '#ff8fab', fontSize: 13, marginBottom: 10 }}>{error}</div>}

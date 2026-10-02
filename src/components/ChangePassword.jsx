@@ -7,6 +7,21 @@ export default function ChangePassword({ user, onClose, onUpdateSession }) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [saving, setSaving] = useState(false)
+  const [invite, setInvite] = useState('')
+  const [inviteError, setInviteError] = useState('')
+  const [inviting, setInviting] = useState(false)
+
+  async function createInvite() {
+    setInviting(true)
+    setInviteError('')
+    try {
+      const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'invite'}) })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || '초대 코드 생성에 실패했습니다.')
+      setInvite(data.code)
+    } catch(e) { setInviteError(e.message) }
+    finally { setInviting(false) }
+  }
 
   const [datingStart, setDatingStart] = useState(user.datingStart || '')
   const [weddingDate, setWeddingDate] = useState(user.weddingDate || '')
@@ -19,8 +34,8 @@ export default function ChangePassword({ user, onClose, onUpdateSession }) {
     setError('')
     setSuccess('')
 
-    if (!next || next.length < 4) {
-      setError('새 비밀번호는 4자 이상으로 입력해주세요.')
+    if (!next || next.length < 8) {
+      setError('새 비밀번호는 8자 이상으로 입력해주세요.')
       return
     }
     if (next !== confirm) {
@@ -71,11 +86,7 @@ export default function ChangePassword({ user, onClose, onUpdateSession }) {
         return
       }
       onUpdateSession(data)
-      if (data.members.length === 2 && user.members.length < 2) {
-        setAnnivSuccess('기념일이 일치해서 상대방과 연결되었습니다! 🎉')
-      } else {
-        setAnnivSuccess('기념일이 저장되었습니다.')
-      }
+      setAnnivSuccess('기념일이 저장되었습니다.')
     } catch (e) {
       setAnnivError(e.message)
     } finally {
@@ -86,6 +97,15 @@ export default function ChangePassword({ user, onClose, onUpdateSession }) {
   return (
     <div className="form">
       <h3>내 정보 변경</h3>
+      {user.members.length === 1 && (
+        <section style={{marginBottom:24}}>
+          <h4>배우자 초대</h4>
+          <p>코드를 배우자에게만 전달해주세요. 24시간 동안 한 번 사용할 수 있으며, 상대방이 회원가입할 때 입력하면 연결됩니다.</p>
+          <button type="button" className="submit-btn" disabled={inviting} onClick={createInvite}>{inviting ? '생성 중…' : '초대 코드 만들기'}</button>
+          {invite && <div className="form-row"><label>코드 (눌러서 전체 선택)</label><input readOnly value={invite} onFocus={e => e.target.select()} /></div>}
+          {inviteError && <p role="alert">{inviteError}</p>}
+        </section>
+      )}
       <h4 style={{ marginTop: 0 }}>비밀번호 변경</h4>
       <form onSubmit={handleSubmit}>
         <div className="form-row">
