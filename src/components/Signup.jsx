@@ -1,8 +1,8 @@
+import { todayKst } from '../lib/dates'
 import { useState } from 'react'
 
 function todayStr() {
-  const d = new Date()
-  return d.toISOString().slice(0, 10)
+  return todayKst()
 }
 
 export default function Signup({ onDone }) {

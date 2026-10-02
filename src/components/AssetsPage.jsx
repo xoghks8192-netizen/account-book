@@ -1,3 +1,4 @@
+import { todayKst, currentMonth, monthRange } from '../lib/dates'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { useCountUp } from '../hooks/useCountUp'
 import { supabase } from '../lib/supabase'
@@ -243,7 +244,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
 
   useEffect(() => {
     if (!householdId || loading) return
-    const today = new Date().toISOString().slice(0, 10)
+    const today = todayKst()
     supabase
       .from('net_worth_snapshots')
       .upsert(
@@ -260,13 +261,15 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
 
   useEffect(() => {
     if (!householdId) return
-    const now = new Date()
-    const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10)
+    const now = currentMonth()
+    const previous = monthRange(now.year, now.month - 1)
+    setLastMonthTotal(null)
     supabase
       .from('net_worth_snapshots')
       .select('total, snapshot_date')
       .eq('household_id', householdId)
-      .lt('snapshot_date', firstOfMonth)
+      .gte('snapshot_date', previous.start)
+      .lt('snapshot_date', previous.end)
       .order('snapshot_date', { ascending: false })
       .limit(1)
       .single()

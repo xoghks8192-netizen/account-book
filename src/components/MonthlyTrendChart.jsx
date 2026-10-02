@@ -1,3 +1,4 @@
+import { currentMonth, monthRange } from '../lib/dates'
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import Collapsible from './Collapsible'
@@ -16,16 +17,10 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners, de
     if (!householdId) return
     async function load() {
       const months = []
-      const now = new Date()
+      const now = currentMonth()
       for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-        const y = d.getFullYear()
-        const m = d.getMonth()
-        const pad = (n) => String(n).padStart(2, '0')
-        const start = `${y}-${pad(m + 1)}-01`
-        const nd = new Date(y, m + 1, 1)
-        const end = `${nd.getFullYear()}-${pad(nd.getMonth() + 1)}-01`
-        months.push({ label: `${m + 1}월`, start, end })
+        const { start, end } = monthRange(now.year, now.month - i)
+        months.push({ label: `${Number(start.slice(5, 7))}월`, start, end })
       }
 
       const { data: rows } = await supabase

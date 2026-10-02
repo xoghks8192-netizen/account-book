@@ -1,10 +1,10 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY, CATEGORY_EMOJI } from '../categories'
 import CategoryManager from './CategoryManager'
+import { todayKst } from '../lib/dates'
 
 function todayStr() {
-  const d = new Date()
-  return d.toISOString().slice(0, 10)
+  return todayKst()
 }
 
 const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory }, ref) {
@@ -15,6 +15,8 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
   const [memo, setMemo] = useState('')
   const [owner, setOwner] = useState(currentUser || owners[0])
   const [saving, setSaving] = useState(false)
+  const savingRef = useRef(false)
+  const [saveError, setSaveError] = useState('')
   const [linkedAssetId, setLinkedAssetId] = useState('')
   const [showCategoryManager, setShowCategoryManager] = useState(false)
   const [showMore, setShowMore] = useState(false)
@@ -44,9 +46,13 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!amount || Number(amount) <= 0) return
+    if (savingRef.current) return
+    if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) return
+    savingRef.current = true
     setSaving(true)
-    const result = await onAdd({
+    setSaveError('')
+    try {
+      const result = await onAdd({
       type,
       date,
       category,
@@ -55,13 +61,20 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
       owner,
       linked_asset_id: linkedAssetId || null,
     })
-    setAmount('')
-    setMemo('')
-    setLinkedAssetId('')
-    setTransferToSpouse(false)
-    setSaving(false)
-    if (result) {
+      if (!result) {
+        setSaveError('저장하지 못했어요. 입력 내용은 유지돼요. 연결 상태를 확인하고 다시 시도해주세요.')
+        return
+      }
+      setAmount('')
+      setMemo('')
+      setLinkedAssetId('')
+      setTransferToSpouse(false)
       onSuccess?.()
+    } catch {
+      setSaveError('저장 결과를 확인하지 못했어요. 내역에 추가되었는지 먼저 확인해주세요. 입력 내용은 유지돼요.')
+    } finally {
+      savingRef.current = false
+      setSaving(false)
     }
   }
 
@@ -208,6 +221,7 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
         </>
       )}
 
+      {saveError && <p role="alert" style={{ color: 'var(--expense-color)', fontSize: 13 }}>{saveError}</p>}
       <button type="submit" className="submit-btn" disabled={saving}>
         {saving ? '저장 중...' : '추가하기'}
       </button>

@@ -1,3 +1,4 @@
+import { todayKst, currentMonth, monthRange } from './lib/dates'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from './lib/supabase'
 import TransactionForm from './components/TransactionForm'
@@ -34,12 +35,6 @@ function shortName(name) {
   return name.length >= 3 ? name.slice(1) : name
 }
 
-function monthRange(year, month) {
-  const start = new Date(year, month, 1)
-  const end = new Date(year, month + 1, 1)
-  const toStr = (d) => d.toISOString().slice(0, 10)
-  return { start: toStr(start), end: toStr(end) }
-}
 
 export default function App() {
   const [pinLocked, setPinLocked] = useState(() =>
@@ -88,8 +83,7 @@ export default function App() {
     setTimeout(() => setSlideDir(null), 350)
   }
   const [cursor, setCursor] = useState(() => {
-    const now = new Date()
-    return { year: now.getFullYear(), month: now.getMonth() }
+    return currentMonth()
   })
   const [lastAddedTxId, setLastAddedTxId] = useState(null)
   const [showPinSetup, setShowPinSetup] = useState(false)
@@ -348,7 +342,7 @@ export default function App() {
 
   async function handleExportAll() {
     setExporting(true)
-    const date = new Date().toISOString().slice(0, 10)
+    const date = todayKst()
 
     try {
       const { data: txData } = await supabase
@@ -607,8 +601,8 @@ export default function App() {
             </button>
             <button className="month-nav-arrow" onClick={() => changeMonth(1)}>›</button>
             <div className="month-nav-side">
-              {(() => { const now = new Date(); return (cursor.year !== now.getFullYear() || cursor.month !== now.getMonth()) ? (
-                <button className="month-nav-today" onClick={() => setCursor({ year: now.getFullYear(), month: now.getMonth() })}>오늘</button>
+              {(() => { const now = currentMonth(); return (cursor.year !== now.year || cursor.month !== now.month) ? (
+                <button className="month-nav-today" onClick={() => setCursor(now)}>오늘</button>
               ) : null })()}
             </div>
           </div>
@@ -873,7 +867,7 @@ export default function App() {
                 memo: t.memo,
                 author: t.author,
                 owner: t.author,
-                date: new Date().toISOString().slice(0, 10),
+                date: todayKst(),
                 linked_asset_id: t.linked_asset_id ?? null,
               })
             }
