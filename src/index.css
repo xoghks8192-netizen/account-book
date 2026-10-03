@@ -179,7 +179,7 @@ body {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
-  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
   background: var(--bg-root);
   box-shadow: 0 0 30px var(--shadow-root);
   transition: background 0.3s ease;
@@ -425,6 +425,25 @@ body {
 
 .bottom-tab-bar button.active {
   color: var(--balance-color);
+}
+
+.bottom-tab-bar .tab-add-button {
+  flex: 0 0 48px;
+  align-self: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 16px;
+  background: var(--active-gradient);
+  color: #fff;
+  font-size: 30px;
+  line-height: 1;
+  box-shadow: 0 2px 6px var(--active-shadow);
+}
+.tab-add-button:focus-visible {
+  outline: 2px solid var(--balance-color);
+  outline-offset: 3px;
 }
 
 .tab-pill {

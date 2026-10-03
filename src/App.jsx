@@ -901,19 +901,25 @@ export default function App() {
       )}
       </div>
 
-      {page === 'transactions' && (
-        <button className="fab" onClick={() => { setFormOpenToken((n) => n + 1); setTimeout(() => formRef.current?.focusAmount(), 100) }} aria-label="내역 추가">+</button>
-      )}
-      {page === 'assets' && (
-        <button className="fab" onClick={() => assetsPageRef.current?.openAddForm()} aria-label="자산 추가">+</button>
-      )}
-
       <div className="bottom-tab-bar">
         <button className={page === 'transactions' ? 'active' : ''} onClick={() => navigateTo('transactions')}>
           <span className="tab-icon">📋</span>
           <span className="tab-label">내역</span>
           {page === 'transactions' && <span className="tab-pill" />}
         </button>
+        <button
+          type="button"
+          className="tab-add-button"
+          aria-label={page === 'assets' ? '자산 추가' : '내역 추가'}
+          title={page === 'assets' ? '자산 추가' : '내역 추가'}
+          onClick={() => {
+            if (page === 'assets') assetsPageRef.current?.openAddForm()
+            else {
+              setFormOpenToken((n) => n + 1)
+              setTimeout(() => formRef.current?.focusAmount(), 100)
+            }
+          }}
+        >+</button>
         <button className={page === 'assets' ? 'active' : ''} onClick={() => navigateTo('assets')}>
           <span className="tab-icon">💰</span>
           <span className="tab-label">자산</span>
