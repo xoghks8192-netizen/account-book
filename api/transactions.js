@@ -6,7 +6,19 @@ export default async function handler(req, res) {
   try {
     const { db, user } = await requireSession(req)
     const { action, id = null, fields = {}, requestId } = req.body || {}
-    if (!['add','update','delete'].includes(action) || !/^[a-f0-9-]{36}$/i.test(requestId || '')) throw fail(400, '잘못된 요청입니다.')
+    if (!['add','update','delete','status'].includes(action) || !/^[a-f0-9-]{36}$/i.test(requestId || '')) throw fail(400, '잘못된 요청입니다.')
+    if (action === 'status') {
+      const {data:receipt,error} = await db.from('app_mutation_requests').select('result')
+        .eq('household_id',user.household_id).eq('actor',user.username).eq('request_id',requestId).maybeSingle()
+      if(error) throw fail(503,'저장 결과를 확인하지 못했습니다.')
+      if(!receipt) return res.status(200).json({state:'unconfirmed'})
+      const ids=[...(receipt.result.removedIds||[]),...(receipt.result.rows||[]).map(r=>r.id)]
+      const {data:rows,error:readError}=ids.length
+        ? await db.from('transactions').select('*').eq('household_id',user.household_id).in('id',ids)
+        : {data:[],error:null}
+      if(readError) throw fail(503,'저장 결과를 확인하지 못했습니다.')
+      return res.status(200).json({state:'confirmed',result:{...receipt.result,rows,removedIds:ids}})
+    }
     const { data, error } = await db.rpc('hb_mutate_transaction', {
       p_actor: user.username, p_action: action, p_id: id, p_fields: fields, p_request: requestId,
     })

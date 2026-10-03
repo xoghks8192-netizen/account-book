@@ -1,13 +1,13 @@
+import { useMoney, usePrivacy } from '../lib/privacy'
 import { useState } from 'react'
 import { STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
 import Modal from './Modal'
 import ConfirmDialog from './ConfirmDialog'
 
-function formatAmount(n) {
-  return Number(n).toLocaleString('ko-KR')
-}
 
 export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
+  const moneyHidden=usePrivacy()
+  const formatAmount = useMoney()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(asset.name)
   const [owner, setOwner] = useState(asset.owner)
@@ -108,11 +108,11 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
             <>
               <div className="form-row">
                 <label>보유 수량 (주)</label>
-                <input type="number" value={shares} onChange={(e) => setShares(e.target.value)} />
+                <input type={moneyHidden ? "password" : "number"} value={shares} onChange={(e) => setShares(e.target.value)} />
               </div>
               <div className="form-row">
                 <label>평단가 (원)</label>
-                <input type="number" value={avgPrice} onChange={(e) => setAvgPrice(e.target.value)} />
+                <input type={moneyHidden ? "password" : "number"} value={avgPrice} onChange={(e) => setAvgPrice(e.target.value)} />
               </div>
               <div className="form-row">
                 <label>종목코드 (선택)</label>
@@ -120,14 +120,14 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
               </div>
               <div className="form-row">
                 <label>현재가 (원)</label>
-                <input type="number" value={currentPrice} onChange={(e) => setCurrentPrice(e.target.value)} disabled={!!ticker.trim()} style={ticker.trim() ? { opacity: 0.6 } : {}} />
+                <input type={moneyHidden ? "password" : "number"} value={currentPrice} onChange={(e) => setCurrentPrice(e.target.value)} disabled={!!ticker.trim()} style={ticker.trim() ? { opacity: 0.6 } : {}} />
               </div>
             </>
           ) : (
             <>
               <div className="form-row">
                 <label>금액</label>
-                <input type="number" inputMode="numeric" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
+                <input type={moneyHidden ? "password" : "number"} inputMode="numeric" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
               </div>
               {amount !== '' && Number(amount) !== asset.amount && (
                 <div style={{ textAlign: 'right', fontSize: 13, fontWeight: 700, color: Number(amount) > asset.amount ? '#ff5c5c' : '#6cb6ff', marginBottom: 8 }}>
@@ -153,7 +153,7 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
           <span className="meta">
             {asset.owner}
             {isStockItem ? ` · ${formatAmount(asset.shares)}주 · 평단 ${formatAmount(asset.avg_price)} · 현재 ${formatAmount(asset.current_price)}` : ''}
-            {asset.memo ? ` · ${asset.memo}` : ''}
+            {asset.memo && !moneyHidden ? ` · ${asset.memo}` : ''}
           </span>
           {refreshError && <span className="meta" style={{ color: '#ff7aa2' }}>{refreshError}</span>}
         </div>

@@ -1,8 +1,10 @@
+import { usePrivacy } from '../lib/privacy'
 import { useState } from 'react'
 import { ASSET_CATEGORIES, STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
 import CategoryManager from './CategoryManager'
 
 export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory, defaultOwner }) {
+  const moneyHidden=usePrivacy()
   const [name, setName] = useState('')
   const [category, setCategory] = useState(categories[0])
   const [owner, setOwner] = useState(defaultOwner || owners[0])
@@ -149,7 +151,7 @@ export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES
           <div className="form-row">
             <label>보유 수량 (주)</label>
             <input
-              type="number"
+              type={moneyHidden ? "password" : "number"}
               inputMode="numeric"
               min="0"
               placeholder="0"
@@ -161,7 +163,7 @@ export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES
           <div className="form-row">
             <label>평단가 (원)</label>
             <input
-              type="number"
+              type={moneyHidden ? "password" : "number"}
               inputMode="numeric"
               min="0"
               placeholder="0"
@@ -173,7 +175,7 @@ export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES
           <div className="form-row">
             <label>현재가 (원)</label>
             <input
-              type="number"
+              type={moneyHidden ? "password" : "number"}
               inputMode="numeric"
               min="0"
               placeholder="0"
@@ -199,7 +201,7 @@ export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES
         <div className="form-row">
           <label>금액</label>
           <input
-            type="number"
+            type={moneyHidden ? "password" : "number"}
             inputMode="numeric"
             min="0"
             placeholder="0"

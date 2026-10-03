@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { saveSession } from '../users'
 import Signup from './Signup'
 import ResetPassword from './ResetPassword'
+import ProblemNotice from './ProblemNotice'
+import { reportProblem } from '../lib/diagnostics'
 
 export default function Login({ onLogin }) {
   const [id, setId] = useState('')
@@ -23,12 +25,14 @@ export default function Login({ onLogin }) {
       })
       const data = await res.json()
       if (!res.ok) {
+        reportProblem('login',res.status,data.code)
         setError(data.error || '아이디 또는 비밀번호가 올바르지 않습니다.')
         return
       }
       saveSession(data)
       onLogin(data)
     } catch {
+      reportProblem('login')
       setError('로그인 중 오류가 발생했습니다.')
     } finally {
       setLoading(false)
@@ -59,7 +63,7 @@ export default function Login({ onLogin }) {
             <label>비밀번호</label>
             <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} required />
           </div>
-          {error && <div style={{ color: '#ff8fab', fontSize: 13, marginBottom: 10 }}>{error}</div>}
+          {error && <ProblemNotice message={error}/>}
           <button type="submit" className="submit-btn" disabled={loading}>
             {loading ? '확인 중...' : '로그인 💗'}
           </button>

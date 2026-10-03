@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Collapsible from './Collapsible'
 import { requestAiInsight } from '../lib/aiInsight'
 import { TRANSFER_CATEGORY } from '../categories'
+import { usePrivacy } from '../lib/privacy'
 
 function formatAmount(n) {
   return Number(n).toLocaleString('ko-KR')
@@ -16,6 +17,7 @@ function categoryBreakdown(transactions, type) {
 }
 
 export default function TransactionInsight({ transactions, totalIncome, totalExpense, balance, monthLabel }) {
+  const hidden=usePrivacy()
   const [result, setResult] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -66,7 +68,7 @@ ${expenseLines}
       </button>
       {error && <div style={{ color: '#e0524c', marginTop: 10, fontSize: 13 }}>{error}</div>}
       {result && (
-        <div style={{ marginTop: 12, whiteSpace: 'pre-wrap', fontSize: 14, lineHeight: 1.6 }}>{result}</div>
+        <div style={{ marginTop: 12, whiteSpace: 'pre-wrap', fontSize: 14, lineHeight: 1.6 }}>{hidden?'금액 숨김 중에는 분석 내용을 가려요.':result}</div>
       )}
     </Collapsible>
   )

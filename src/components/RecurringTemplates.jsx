@@ -1,3 +1,4 @@
+import { useMoney, usePrivacy } from '../lib/privacy'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { DEFAULT_CATEGORIES } from '../categories'
@@ -6,13 +7,12 @@ import CategorySelect from './CategorySelect'
 import Modal from './Modal'
 import ConfirmDialog from './ConfirmDialog'
 
-function formatAmount(n) {
-  return Number(n).toLocaleString('ko-KR')
-}
 
 const UNDO_TIMEOUT = 8000
 
 export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, owners, householdId, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onToast, currentMonthTransactions = [] }) {
+  const moneyHidden=usePrivacy()
+  const formatAmount = useMoney()
   const [templates, setTemplates] = useState([])
   const [swipedId, setSwipedId] = useState(null)
   const touchStartX = { current: 0 }
@@ -420,7 +420,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
           </div>
           <div className="form-row">
             <label>금액</label>
-            <input type="number" inputMode="numeric" min="1" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
+            <input type={moneyHidden ? "password" : "number"} inputMode="numeric" min="1" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
           </div>
           <div className="form-row">
             <label>구분</label>
@@ -548,7 +548,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
           <div className="form-row">
             <label>금액</label>
             <input
-              type="number"
+              type={moneyHidden ? "password" : "number"}
               inputMode="numeric"
               min="1"
               value={amount}

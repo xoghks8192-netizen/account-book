@@ -1,4 +1,6 @@
 import { Component } from 'react'
+import { reportProblem } from '../lib/diagnostics'
+import ProblemNotice from './ProblemNotice'
 
 export default class ErrorBoundary extends Component {
   state = { failed: false }
@@ -7,6 +9,8 @@ export default class ErrorBoundary extends Component {
     return { failed: true }
   }
 
+  componentDidCatch() { reportProblem('screen',500) }
+
   render() {
     if (!this.state.failed) return this.props.children
     return (
@@ -14,6 +18,7 @@ export default class ErrorBoundary extends Component {
         <section className="form" style={{ margin: '32px 0' }}>
           <h2 style={{ fontSize: 19 }}>화면을 불러오지 못했어요</h2>
           <p>일시적인 오류가 발생했어요. 다시 불러온 뒤 확인해주세요.</p>
+          <ProblemNotice message="화면 오류가 발생했습니다. 진단 정보를 복사해 전달할 수 있어요." />
           <p style={{ color: 'var(--text-sub)', fontSize: 13 }}>
             저장된 내역은 삭제되지 않지만, 아직 저장하지 않은 입력은 사라질 수 있어요.
           </p>

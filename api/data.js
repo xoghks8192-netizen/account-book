@@ -1,11 +1,13 @@
 import { requireSession, fail } from '../server/auth.js'
 import { columns, dataPlan } from '../server/dataPolicy.js'
+import { handleBackup } from '../server/backup.js'
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store')
   if (req.method !== 'POST') return res.status(405).json({ message: '허용되지 않는 요청입니다.' })
   try {
     const { db, user } = await requireSession(req)
+    if (req.body?.action?.startsWith('backup-')) return await handleBackup(req,res,db,user)
     const p = dataPlan(req.body, user)
     if (p.values) {
       const { data: members, error } = await db.from('app_users').select('display_name').eq('household_id', user.household_id)
@@ -64,6 +66,6 @@ export default async function handler(req, res) {
     if (error) return res.status(error.code === 'PGRST116' ? 406 : 400).json({ code:error.code, message:'요청한 항목을 불러오거나 저장하지 못했습니다.' })
     return res.status(status === 201 ? 201 : 200).json(data)
   } catch (e) {
-    return res.status(e.status || 500).json({ message:e.status ? e.message : '요청을 처리하지 못했습니다.', code:String(e.status || 500) })
+    return res.status(e.status || 500).json({ message:e.status ? e.message : '요청을 처리하지 못했습니다.', code:e.code || String(e.status || 500) })
   }
 }

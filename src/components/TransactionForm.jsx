@@ -1,3 +1,4 @@
+import { usePrivacy } from '../lib/privacy'
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY, CATEGORY_EMOJI } from '../categories'
 import CategoryManager from './CategoryManager'
@@ -7,7 +8,8 @@ function todayStr() {
   return todayKst()
 }
 
-const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory }, ref) {
+const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory, mutationState, onRetrySave }, ref) {
+  const moneyHidden=usePrivacy()
   const [type, setType] = useState('expense')
   const [date, setDate] = useState(todayStr())
   const [category, setCategory] = useState(categories.expense[0])
@@ -62,7 +64,7 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
       linked_asset_id: linkedAssetId || null,
     })
       if (!result) {
-        setSaveError('저장하지 못했어요. 입력 내용은 유지돼요. 연결 상태를 확인하고 다시 시도해주세요.')
+        setSaveError('')
         return
       }
       setAmount('')
@@ -80,6 +82,7 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
 
   return (
     <form onSubmit={handleSubmit}>
+      <fieldset className="transaction-fields" disabled={saving||['uncertain','checking','saving'].includes(mutationState?.status)}>
       <div className="type-toggle">
         <button
           type="button"
@@ -221,8 +224,11 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
         </>
       )}
 
+      </fieldset>
       {saveError && <p role="alert" style={{ color: 'var(--expense-color)', fontSize: 13 }}>{saveError}</p>}
-      <button type="submit" className="submit-btn" disabled={saving}>
+      {mutationState?.status==='failed'&&<p role="alert" className="utility-error">{mutationState.message} 입력 내용은 유지돼요.</p>}
+      {mutationState?.status==='uncertain'&&<div className="problem-notice" role="status"><p>저장 결과를 확인하지 못했어요. 입력 내용은 유지돼요.</p><button type="button" onClick={onRetrySave}>같은 요청으로 다시 확인</button></div>}
+      <button type="submit" className="submit-btn" disabled={saving||['uncertain','checking','saving'].includes(mutationState?.status)}>
         {saving ? '저장 중...' : '추가하기'}
       </button>
     </form>

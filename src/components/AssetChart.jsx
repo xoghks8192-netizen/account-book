@@ -1,10 +1,9 @@
+import { useMoney } from '../lib/privacy'
 import { CATEGORY_COLORS } from '../assetMeta'
 
-function formatAmount(n) {
-  return Number(n).toLocaleString('ko-KR')
-}
 
 export default function AssetChart({ data, total }) {
+  const formatAmount = useMoney()
   if (total <= 0) return null
 
   let acc = 0

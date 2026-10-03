@@ -1,3 +1,8 @@
+import { useMoney, usePrivacy, setMoneyHidden } from './lib/privacy'
+import BackupRestore from './components/BackupRestore'
+import { exportLegacyCsv } from './lib/backupExport'
+import ProblemNotice from './components/ProblemNotice'
+import { reportProblem } from './lib/diagnostics'
 import { todayKst, currentMonth, monthRange } from './lib/dates'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from './lib/supabase'
@@ -14,7 +19,7 @@ import TransactionInsight from './components/TransactionInsight'
 import TransactionCalendar from './components/TransactionCalendar'
 import Modal from './components/Modal'
 import MonthlyTrendChart from './components/MonthlyTrendChart'
-import { toCSV, downloadCSV } from './lib/csv'
+
 import { saveSession, clearSession } from './users'
 import { STOCK_CATEGORIES } from './assetMeta'
 import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from './categories'
@@ -27,9 +32,6 @@ const PAGE_KEY = 'household-budget-page'
 const THEME_KEY = 'household-budget-theme'
 const COLOR_KEY = 'household-budget-color'
 
-function formatAmount(n) {
-  return n.toLocaleString('ko-KR')
-}
 
 function shortName(name) {
   return name.length >= 3 ? name.slice(1) : name
@@ -37,6 +39,12 @@ function shortName(name) {
 
 
 export default function App() {
+  const formatAmount = useMoney()
+  const moneyHidden = usePrivacy()
+  const [showRestore,setShowRestore] = useState(false)
+  const [showDiagnostics,setShowDiagnostics] = useState(false)
+  const [dataVersion,setDataVersion] = useState(0)
+  useEffect(()=>{document.documentElement.dataset.moneyHidden=moneyHidden?'true':'false'},[moneyHidden])
   const [pinLocked, setPinLocked] = useState(() =>
     !!localStorage.getItem('app_pin') && !sessionStorage.getItem('pin_unlocked'),
   )
@@ -72,11 +80,11 @@ export default function App() {
       .then(async res => {
         if (res.status === 401) { clearSession(); return null }
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error || '로그인 상태를 확인하지 못했습니다.')
+        if (!res.ok) { reportProblem('login',res.status,data.code); throw new Error(data.error || '로그인 상태를 확인하지 못했습니다.') }
         return data
       })
       .then(data => { if (!cancelled && data) { saveSession(data); setUser(data) } })
-      .catch(() => { if (!cancelled) setAuthError('서버에 연결하지 못했어요. 연결 상태를 확인한 뒤 다시 시도해주세요.') })
+      .catch(() => { reportProblem('login'); if (!cancelled) setAuthError('서버에 연결하지 못했어요. 연결 상태를 확인한 뒤 다시 시도해주세요.') })
       .finally(() => { if (!cancelled) setAuthReady(true) })
     const expired = () => { clearSession(); setUser(null); setShowPasswordForm(false) }
     window.addEventListener('hb-session-expired', expired)
@@ -185,6 +193,7 @@ export default function App() {
   const {
     transactions, prevTransactions, loading, error, setError,
     handleAdd: _handleAdd, handleDelete, handleUpdate: handleUpdateTransaction,
+    mutationState, retryMutation, refresh:refreshTransactions,
   } = useTransactions({ householdId, start, end, prevStart, prevEnd, owners, myName })
 
   useEffect(() => {
@@ -241,7 +250,7 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [page, householdId])
+  }, [page, householdId, dataVersion])
 
   async function handleAdd(tx) {
     return _handleAdd(tx)
@@ -363,81 +372,38 @@ export default function App() {
   }
 
   async function handleExportAll() {
+    if(!window.confirm('백업 파일에는 거래와 자산 정보가 포함됩니다. 이 계정에서 볼 수 있는 데이터만 내려받습니다. 저장할까요?')) return
     setExporting(true)
-    const date = todayKst()
-
     try {
-      const { data: txData } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('household_id', householdId)
-        .order('date', { ascending: false })
-        .order('id', { ascending: false })
-      if (txData) {
-        const csv = toCSV(
-          ['날짜', '구분', '유형', '카테고리', '금액', '메모', '작성자', '연동자산ID'],
-          txData.map((t) => [
-            t.date,
-            t.owner ?? '',
-            t.type === 'income' ? '수입' : '지출',
-            t.category,
-            t.amount,
-            t.memo ?? '',
-            t.author ?? '',
-            t.linked_asset_id ?? '',
-          ]),
-        )
-        downloadCSV(`거래내역_${date}.csv`, csv)
+      const res=await fetch('/api/data',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'backup-export'})})
+      const file=await res.json()
+      if(file.code==='BACKUP_SETUP_REQUIRED') {
+        await exportLegacyCsv(householdId)
+        showToast('기존 CSV로 백업했어요. JSON 복원은 SQL 024 적용 후 가능해요.')
+        return
       }
-
-      const { data: assetData } = await supabase
-        .from('assets')
-        .select('*')
-        .eq('household_id', householdId)
-        .order('category', { ascending: true })
-        .order('id', { ascending: true })
-      if (assetData) {
-        const csv = toCSV(
-          ['이름', '카테고리', '유동성', '구분', '금액'],
-          assetData.map((a) => [
-            a.name,
-            a.category,
-            a.liquidity ?? '',
-            a.owner ?? '',
-            a.amount,
-          ]),
-        )
-        downloadCSV(`자산_${date}.csv`, csv)
-      }
-
-      const { data: recurringData } = await supabase
-        .from('recurring_templates')
-        .select('*')
-        .eq('household_id', householdId)
-        .order('sort_order', { ascending: true, nullsFirst: false })
-        .order('id', { ascending: true })
-      if (recurringData) {
-        const csv = toCSV(
-          ['이름', '유형', '카테고리', '금액', '메모', '구분', '연동자산ID'],
-          recurringData.map((t) => [
-            t.name,
-            t.type === 'income' ? '수입' : '지출',
-            t.category,
-            t.amount,
-            t.memo ?? '',
-            t.author ?? '',
-            t.linked_asset_id ?? '',
-          ]),
-        )
-        downloadCSV(`고정지출수입_${date}.csv`, csv)
-      }
-    } finally {
-      setExporting(false)
-    }
+      if(!res.ok){reportProblem('backup',res.status);throw new Error(file.message||file.error||'백업에 실패했습니다.')}
+      const url=URL.createObjectURL(new Blob([JSON.stringify(file)],{type:'application/json'}))
+      const a=document.createElement('a')
+      a.href=url;a.download='가계부_백업_'+todayKst()+'.json';a.click()
+      setTimeout(()=>URL.revokeObjectURL(url),1000)
+      showToast('백업 파일을 내려받았어요')
+    }catch(e){reportProblem('backup');showToast(e.message||'백업하지 못했습니다. 다시 시도해주세요.')}
+    finally{setExporting(false)}
+  }
+  function restored() {
+    refreshTransactions()
+    setDataVersion(n=>n+1)
+    showToast('백업 복원 결과를 확인했어요')
+  }
+  async function retrySave() {
+    const result=await retryMutation()
+    if(result?.action==='add') handleAddSuccess()
+    else if(result)showToast('처리 결과를 확인했어요')
   }
 
   if (!authReady || authError) {
-    return <div className="container" role="status"><p>{authError || '로그인 확인 중…'}</p>{authError && <button className="submit-btn" onClick={() => window.location.reload()}>다시 시도</button>}</div>
+    return <div className="container">{authError?<ProblemNotice message={authError} onRetry={()=>window.location.reload()}/>:<p role="status">로그인 확인 중…</p>}</div>
   }
   if (!user) {
     return <Login onLogin={setUser} />
@@ -512,6 +478,9 @@ export default function App() {
         </div>
         <h1>{user.members.length === 2 ? `${shortName(user.members[0])} ❤️ ${shortName(user.members[1])}` : shortName(user.members[0])}</h1>
         <div className="brand-header-actions">
+          <button className="header-icon-btn privacy-toggle" onClick={()=>setMoneyHidden(!moneyHidden)} aria-label={moneyHidden?'금액 보이기':'금액 숨기기'} title={moneyHidden?'금액 보이기':'금액 숨기기'} aria-pressed={moneyHidden}>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>{moneyHidden&&<path d="m3 3 18 18"/>}</svg>
+          </button>
           <button className="header-icon-btn" onClick={() => setShowMoreMenu((prev) => !prev)} title="설정">
             ⚙️
           </button>
@@ -544,6 +513,8 @@ export default function App() {
                 <span className="more-menu-icon" style={{ background: '#e8f8ef', color: '#4caf7d' }}>💾</span>
                 {exporting ? '내보내는 중...' : '데이터 백업'}
               </button>
+              <button className="more-menu-item" onClick={()=>{setShowMoreMenu(false);setShowRestore(true)}}><span className="more-menu-icon">↥</span>백업 복원</button>
+              <button className="more-menu-item" onClick={()=>{setShowMoreMenu(false);setShowDiagnostics(true)}}><span className="more-menu-icon">ⓘ</span>문제 진단</button>
               <button className="more-menu-item" onClick={() => setShowPasswordForm((prev) => !prev)}>
                 <span className="more-menu-icon" style={{ background: '#f0ebff', color: '#9b6ff5' }}>👤</span>
                 내 정보 변경
@@ -574,6 +545,12 @@ export default function App() {
       </div>
 
       <AnniversaryBanner datingStart={user.datingStart} weddingDate={user.weddingDate} />
+      {showRestore&&<BackupRestore onClose={()=>setShowRestore(false)} onRestored={restored}/>}
+      {showDiagnostics&&<Modal title="문제 진단" onClose={()=>setShowDiagnostics(false)}><ProblemNotice message="최근 연결 오류를 안전한 진단 코드로 확인할 수 있어요." onRetry={()=>{refreshTransactions();setDataVersion(n=>n+1);setShowDiagnostics(false)}}/></Modal>}
+      {['saving','checking','uncertain','failed'].includes(mutationState.status)&&<section className="mutation-notice" role="status">
+        <p>{mutationState.message}</p>
+        {mutationState.status==='uncertain'&&<button type="button" onClick={retrySave}>같은 요청으로 다시 확인</button>}
+      </section>}
 
       {showPasswordForm && (
         <ChangePassword
@@ -610,7 +587,7 @@ export default function App() {
         onTouchEnd={handleMonthSwipeEnd}
       >
       {page === 'assets' ? (
-        <AssetsPage ref={assetsPageRef}
+        <AssetsPage key={dataVersion} ref={assetsPageRef}
           currentUser={myName}
           owners={owners}
           householdId={householdId}
@@ -757,7 +734,7 @@ export default function App() {
 
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
             <Collapsible title="내역 추가" forceClose={formCloseToken} forceOpen={formOpenToken}>
-              <TransactionForm
+              <TransactionForm mutationState={mutationState} onRetrySave={retrySave}
                 ref={formRef}
                 onAdd={handleAdd}
                 onSuccess={handleAddSuccess}
@@ -772,7 +749,7 @@ export default function App() {
             </Collapsible>
           ) : null}
 
-          {error && <div className="container" style={{ color: '#e0524c' }}>오류: {error}</div>}
+          {error && <ProblemNotice message="내역을 불러오지 못했어요. 연결 상태를 확인해주세요." onRetry={refreshTransactions}/>}
 
           {loading ? (
             <div className="skeleton-list">
@@ -857,10 +834,10 @@ export default function App() {
                 </div>
               )}
               <div className="tx-month-summary">
-                <span className="tx-month-balance">{(totalIncome - totalExpense).toLocaleString('ko-KR')}원</span>
+                <span className="tx-month-balance">{formatAmount(totalIncome - totalExpense)}원</span>
                 <span className="tx-month-sub">
-                  <span className="tx-month-income">+{totalIncome.toLocaleString('ko-KR')}</span>
-                  <span className="tx-month-expense">−{totalExpense.toLocaleString('ko-KR')}</span>
+                  <span className="tx-month-income">+{formatAmount(totalIncome)}</span>
+                  <span className="tx-month-expense">−{formatAmount(totalExpense)}</span>
                 </span>
               </div>
               <TransactionList

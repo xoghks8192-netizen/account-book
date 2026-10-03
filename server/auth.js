@@ -69,11 +69,11 @@ export async function sessionView(db, user) {
 }
 export function apiError(res, error) {
   res.setHeader('Cache-Control', 'no-store')
-  return res.status(error.status || 500).json({ error: error.status ? error.message : '요청을 처리하지 못했습니다. 다시 시도해주세요.' })
+  return res.status(error.status || 500).json({ error: error.status ? error.message : '요청을 처리하지 못했습니다. 다시 시도해주세요.', code:error.code || (error.status===401?'AUTH_REQUIRED':'SERVER') })
 }
 
 export async function rateLimit(db, key, limit) {
   const { data, error } = await db.rpc('hb_rate_limit', { p_key:key, p_limit:limit })
-  if (error) throw fail(503,'로그인 보안 점검 중입니다. 잠시 후 다시 시도해주세요.')
+  if (error) throw Object.assign(fail(503,'로그인 보안 설정을 확인하지 못했습니다. 관리자에게 진단 코드를 전달해주세요.'),{code:'DB_SECURITY_NOT_READY'})
   if (!data) throw fail(429,'요청이 많습니다. 15분 후 다시 시도해주세요.')
 }

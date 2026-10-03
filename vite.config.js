@@ -27,7 +27,7 @@ function apiRoute(path, handler) {
         const chunks=[]; let size=0
         for await (const chunk of req) {
           size+=chunk.length
-          if(size>1000000) return wrapped.status(413).json({error:'입력 내용이 너무 큽니다.'})
+          if(size>4000000) return wrapped.status(413).json({error:'입력 내용이 너무 큽니다.'})
           chunks.push(chunk)
         }
         const raw=Buffer.concat(chunks).toString('utf8')

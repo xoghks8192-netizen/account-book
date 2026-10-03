@@ -1,13 +1,12 @@
+import { useMoney } from '../lib/privacy'
 import { useState } from 'react'
 import { getCategoryColor, TRANSFER_CATEGORY } from '../categories'
 
 const VISIBLE_COUNT = 5
 
-function formatAmount(n) {
-  return Number(n).toLocaleString('ko-KR')
-}
 
 export default function ExpenseChart({ transactions }) {
+  const formatAmount = useMoney()
   const [showAll, setShowAll] = useState(false)
   const [mode, setMode] = useState('expense')
 

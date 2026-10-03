@@ -1,3 +1,4 @@
+import { useMoney } from '../lib/privacy'
 import { todayKst, currentMonth, monthRange } from '../lib/dates'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { useCountUp } from '../hooks/useCountUp'
@@ -9,14 +10,14 @@ import AssetChart from './AssetChart'
 import Collapsible from './Collapsible'
 import NetWorthChart from './NetWorthChart'
 import Modal from './Modal'
+import ProblemNotice from './ProblemNotice'
 
-function formatAmount(n) {
-  return Number(n).toLocaleString('ko-KR')
-}
 
 const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory, onAssetsChange, onToast }, ref) {
+  const formatAmount = useMoney()
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
+  const [retry,setRetry] = useState(0)
   useEffect(() => { onAssetsChange?.(assets) }, [assets])
   const [error, setError] = useState(null)
   const [ownerFilter, setOwnerFilter] = useState('전체')
@@ -40,6 +41,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
     let cancelled = false
     async function load() {
       setLoading(true)
+      setError(null)
       const { data, error } = await supabase
         .from('assets')
         .select('*')
@@ -55,7 +57,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
     return () => {
       cancelled = true
     }
-  }, [householdId])
+  }, [householdId,retry])
 
   async function handleAdd(asset) {
     const { data, error } = await supabase
@@ -375,7 +377,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
         </div>
       ) : null}
 
-      {error && <div className="container" style={{ color: '#e0524c' }}>오류: {error}</div>}
+      {error && <ProblemNotice message="자산 데이터를 불러오거나 저장하지 못했어요." onRetry={()=>setRetry(n=>n+1)}/>}
 
       {loading ? (
         <div className="container">불러오는 중...</div>

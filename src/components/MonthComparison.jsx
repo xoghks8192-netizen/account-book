@@ -1,8 +1,7 @@
-function formatAmount(n) {
-  return Math.abs(n).toLocaleString('ko-KR')
-}
+import { useMoney } from '../lib/privacy'
 
 function DiffValue({ diff, invert }) {
+  const formatAmount=useMoney()
   let cls = 'flat'
   if (diff > 0) cls = invert ? 'down' : 'up'
   if (diff < 0) cls = invert ? 'up' : 'down'
@@ -10,7 +9,7 @@ function DiffValue({ diff, invert }) {
   return (
     <div className={`diff ${cls}`}>
       {sign}
-      {formatAmount(diff)}원
+      {formatAmount(Math.abs(diff))}원
     </div>
   )
 }

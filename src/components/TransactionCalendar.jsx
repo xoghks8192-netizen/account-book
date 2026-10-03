@@ -1,16 +1,15 @@
+import { useMoney } from '../lib/privacy'
 import { useEffect, useMemo, useState } from 'react'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
 
-function formatAmount(n) {
-  return n.toLocaleString('ko-KR')
-}
 
 function pad(n) {
   return String(n).padStart(2, '0')
 }
 
 export default function TransactionCalendar({ transactions, year, month, onDeleteDate, onChangeMonth }) {
+  const formatAmount = useMoney()
   const [selectedDate, setSelectedDate] = useState(null)
 
   useEffect(() => {

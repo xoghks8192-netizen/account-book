@@ -1,9 +1,7 @@
+import { useMoney } from '../lib/privacy'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-function formatAmount(n) {
-  return Number(n).toLocaleString('ko-KR')
-}
 
 function formatMonth(key) {
   const [, m] = key.split('-')
@@ -11,6 +9,7 @@ function formatMonth(key) {
 }
 
 export default function NetWorthChart({ householdId }) {
+  const formatAmount = useMoney()
   const [snapshots, setSnapshots] = useState([])
   const [loading, setLoading] = useState(true)
 

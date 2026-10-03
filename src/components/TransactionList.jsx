@@ -1,12 +1,11 @@
+import { useMoney, usePrivacy } from '../lib/privacy'
 import { useEffect, useRef, useState } from 'react'
 import { DEFAULT_CATEGORIES, CATEGORY_EMOJI } from '../categories'
 import CategorySelect from './CategorySelect'
 import Modal from './Modal'
 import ConfirmDialog from './ConfirmDialog'
+import TransferDetails from './TransferDetails'
 
-function formatAmount(n) {
-  return n.toLocaleString('ko-KR')
-}
 
 function Highlight({ text, query }) {
   if (!query || !text) return text
@@ -30,7 +29,10 @@ function formatDate(dateStr) {
 }
 
 export default function TransactionList({ transactions, onDelete, onUpdate, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, search = '', scrollToId = null }) {
+  const moneyHidden=usePrivacy()
+  const formatAmount = useMoney()
   const [editingId, setEditingId] = useState(null)
+  const [transferDetails,setTransferDetails] = useState(null)
   const [swipedId, setSwipedId] = useState(null)
   const touchStartX = { current: 0 }
   const [editDate, setEditDate] = useState('')
@@ -126,6 +128,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
 
   return (
     <>
+      {transferDetails&&<TransferDetails transaction={transferDetails} onClose={()=>setTransferDetails(null)}/>}
       {confirmDeleteId && (
         <ConfirmDialog
           message={transactions.find(t => t.id === confirmDeleteId)?.transfer_id
@@ -159,7 +162,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
           </div>
           <div className="form-row">
             <label>금액</label>
-            <input type="number" inputMode="numeric" min="1" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
+            <input type={moneyHidden ? "password" : "number"} inputMode="numeric" min="1" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
           </div>
           <div className="form-row">
             <label>구분</label>
@@ -200,7 +203,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
           <div className="tx-date-header" onClick={() => toggleDate(date)} style={{ cursor: 'pointer', userSelect: 'none' }}>
             <span>{formatDate(date)}</span>
             <span className="tx-date-meta">
-              <span className={`tx-date-total ${dayTotal >= 0 ? 'pos' : 'neg'}`}>{dayTotal >= 0 ? '+' : ''}{dayTotal.toLocaleString('ko-KR')}원</span>
+              <span className={`tx-date-total ${dayTotal >= 0 ? 'pos' : 'neg'}`}>{dayTotal >= 0 ? '+' : ''}{formatAmount(dayTotal)}원</span>
               <span className="tx-date-chevron">{collapsed ? '▸' : '▾'}</span>
             </span>
           </div>
@@ -222,10 +225,11 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
                   <span className="category">
                     {CATEGORY_EMOJI[tx.category] && <span className="cat-emoji">{CATEGORY_EMOJI[tx.category]}</span>}
                     <Highlight text={tx.category} query={search} />
+                    {(tx.transfer_id||tx.category==='배우자 이체')&&<button type="button" className="transfer-link" onClick={e=>{e.stopPropagation();setTransferDetails(tx)}}>연결 보기 ↗</button>}
                   </span>
                   <span className="meta">
                     {tx.owner ? tx.owner : ''}
-                    {tx.memo ? <>{tx.owner ? ' · ' : ''}<Highlight text={tx.memo} query={search} /></> : ''}
+                    {tx.memo && !moneyHidden ? <>{tx.owner ? ' · ' : ''}<Highlight text={tx.memo} query={search} /></> : ''}
                   </span>
                 </div>
                 <div className="tx-amount">

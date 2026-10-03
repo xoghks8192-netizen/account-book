@@ -1,14 +1,13 @@
+import { useMoney } from '../lib/privacy'
 import { currentMonth, monthRange } from '../lib/dates'
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import Collapsible from './Collapsible'
 import { TRANSFER_CATEGORY } from '../categories'
 
-function formatAmount(n) {
-  return Number(n).toLocaleString('ko-KR')
-}
 
 export default function MonthlyTrendChart({ householdId, ownerFilter, owners, defaultOpen = false }) {
+  const formatAmount = useMoney()
   const [data, setData] = useState([])
   const [hovered, setHovered] = useState(null)
   const hideTimer = useRef(null)
