@@ -139,7 +139,11 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
         />
       )}
       {editingTx && (
-        <Modal title="내역 수정" onClose={() => setEditingId(null)}>
+        <Modal title="내역 수정" onClose={() => setEditingId(null)} busy={saving} dirty={
+          editDate !== editingTx.date || editType !== editingTx.type || editCategory !== editingTx.category ||
+          Number(editAmount) !== Number(editingTx.amount) || editOwner !== editingTx.owner ||
+          editMemo !== (editingTx.memo ?? '') || String(editLinkedAssetId) !== String(editingTx.linked_asset_id ?? '')
+        }>
           {editingTx.transfer_id && <p style={{ color: 'var(--text-sub)', fontSize: 13 }}>연결된 이체입니다. 금액과 날짜는 배우자 내역에도 함께 반영됩니다. 구분·카테고리·소유자를 바꾸려면 삭제 후 다시 입력해주세요.</p>}
           {!editingTx.transfer_id && editingTx.category === '배우자 이체' && <p style={{ color: 'var(--text-sub)', fontSize: 13 }}>기존에 입력한 이체는 자동 연결되지 않습니다. 상대방 내역은 별도로 확인해주세요.</p>}
           <div className="type-toggle">
@@ -190,7 +194,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
           )}
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
             <button onClick={() => handleSave(editingId)} disabled={saving} className="submit-btn" style={{ flex: 1 }}>저장</button>
-            <button onClick={() => setEditingId(null)} style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
+            <button data-modal-dismiss type="button" style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
           </div>
         </Modal>
       )}
@@ -201,7 +205,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
         return (
         <div key={date}>
           <div className="tx-date-header" onClick={() => toggleDate(date)} style={{ cursor: 'pointer', userSelect: 'none' }}>
-            <span>{formatDate(date)}</span>
+            <span>{formatDate(date)} <span className="date-count">· {items.length}건</span></span>
             <span className="tx-date-meta">
               <span className={`tx-date-total ${dayTotal >= 0 ? 'pos' : 'neg'}`}>{dayTotal >= 0 ? '+' : ''}{formatAmount(dayTotal)}원</span>
               <span className="tx-date-chevron">{collapsed ? '▸' : '▾'}</span>

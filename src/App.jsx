@@ -149,6 +149,20 @@ export default function App() {
     setExpandedCategory((prev) => (prev === cat ? null : cat))
   }
   const [toast, setToast] = useState('')
+  const [toastAction, setToastAction] = useState(null)
+  const [toastBusy, setToastBusy] = useState(false)
+  const toastTimer = useRef(null)
+  const actionBusy = useRef(false)
+  useEffect(() => () => clearTimeout(toastTimer.current), [])
+  const [duplicatePrompt, setDuplicatePrompt] = useState(false)
+  const duplicateAnswer = useRef(null)
+  const checkingDuplicate = useRef(false)
+  function answerDuplicate(yes) {
+    setDuplicatePrompt(false)
+    duplicateAnswer.current?.(yes)
+    duplicateAnswer.current = null
+  }
+  useEffect(() => () => duplicateAnswer.current?.(false), [])
   const [formCloseToken, setFormCloseToken] = useState(0)
 
   useEffect(() => {
@@ -166,10 +180,19 @@ export default function App() {
     }
   }, [showMoreMenu])
 
-  function showToast(msg) {
+  function showToast(msg, action = null) {
+    clearTimeout(toastTimer.current)
     setToast(msg)
+    setToastAction(action ? { run: action } : null)
     navigator.vibrate?.(40)
-    setTimeout(() => setToast(''), 2500)
+    toastTimer.current = setTimeout(() => { setToast(''); setToastAction(null) }, action ? 10000 : 2500)
+  }
+  async function runToastAction() {
+    if (actionBusy.current || !toastAction) return
+    actionBusy.current = true; setToastBusy(true)
+    clearTimeout(toastTimer.current)
+    try { await toastAction.run() }
+    finally { actionBusy.current = false; setToastBusy(false) }
   }
 
   function handleAddSuccess() {
@@ -194,7 +217,15 @@ export default function App() {
     transactions, prevTransactions, loading, error, setError,
     handleAdd: _handleAdd, handleDelete, handleUpdate: handleUpdateTransaction,
     mutationState, retryMutation, refresh:refreshTransactions,
+    lastDelete, undoDelete,
   } = useTransactions({ householdId, start, end, prevStart, prevEnd, owners, myName })
+  useEffect(() => {
+    if (!lastDelete) return
+    showToast('내역을 삭제했어요', async () => {
+      const ok = await undoDelete(lastDelete.requestId)
+      showToast(ok ? '삭제를 취소했어요. 연결된 이체도 복구됐어요.' : '취소 결과를 확인해주세요. 상단 안내에서 다시 확인할 수 있어요.')
+    })
+  }, [lastDelete])
 
   useEffect(() => {
     localStorage.setItem(PAGE_KEY, page)
@@ -253,7 +284,19 @@ export default function App() {
   }, [page, householdId, dataVersion])
 
   async function handleAdd(tx) {
-    return _handleAdd(tx)
+    if (checkingDuplicate.current) return null
+    checkingDuplicate.current = true
+    try {
+      const { data, error } = await supabase.from('transactions').select('id')
+        .eq('household_id', householdId).eq('date', tx.date).eq('type', tx.type)
+        .eq('owner', tx.owner).eq('category', tx.category).eq('amount', Number(tx.amount)).limit(1)
+      if (error) { showToast('중복 내역을 확인하지 못했어요. 입력을 유지했으니 다시 시도해주세요.'); return null }
+      if (data.length) {
+        const agreed = await new Promise(resolve => { duplicateAnswer.current = resolve; setDuplicatePrompt(true) })
+        if (!agreed) return null
+      }
+      return await _handleAdd(tx)
+    } finally { checkingDuplicate.current = false }
   }
 
   async function wrappedDelete(id) {
@@ -471,7 +514,6 @@ export default function App() {
     <div>
       <div className="brand-header">
         <div className="brand-header-left">
-          <button className="header-icon-btn" onClick={() => window.location.reload()} title="새로고침">🔄</button>
           <button className="header-icon-btn" onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))} title="테마 변경">
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
@@ -509,6 +551,8 @@ export default function App() {
             </div>
             <div className="more-menu-divider" />
             <div className="more-menu-group">
+              <button className="more-menu-item" onClick={() => window.location.reload()}><span className="more-menu-icon">↻</span>새로고침</button>
+              <p className="auto-sync-hint">화면을 보고 있을 때 15초마다 자동 확인해요</p>
 <button className="more-menu-item" onClick={() => { setShowMoreMenu(false); handleExportAll() }} disabled={exporting}>
                 <span className="more-menu-icon" style={{ background: '#e8f8ef', color: '#4caf7d' }}>💾</span>
                 {exporting ? '내보내는 중...' : '데이터 백업'}
@@ -545,6 +589,10 @@ export default function App() {
       </div>
 
       <AnniversaryBanner datingStart={user.datingStart} weddingDate={user.weddingDate} />
+      {duplicatePrompt && <Modal title="같은 내역이 있어요" onClose={() => answerDuplicate(false)}>
+        <p>날짜·금액·구분·소유자·카테고리가 같은 내역이 있어요. 별도의 거래라면 추가할 수 있습니다.</p>
+        <div className="confirm-actions"><button className="confirm-btn cancel" onClick={() => answerDuplicate(false)}>돌아가기</button><button className="confirm-btn" onClick={() => answerDuplicate(true)}>그래도 추가</button></div>
+      </Modal>}
       {showRestore&&<BackupRestore onClose={()=>setShowRestore(false)} onRestored={restored}/>}
       {showDiagnostics&&<Modal title="문제 진단" onClose={()=>setShowDiagnostics(false)}><ProblemNotice message="최근 연결 오류를 안전한 진단 코드로 확인할 수 있어요." onRetry={()=>{refreshTransactions();setDataVersion(n=>n+1);setShowDiagnostics(false)}}/></Modal>}
       {['saving','checking','uncertain','failed'].includes(mutationState.status)&&<section className="mutation-notice" role="status">
@@ -730,7 +778,7 @@ export default function App() {
 
           <ExpenseChart transactions={ownedTransactions} />
 
-          <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} />
+          <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} refreshKey={JSON.stringify(transactions)} />
 
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
             <Collapsible title="내역 추가" forceClose={formCloseToken} forceOpen={formOpenToken}>
@@ -929,9 +977,10 @@ export default function App() {
 
       {!isOnline && <div className="offline-banner">📡 오프라인 상태예요 — 데이터가 저장되지 않을 수 있어요</div>}
       {toast && (
-        <div className="toast">
+        <div className={`toast${toastAction ? ' toast-action' : ''}`} role="status">
           <span className="toast-bar" />
           <span className="toast-text">{toast}</span>
+          {toastAction && <button className="toast-undo" onClick={runToastAction} disabled={toastBusy}>{toastBusy ? '처리 중…' : '실행 취소'}</button>}
         </div>
       )}
     </div>

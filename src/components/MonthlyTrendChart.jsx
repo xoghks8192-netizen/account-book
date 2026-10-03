@@ -6,7 +6,7 @@ import Collapsible from './Collapsible'
 import { TRANSFER_CATEGORY } from '../categories'
 
 
-export default function MonthlyTrendChart({ householdId, ownerFilter, owners, defaultOpen = false }) {
+export default function MonthlyTrendChart({ householdId, ownerFilter, owners, defaultOpen = false, refreshKey = '' }) {
   const formatAmount = useMoney()
   const [data, setData] = useState([])
   const [hovered, setHovered] = useState(null)
@@ -14,6 +14,7 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners, de
 
   useEffect(() => {
     if (!householdId) return
+    let cancelled = false
     async function load() {
       const months = []
       const now = currentMonth()
@@ -29,7 +30,7 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners, de
         .gte('date', months[0].start)
         .lt('date', months[months.length - 1].end)
 
-      if (!rows) return
+      if (!rows || cancelled) return
 
       const result = months.map(({ label, start, end }) => {
         const filtered = rows.filter((r) => {
@@ -44,7 +45,8 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners, de
       setData(result)
     }
     load()
-  }, [householdId, ownerFilter])
+    return () => { cancelled = true }
+  }, [householdId, ownerFilter, refreshKey])
 
   if (!data.length) return null
   const maxVal = Math.max(...data.map((d) => Math.max(d.expense, d.income)), 1)

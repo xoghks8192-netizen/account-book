@@ -41,9 +41,10 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
   async function handleSave() {
     if (!name.trim()) return
     setSaving(true)
+    let ok
     if (isStock) {
       if (shares === '' || avgPrice === '' || currentPrice === '') { setSaving(false); return }
-      await onUpdate(asset.id, {
+      ok = await onUpdate(asset.id, {
         name: name.trim(), owner, liquidity, memo: memo.trim() || null,
         amount: Number(shares) * Number(currentPrice),
         shares: Number(shares), avg_price: Number(avgPrice),
@@ -51,10 +52,10 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
       })
     } else {
       if (amount === '' || Number(amount) < 0) { setSaving(false); return }
-      await onUpdate(asset.id, { name: name.trim(), owner, liquidity, memo: memo.trim() || null, amount: Number(amount) })
+      ok = await onUpdate(asset.id, { name: name.trim(), owner, liquidity, memo: memo.trim() || null, amount: Number(amount) })
     }
     setSaving(false)
-    setEditing(false)
+    if (ok !== false) setEditing(false)
   }
 
   async function handleRefreshPrice() {
@@ -87,7 +88,12 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
         />
       )}
       {editing && (
-        <Modal title="자산 수정" onClose={handleCancel}>
+        <Modal title="자산 수정" onClose={handleCancel} busy={saving} dirty={
+          name !== asset.name || owner !== asset.owner || liquidity !== (asset.liquidity ?? defaultLiquidity(asset.category)) ||
+          memo !== (asset.memo ?? '') || Number(amount) !== Number(asset.amount) ||
+          String(shares) !== String(asset.shares ?? '') || String(avgPrice) !== String(asset.avg_price ?? '') ||
+          String(currentPrice) !== String(asset.current_price ?? '') || ticker !== (asset.ticker ?? '')
+        }>
           <div className="form-row">
             <label>이름</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
@@ -142,7 +148,7 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
             <button onClick={handleSave} disabled={saving} className="submit-btn" style={{ flex: 1 }}>저장</button>
-            <button onClick={handleCancel} style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
+            <button data-modal-dismiss type="button" style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
           </div>
         </Modal>
       )}
@@ -171,7 +177,7 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
               {refreshing ? '⏳' : '🔄'}
             </button>
           )}
-          <button onClick={() => setEditing(true)} title="수정">✎</button>
+          <button onClick={() => { handleCancel(); setEditing(true) }} title="수정">✎</button>
           <button onClick={() => setConfirmDelete(true)} title="삭제">✕</button>
         </div>
       </div>

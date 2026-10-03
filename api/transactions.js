@@ -6,7 +6,8 @@ export default async function handler(req, res) {
   try {
     const { db, user } = await requireSession(req)
     const { action, id = null, fields = {}, requestId } = req.body || {}
-    if (!['add','update','delete','status'].includes(action) || !/^[a-f0-9-]{36}$/i.test(requestId || '')) throw fail(400, '잘못된 요청입니다.')
+    if (!['add','update','delete','undo','status'].includes(action) || !/^[a-f0-9-]{36}$/i.test(requestId || '')) throw fail(400, '잘못된 요청입니다.')
+    if (action === 'undo' && !/^[a-f0-9-]{36}$/i.test(fields?.delete_request || '')) throw fail(400, '실행 취소 요청을 확인해주세요.')
     if (action === 'status') {
       const {data:receipt,error} = await db.from('app_mutation_requests').select('result')
         .eq('household_id',user.household_id).eq('actor',user.username).eq('request_id',requestId).maybeSingle()

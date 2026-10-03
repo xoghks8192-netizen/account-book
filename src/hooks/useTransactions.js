@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { mutationRequest } from '../lib/mutationRequest'
 import { reportProblem } from '../lib/diagnostics'
+import { useAutoRefresh, canAutoRefresh } from './useAutoRefresh'
 
 function sortTx(list) {
   return [...list].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id))
@@ -15,11 +16,15 @@ export function useTransactions({ householdId, start, end, prevStart, prevEnd, o
 
   const pending = useRef(null)
   const busy = useRef(false)
+  const revision = useRef(0)
+  const loadedRange = useRef('')
   const [mutationState,setMutationState] = useState({status:'idle'})
+  const [lastDelete,setLastDelete] = useState(null)
   const [refreshToken,setRefreshToken] = useState(0)
   const storageKey = 'hb-pending:'+householdId+':'+myName
   useEffect(()=>{
     pending.current=null
+    setLastDelete(null)
     try { const saved=JSON.parse(sessionStorage.getItem(storageKey)||'null'); if(saved?.requestId) pending.current=saved } catch {}
     setMutationState(pending.current?{status:'uncertain',message:'앞선 저장 요청의 결과를 확인해주세요.'}:{status:'idle'})
   },[storageKey])
@@ -27,12 +32,26 @@ export function useTransactions({ householdId, start, end, prevStart, prevEnd, o
   function forget(){pending.current=null;try{sessionStorage.removeItem(storageKey)}catch{}}
   const activeContext = useRef(null)
   activeContext.current = { householdId, myName, start, end, prevStart, prevEnd }
+  useAutoRefresh(async () => {
+    if (busy.current || pending.current) return
+    const context = activeContext.current
+    const version = revision.current
+    const { data, error } = await supabase.from('transactions').select('*')
+      .eq('household_id', householdId).gte('date', prevStart).lt('date', end)
+      .order('date', { ascending: false }).order('id', { ascending: false })
+    const active = activeContext.current
+    if (error || busy.current || pending.current || revision.current !== version || !canAutoRefresh() || active.householdId !== context.householdId || active.start !== context.start) return
+    setTransactions(data.filter(t => t.date >= start && t.date < end))
+    setPrevTransactions(data.filter(t => t.date >= prevStart && t.date < prevEnd))
+  }, !!householdId)
   // 이번 달 내역
   useEffect(() => {
     if (!householdId) { setTransactions([]); setPrevTransactions([]); setLoading(false); return }
     let cancelled = false
     async function load() {
-      setLoading(true); setError(null)
+      const range = householdId + ':' + start + ':' + end
+      if (loadedRange.current !== range) setLoading(true)
+      setError(null)
       const { data, error } = await supabase
         .from('transactions').select('*')
         .eq('household_id', householdId)
@@ -40,7 +59,7 @@ export function useTransactions({ householdId, start, end, prevStart, prevEnd, o
         .order('date', { ascending: false }).order('id', { ascending: false })
       if (cancelled) return
       if (error) setError(error.message)
-      else setTransactions(data)
+      else { setTransactions(data); loadedRange.current = range }
       setLoading(false)
     }
     load()
@@ -76,6 +95,7 @@ export function useTransactions({ householdId, start, end, prevStart, prevEnd, o
     if(busy.current || !pending.current) return null
     const request=pending.current
     busy.current=true
+    revision.current++
     setError(null)
     setMutationState({status:'saving',message:'저장 중…'})
     let result=null
@@ -99,6 +119,8 @@ export function useTransactions({ householdId, start, end, prevStart, prevEnd, o
     } finally { busy.current=false }
     if(activeContext.current.householdId!==householdId || activeContext.current.myName!==myName) return null
     if(result) {
+      if (request.action === 'delete' && result.deleteRequest) setLastDelete({ requestId: result.deleteRequest })
+      if (request.action === 'undo') setLastDelete(null)
       applyResult(result)
       forget()
       setMutationState({status:'saved',message:'저장 결과를 확인했어요.'})
@@ -113,7 +135,7 @@ export function useTransactions({ householdId, start, end, prevStart, prevEnd, o
       setMutationState({status:'uncertain',message:'먼저 앞선 요청의 저장 결과를 확인해주세요.'})
       return null
     }
-    const cleaned=Object.fromEntries(Object.entries(fields).filter(([key])=>['type','date','category','amount','memo','owner','linked_asset_id'].includes(key)))
+    const cleaned=Object.fromEntries(Object.entries(fields).filter(([key])=>['type','date','category','amount','memo','owner','linked_asset_id','delete_request'].includes(key)))
     pending.current={action,id,fields:cleaned,requestId:crypto.randomUUID()}
     try{sessionStorage.setItem(storageKey,JSON.stringify(pending.current))}catch{}
     return runPending()
@@ -130,5 +152,6 @@ export function useTransactions({ householdId, start, end, prevStart, prevEnd, o
     return !!await mutate('update',id,fields)
   }
 
-  return { transactions, prevTransactions, loading, error, setError, handleAdd, handleDelete, handleUpdate, mutationState, retryMutation:runPending, refresh }
+  async function undoDelete(requestId) { return !!await mutate('undo',null,{delete_request:requestId}) }
+  return { transactions, prevTransactions, loading, error, setError, handleAdd, handleDelete, handleUpdate, mutationState, retryMutation:runPending, refresh, lastDelete, undoDelete }
 }

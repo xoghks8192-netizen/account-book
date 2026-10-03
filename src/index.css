@@ -1588,6 +1588,13 @@ body {
   flex: 1;
 }
 
+.toast.toast-action { pointer-events: auto; animation: none; }
+.toast-undo { flex-shrink: 0; padding: 8px 10px; border: 1px solid var(--input-border); border-radius: 10px; color: var(--text-heading); background: var(--tab-bg); font: inherit; cursor: pointer; }
+.toast-undo:disabled { opacity: .6; cursor: wait; }
+.date-count { color: var(--text-sub); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.auto-sync-hint { color: var(--text-sub); font-size: 11px; padding: 0 12px; margin: 0 0 8px; }
+.discard-confirm { padding: 12px 0; }
+
 @keyframes toastDrop {
   0%, 100% { opacity: 0; }
   10%, 85% { opacity: 1; }

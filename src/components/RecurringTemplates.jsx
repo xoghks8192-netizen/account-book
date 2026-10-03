@@ -1,11 +1,12 @@
 import { useMoney, usePrivacy } from '../lib/privacy'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { DEFAULT_CATEGORIES } from '../categories'
 import Collapsible from './Collapsible'
 import CategorySelect from './CategorySelect'
 import Modal from './Modal'
 import ConfirmDialog from './ConfirmDialog'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 
 const UNDO_TIMEOUT = 8000
@@ -14,6 +15,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   const moneyHidden=usePrivacy()
   const formatAmount = useMoney()
   const [templates, setTemplates] = useState([])
+  const writeRevision = useRef(0)
   const [swipedId, setSwipedId] = useState(null)
   const touchStartX = { current: 0 }
   const [showForm, setShowForm] = useState(false)
@@ -27,6 +29,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   const [lastAdded, setLastAdded] = useState({})
   const [ownerFilter, setOwnerFilter] = useState('전체')
   const [editingId, setEditingId] = useState(null)
+  const [savingEdit, setSavingEdit] = useState(false)
   const [editName, setEditName] = useState('')
   const [editType, setEditType] = useState('expense')
   const [editCategory, setEditCategory] = useState(categories.expense[0])
@@ -40,6 +43,13 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   const [undidIds, setUndidIds] = useState(new Set())
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const [suggestions, setSuggestions] = useState([])
+  useAutoRefresh(async (canApply) => {
+    const version = writeRevision.current
+    if (reordering || adding) return
+    const { data, error } = await supabase.from('recurring_templates').select('*')
+      .eq('household_id', householdId).order('sort_order', { ascending: true, nullsFirst: false }).order('id')
+    if (!error && canApply() && version === writeRevision.current) setTemplates(data)
+  }, householdId)
   const [dismissedSuggestions, setDismissedSuggestions] = useState(() => {
     try { return JSON.parse(localStorage.getItem('dismissed_suggestions') || '[]') } catch { return [] }
   })
@@ -150,7 +160,8 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
       })
       .select().single()
     if (!error) {
-      setTemplates((prev) => [...prev, data])
+      writeRevision.current++
+    setTemplates((prev) => [...prev, data])
       dismissSuggestion(s.key)
       onToast?.('✓ 고정 항목으로 등록되었습니다')
     }
@@ -188,6 +199,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
       .select()
       .single()
     if (!error) {
+      writeRevision.current++
       setTemplates((prev) => [...prev, data])
       setName('')
       setAmount('')
@@ -201,6 +213,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   async function handleDelete(id) {
     const { error } = await supabase.from('recurring_templates').delete().eq('id', id)
     if (error) { onToast?.('삭제하지 못했습니다. 다시 시도해주세요.'); return }
+    writeRevision.current++
     setTemplates((prev) => prev.filter((t) => t.id !== id))
     onToast?.('🗑 고정 항목이 삭제되었습니다')
   }
@@ -219,6 +232,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
       supabase.from('recurring_templates').update({ sort_order: currentOrder }).eq('id', target.id),
     ])
 
+    writeRevision.current++
     setTemplates((prev) => {
       const next = [...prev]
       next[index] = { ...current, sort_order: targetOrder }
@@ -253,6 +267,8 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
 
   async function handleUpdate(id) {
     if (!editName.trim() || !editAmount) return
+    if (savingEdit) return
+    setSavingEdit(true)
     const { data, error } = await supabase
       .from('recurring_templates')
       .update({
@@ -268,10 +284,13 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
       .select()
       .single()
     if (!error) {
+      writeRevision.current++
       setTemplates((prev) => prev.map((t) => (t.id === id ? data : t)))
       setEditingId(null)
       onToast?.('✓ 고정 항목이 수정되었습니다')
     }
+    else onToast?.('수정하지 못했어요. 입력 내용은 유지됩니다.')
+    setSavingEdit(false)
   }
 
   async function handleQuickAdd(template) {
@@ -405,7 +424,12 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
       )}
 
       {editingId && visibleTemplates.find((t) => t.id === editingId) && (
-        <Modal title="고정 항목 수정" onClose={() => setEditingId(null)}>
+        <Modal title="고정 항목 수정" onClose={() => setEditingId(null)} busy={savingEdit} dirty={(() => {
+          const original = templates.find(t => t.id === editingId)
+          return original && (editName !== original.name || editType !== original.type || editCategory !== original.category ||
+            Number(editAmount) !== Number(original.amount) || editMemo !== (original.memo ?? '') ||
+            editAuthor !== (original.author || owners[0]) || String(editLinkedAssetId) !== String(original.linked_asset_id ?? ''))
+        })()}>
           <div className="type-toggle">
             <button type="button" className={`income ${editType === 'income' ? 'active' : ''}`} onClick={() => handleEditTypeChange('income')}>수입</button>
             <button type="button" className={`expense ${editType === 'expense' ? 'active' : ''}`} onClick={() => handleEditTypeChange('expense')}>지출</button>
@@ -441,7 +465,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
             <button onClick={() => handleUpdate(editingId)} className="submit-btn" style={{ flex: 1 }}>저장</button>
-            <button onClick={() => setEditingId(null)} style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
+            <button data-modal-dismiss type="button" style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
           </div>
         </Modal>
       )}

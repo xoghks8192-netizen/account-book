@@ -11,11 +11,13 @@ import Collapsible from './Collapsible'
 import NetWorthChart from './NetWorthChart'
 import Modal from './Modal'
 import ProblemNotice from './ProblemNotice'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 
 const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory, onAssetsChange, onToast }, ref) {
   const formatAmount = useMoney()
   const [assets, setAssets] = useState([])
+  const writeRevision = useRef(0)
   const [loading, setLoading] = useState(true)
   const [retry,setRetry] = useState(0)
   useEffect(() => { onAssetsChange?.(assets) }, [assets])
@@ -24,6 +26,13 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
   const [summaryModal, setSummaryModal] = useState(null)
   const [lastMonthTotal, setLastMonthTotal] = useState(null)
   const [reordering, setReordering] = useState(false)
+  useAutoRefresh(async (canApply) => {
+    const version = writeRevision.current
+    if (reordering) return
+    const { data, error } = await supabase.from('assets').select('*').eq('household_id', householdId)
+      .order('category').order('id')
+    if (!error && canApply() && version === writeRevision.current) setAssets(data)
+  }, householdId)
   const [assetFormOpenToken, setAssetFormOpenToken] = useState(0)
   const assetFormRef = useRef(null)
   useImperativeHandle(ref, () => ({
@@ -67,8 +76,9 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
       .single()
     if (error) {
       setError(error.message)
-      return
+      return false
     }
+    writeRevision.current++
     setAssets((prev) => [...prev, data])
     onToast?.('✓ 자산이 추가되었습니다')
   }
@@ -82,10 +92,12 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
       .single()
     if (error) {
       setError(error.message)
-      return
+      return false
     }
+    writeRevision.current++
     setAssets((prev) => prev.map((a) => (a.id === id ? data : a)))
     onToast?.('✓ 자산이 수정되었습니다')
+    return true
   }
 
   async function handleDelete(id) {
@@ -99,12 +111,13 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
       setError(error.message)
       return
     }
+    writeRevision.current++
     setAssets((prev) => prev.map((a) => (a.id === id ? data : a)))
-    onToast?.('🗑 자산이 삭제되었습니다')
+    onToast?.('🗑 자산이 삭제되었습니다', () => handleRestore(id, true))
   }
 
-  async function handleRestore(id) {
-    if (!window.confirm('이 자산을 복구할까요?')) return
+  async function handleRestore(id, undo = false) {
+    if (!undo && !window.confirm('이 자산을 복구할까요?')) return
     const { data, error } = await supabase
       .from('assets')
       .update({ deleted_at: null })
@@ -113,8 +126,10 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
       .single()
     if (error) {
       setError(error.message)
+      onToast?.('복구하지 못했어요. 삭제된 자산에서 다시 시도해주세요.')
       return
     }
+    writeRevision.current++
     setAssets((prev) => prev.map((a) => (a.id === id ? data : a)))
     onToast?.('✓ 자산이 복구되었습니다')
   }
@@ -126,6 +141,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
       setError(error.message)
       return
     }
+    writeRevision.current++
     setAssets((prev) => prev.filter((a) => a.id !== id))
     onToast?.('🗑 자산이 영구 삭제되었습니다')
   }
