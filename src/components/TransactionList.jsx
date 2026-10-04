@@ -28,7 +28,7 @@ function formatDate(dateStr) {
   return `${mm}/${dd} ${DAY_NAMES[d.getDay()]}`
 }
 
-export default function TransactionList({ transactions, onDelete, onUpdate, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, search = '', scrollToId = null }) {
+export default function TransactionList({ transactions, onDelete, onUpdate, onCopy, filtered = false, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, search = '', scrollToId = null }) {
   const moneyHidden=usePrivacy()
   const formatAmount = useMoney()
   const [editingId, setEditingId] = useState(null)
@@ -99,8 +99,8 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
     return (
       <div className="empty-state">
         <div className="empty-state-icon">🌿</div>
-        <div className="empty-state-title">아직 내역이 없어요</div>
-        <div className="empty-state-desc">이번 달 첫 번째 내역을 추가해볼까요?</div>
+        <div className="empty-state-title">{filtered ? '조건에 맞는 내역이 없어요' : '아직 내역이 없어요'}</div>
+        <div className="empty-state-desc">{filtered ? '검색어나 필터를 바꿔보세요.' : '이번 달 첫 번째 내역을 추가해볼까요?'}</div>
       </div>
     )
   }
@@ -213,7 +213,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
           </div>
           {!collapsed && items.map((tx) => (
             <div
-              className={`tx-item${swipedId === tx.id ? ' swiped' : ''}`}
+              className={`tx-item${onCopy ? ' has-copy' : ''}${swipedId === tx.id ? ' swiped' : ''}`}
               key={tx.id}
               ref={(el) => { itemRefs.current[tx.id] = el }}
               onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX }}
@@ -245,6 +245,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, asse
               </div>
               <span className="swipe-hint"><span/><span/><span/></span>
               <div className="tx-swipe-actions">
+                {onCopy && <button className="swipe-btn copy" aria-label="내역 복사" title="내역 복사" onClick={e => { e.stopPropagation(); setSwipedId(null); onCopy(tx) }}>⧉</button>}
                 <button className="swipe-btn edit" onClick={(e) => { e.stopPropagation(); setSwipedId(null); startEdit(tx) }}>✎</button>
                 <button
                   className="swipe-btn delete"

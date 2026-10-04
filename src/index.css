@@ -1089,6 +1089,23 @@ body {
 .tx-item.swiped .tx-inner {
   transform: translateX(-112px);
 }
+.tx-item.has-copy.swiped .tx-inner { transform: translateX(-168px); }
+.swipe-btn.copy { background: var(--tab-bg); color: var(--text-heading); font-size: 22px; }
+.active-filter-strip { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 0; }
+.active-filter-strip button, .transfer-entry button { border: 1px solid var(--input-border); border-radius: 12px; background: var(--tab-bg); color: var(--text-heading); padding: 7px 10px; font: inherit; font-size: 12px; cursor: pointer; overflow-wrap: anywhere; }
+.search-result-summary { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 14px; padding: 12px; border: 1px solid var(--input-border); border-radius: 14px; background: var(--input-bg); font-size: 13px; }
+.search-result-summary small, .view-note, .backup-history { color: var(--text-sub); font-size: 12px; line-height: 1.6; }
+.month-total-label { font-size: 11px; color: var(--text-sub); }
+.tx-month-summary { flex-wrap: wrap; }
+.transfer-entry { margin: 0 16px 16px; text-align: right; }
+.transfer-totals { display: flex; gap: 8px; }
+.transfer-totals > div { flex: 1; min-width: 0; background: var(--card-bg); border-radius: 12px; padding: 12px; font-size: 12px; }
+.transfer-totals strong { display: block; margin-top: 6px; font-size: 17px; overflow-wrap: anywhere; }
+.transfer-summary-row { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--form-border); font-size: 13px; }
+.transfer-summary-row small { display: block; color: var(--text-sub); font-size: 11px; }
+.transfer-summary-row strong { overflow-wrap: anywhere; min-width: 0; }
+.backup-history { margin: 0; padding: 0 12px 10px; }
+.backup-history small { font-size: 10px; }
 
 .tx-swipe-actions {
   position: absolute;

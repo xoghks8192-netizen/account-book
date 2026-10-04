@@ -27,6 +27,8 @@ import PinLock from './components/PinLock'
 import ConfirmDialog from './components/ConfirmDialog'
 import { useCountUp } from './hooks/useCountUp'
 import { useTransactions } from './hooks/useTransactions'
+import { summarizeResults, copyTransaction, backupStorageKey, formatExportTime } from './lib/ledgerView'
+import TransferSummary from './components/TransferSummary'
 
 const PAGE_KEY = 'household-budget-page'
 const THEME_KEY = 'household-budget-theme'
@@ -143,6 +145,10 @@ export default function App() {
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [summaryModal, setSummaryModal] = useState(null)
+  const [showTransfers, setShowTransfers] = useState(false)
+  const [copyCandidate, setCopyCandidate] = useState(null)
+  const [copyDraft, setCopyDraft] = useState(null)
+  const [lastExport, setLastExport] = useState(null)
   const [expandedCategory, setExpandedCategory] = useState(null)
 
   function toggleCategory(cat) {
@@ -196,6 +202,7 @@ export default function App() {
   }
 
   function handleAddSuccess() {
+    setCopyDraft(null)
     setFormCloseToken((n) => n + 1)
     showToast('✓ 내역이 추가되었습니다')
   }
@@ -203,6 +210,28 @@ export default function App() {
   const householdId = user?.householdId
   const myName = user?.displayName
   const owners = [...(user?.members ?? []), '공동']
+  const exportKey = backupStorageKey(householdId, user?.username)
+  useEffect(() => {
+    try { setLastExport(localStorage.getItem(exportKey)) } catch { setLastExport(null) }
+    setCopyCandidate(null); setCopyDraft(null); setShowTransfers(false)
+  }, [exportKey])
+  function recordExport() {
+    const value = new Date().toISOString()
+    try { localStorage.setItem(exportKey, value) } catch {}
+    setLastExport(value)
+  }
+  function requestCopy(tx) {
+    if (['saving','checking','uncertain'].includes(mutationState.status)) { showToast('앞선 저장 요청을 먼저 확인해주세요.'); return }
+    try { setCopyCandidate(copyTransaction(tx, owners, linkableAssets)) }
+    catch(e) { showToast(e.message) }
+  }
+  function confirmCopy() {
+    setCopyDraft({ ...copyCandidate, token:crypto.randomUUID() })
+    setCopyCandidate(null)
+    setOwnerFilter('전체')
+    setFormOpenToken(n => n + 1)
+    showToast('추가 폼에 복사했어요. 날짜를 확인한 뒤 저장해주세요.')
+  }
   const { start, end } = useMemo(() => monthRange(cursor.year, cursor.month), [cursor])
   const { start: prevStart, end: prevEnd } = useMemo(() => monthRange(cursor.year, cursor.month - 1), [cursor])
   const rawCategories = { ...DEFAULT_CATEGORIES, ...(user?.categories ?? {}) }
@@ -369,7 +398,7 @@ export default function App() {
   const transferSent =
     ownerFilter !== '전체' && ownerFilter !== '공동'
       ? transactions
-          .filter((t) => t.type === 'income' && t.category === TRANSFER_CATEGORY && t.owner !== ownerFilter)
+          .filter((t) => t.type === 'expense' && (t.transfer_id || t.category === TRANSFER_CATEGORY) && t.owner === ownerFilter)
           .reduce((s, t) => s + Number(t.amount), 0)
       : 0
 
@@ -406,6 +435,8 @@ export default function App() {
   }, [ownedTransactions, search, amountMin, amountMax, dateFrom, dateTo])
 
   const hasActiveFilters = amountMin || amountMax || dateFrom || dateTo
+  const isFiltered = !!(search.trim() || hasActiveFilters)
+  const resultSummary = summarizeResults(filteredTransactions)
 
   function clearFilters() {
     setAmountMin('')
@@ -422,6 +453,7 @@ export default function App() {
       const file=await res.json()
       if(file.code==='BACKUP_SETUP_REQUIRED') {
         await exportLegacyCsv(householdId)
+        recordExport()
         showToast('기존 CSV로 백업했어요. JSON 복원은 SQL 024 적용 후 가능해요.')
         return
       }
@@ -429,6 +461,7 @@ export default function App() {
       const url=URL.createObjectURL(new Blob([JSON.stringify(file)],{type:'application/json'}))
       const a=document.createElement('a')
       a.href=url;a.download='가계부_백업_'+todayKst()+'.json';a.click()
+      recordExport()
       setTimeout(()=>URL.revokeObjectURL(url),1000)
       showToast('백업 파일을 내려받았어요')
     }catch(e){reportProblem('backup');showToast(e.message||'백업하지 못했습니다. 다시 시도해주세요.')}
@@ -557,6 +590,7 @@ export default function App() {
                 <span className="more-menu-icon" style={{ background: '#e8f8ef', color: '#4caf7d' }}>💾</span>
                 {exporting ? '내보내는 중...' : '데이터 백업'}
               </button>
+              <p className="backup-history">마지막 내보내기: {formatExportTime(lastExport)}<br/><small>이 기기·계정의 요청 기록이에요. 파일 저장 여부는 다운로드 목록에서 확인해주세요.</small></p>
               <button className="more-menu-item" onClick={()=>{setShowMoreMenu(false);setShowRestore(true)}}><span className="more-menu-icon">↥</span>백업 복원</button>
               <button className="more-menu-item" onClick={()=>{setShowMoreMenu(false);setShowDiagnostics(true)}}><span className="more-menu-icon">ⓘ</span>문제 진단</button>
               <button className="more-menu-item" onClick={() => setShowPasswordForm((prev) => !prev)}>
@@ -589,6 +623,12 @@ export default function App() {
       </div>
 
       <AnniversaryBanner datingStart={user.datingStart} weddingDate={user.weddingDate} />
+      {copyCandidate && <Modal title="내역 복사" onClose={() => setCopyCandidate(null)}>
+        <p>금액·날짜·카테고리·메모를 추가 폼에 채울까요? 현재 작성 중인 추가 폼은 복사한 내용으로 바뀌며, 저장 버튼을 눌러야 등록됩니다.</p>
+        {copyCandidate.category === TRANSFER_CATEGORY && <p className="view-note">보낸 이체를 저장하면 배우자 쪽 받은 이체도 함께 생성됩니다.</p>}
+        <div className="confirm-actions"><button className="confirm-btn cancel" onClick={() => setCopyCandidate(null)}>취소</button><button className="confirm-btn" onClick={confirmCopy}>폼에 복사</button></div>
+      </Modal>}
+      {showTransfers && ownerFilter !== '전체' && ownerFilter !== '공동' && <TransferSummary rows={ownedTransactions} owner={ownerFilter} monthLabel={`${cursor.year}년 ${cursor.month+1}월`} onClose={() => setShowTransfers(false)}/>}
       {duplicatePrompt && <Modal title="같은 내역이 있어요" onClose={() => answerDuplicate(false)}>
         <p>날짜·금액·구분·소유자·카테고리가 같은 내역이 있어요. 별도의 거래라면 추가할 수 있습니다.</p>
         <div className="confirm-actions"><button className="confirm-btn cancel" onClick={() => answerDuplicate(false)}>돌아가기</button><button className="confirm-btn" onClick={() => answerDuplicate(true)}>그래도 추가</button></div>
@@ -777,12 +817,13 @@ export default function App() {
           })()}
 
           <ExpenseChart transactions={ownedTransactions} />
+          {ownerFilter !== '전체' && ownerFilter !== '공동' && <div className="transfer-entry"><button type="button" onClick={() => setShowTransfers(true)}>보낸 이체 · 받은 이체 보기 ↗</button></div>}
 
           <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} refreshKey={JSON.stringify(transactions)} />
 
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
             <Collapsible title="내역 추가" forceClose={formCloseToken} forceOpen={formOpenToken}>
-              <TransactionForm mutationState={mutationState} onRetrySave={retrySave}
+              <TransactionForm mutationState={mutationState} onRetrySave={retrySave} copyDraft={copyDraft}
                 ref={formRef}
                 onAdd={handleAdd}
                 onSuccess={handleAddSuccess}
@@ -881,14 +922,30 @@ export default function App() {
                   )}
                 </div>
               )}
+              {isFiltered && <div className="active-filter-strip" aria-label="적용 중인 검색 조건">
+                {search.trim() && <button onClick={() => setSearch('')} aria-label="검색어 해제">검색어 적용 ×</button>}
+                {(amountMin || amountMax) && <button onClick={() => { setAmountMin('');setAmountMax('') }} aria-label="금액 조건 해제">금액 {amountMin ? formatAmount(Number(amountMin)) : '제한 없음'} ~ {amountMax ? formatAmount(Number(amountMax)) : '제한 없음'} ×</button>}
+                {(dateFrom || dateTo) && <button onClick={() => { setDateFrom('');setDateTo('') }} aria-label="날짜 조건 해제">기간 {dateFrom || '시작 제한 없음'} ~ {dateTo || '종료 제한 없음'} ×</button>}
+                <button onClick={() => { clearFilters();setSearch('') }}>전체 초기화</button>
+              </div>}
               <div className="tx-month-summary">
+                <span className="month-total-label">월 전체 · {ownerFilter}</span>
                 <span className="tx-month-balance">{formatAmount(totalIncome - totalExpense)}원</span>
                 <span className="tx-month-sub">
                   <span className="tx-month-income">+{formatAmount(totalIncome)}</span>
                   <span className="tx-month-expense">−{formatAmount(totalExpense)}</span>
                 </span>
               </div>
+              {isFiltered && <section className="search-result-summary" aria-label="검색 결과 합계" aria-live="polite">
+                <strong>검색 결과 · {resultSummary.count}건</strong>
+                <span>일반 수입 {formatAmount(resultSummary.income)}원 · 일반 지출 {formatAmount(resultSummary.expense)}원</span>
+                <span>합계 {formatAmount(resultSummary.income - resultSummary.expense)}원</span>
+                {(resultSummary.received > 0 || resultSummary.sent > 0) && <small>별도 이체: 보냄 {formatAmount(resultSummary.sent)}원 · 받음 {formatAmount(resultSummary.received)}원</small>}
+                <small>선택한 월·소유자 안에서 검색한 결과예요. 이체는 일반 합계에서 제외합니다.</small>
+              </section>}
               <TransactionList
+                onCopy={requestCopy}
+                filtered={isFiltered}
                 transactions={filteredTransactions}
                 onDelete={wrappedDelete}
                 onUpdate={wrappedUpdate}

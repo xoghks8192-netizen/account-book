@@ -1,5 +1,5 @@
 import { usePrivacy } from '../lib/privacy'
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY, CATEGORY_EMOJI } from '../categories'
 import CategoryManager from './CategoryManager'
 import { todayKst } from '../lib/dates'
@@ -8,7 +8,7 @@ function todayStr() {
   return todayKst()
 }
 
-const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory, mutationState, onRetrySave }, ref) {
+const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory, mutationState, onRetrySave, copyDraft }, ref) {
   const moneyHidden=usePrivacy()
   const [type, setType] = useState('expense')
   const [date, setDate] = useState(todayStr())
@@ -30,6 +30,16 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
     }
   }))
   const [transferToSpouse, setTransferToSpouse] = useState(false)
+  useEffect(() => {
+    if (!copyDraft) return
+    setType(copyDraft.type); setDate(copyDraft.date); setCategory(copyDraft.category)
+    setAmount(copyDraft.amount); setMemo(copyDraft.memo); setOwner(copyDraft.owner)
+    setLinkedAssetId(copyDraft.linked_asset_id)
+    setTransferToSpouse(copyDraft.category === TRANSFER_CATEGORY)
+    setShowMore(!!copyDraft.memo || !!copyDraft.linked_asset_id)
+    const timer = setTimeout(() => { amountRef.current?.scrollIntoView({ behavior:'smooth', block:'center' }); amountRef.current?.focus() }, 100)
+    return () => clearTimeout(timer)
+  }, [copyDraft])
 
   const partner = owners.find((o) => o !== '공동' && o !== owner)
 
@@ -126,7 +136,7 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
           </button>
         </div>
         <div className="category-icon-grid">
-          {categories[type].map((c) => (
+          {[...new Set([...categories[type], category])].map((c) => (
             <button
               key={c}
               type="button"
