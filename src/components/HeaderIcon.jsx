@@ -1,0 +1,8 @@
+export default function HeaderIcon({ name }) {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+    {name === 'moon' && <path d="M20.8 13.2A9 9 0 0 1 10.8 3.2 9 9 0 1 0 20.8 13.2Z" />}
+    {name === 'sun' && <><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></>}
+    {name === 'settings' && <><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2.5" fill="var(--form-bg)"/><circle cx="15" cy="17" r="2.5" fill="var(--form-bg)"/></>}
+    {(name === 'eye' || name === 'eye-off') && <><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>{name === 'eye-off' && <path d="m3 3 18 18"/>}</>}
+  </svg>
+}

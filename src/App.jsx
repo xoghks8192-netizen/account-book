@@ -30,6 +30,7 @@ import { useTransactions } from './hooks/useTransactions'
 import { summarizeResults, copyTransaction, backupStorageKey, formatExportTime } from './lib/ledgerView'
 import TransferSummary from './components/TransferSummary'
 import AppSplash from './components/AppSplash'
+import HeaderIcon from './components/HeaderIcon'
 
 const PAGE_KEY = 'household-budget-page'
 const THEME_KEY = 'household-budget-theme'
@@ -530,17 +531,17 @@ export default function App() {
     <div>
       <div className="brand-header">
         <div className="brand-header-left">
-          <button className="header-icon-btn" onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))} title="테마 변경">
-            {theme === 'dark' ? '☀️' : '🌙'}
+          <button className="header-icon-btn" onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))} title="테마 변경" aria-label={theme === 'dark' ? '라이트 모드로 변경' : '다크 모드로 변경'}>
+            <HeaderIcon name={theme === 'dark' ? 'sun' : 'moon'} />
           </button>
         </div>
         <h1>{user.members.length === 2 ? `${shortName(user.members[0])} ❤️ ${shortName(user.members[1])}` : shortName(user.members[0])}</h1>
         <div className="brand-header-actions">
           <button className="header-icon-btn privacy-toggle" onClick={()=>setMoneyHidden(!moneyHidden)} aria-label={moneyHidden?'금액 보이기':'금액 숨기기'} title={moneyHidden?'금액 보이기':'금액 숨기기'} aria-pressed={moneyHidden}>
-            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>{moneyHidden&&<path d="m3 3 18 18"/>}</svg>
+            <HeaderIcon name={moneyHidden ? 'eye-off' : 'eye'} />
           </button>
-          <button className="header-icon-btn" onClick={() => setShowMoreMenu((prev) => !prev)} title="설정">
-            ⚙️
+          <button className="header-icon-btn" onClick={() => setShowMoreMenu((prev) => !prev)} title="설정" aria-label="설정" aria-expanded={showMoreMenu}>
+            <HeaderIcon name="settings" />
           </button>
         </div>
         {showMoreMenu && (

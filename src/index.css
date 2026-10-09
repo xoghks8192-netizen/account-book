@@ -3827,3 +3827,43 @@ button:disabled { cursor: default; }
 [data-money-hidden="true"] input[inputmode="numeric"] { -webkit-text-security:disc; }
 .transaction-fields { border:0; padding:0; margin:0; min-width:0; }
 .transaction-fields:disabled { opacity:.7; }
+
+/* Reading hierarchy: quiet surfaces, clear amounts and selected context. */
+.brand-header .header-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 40px; min-height: 40px; padding: 8px;
+  color: var(--text-sub); background: transparent; border: 1px solid transparent;
+}
+.brand-header .header-icon-btn:hover,
+.brand-header .header-icon-btn[aria-pressed="true"],
+.brand-header .header-icon-btn[aria-expanded="true"] { background: var(--tab-bg); color: var(--text-heading); }
+.owner-tabs button { background: transparent; border: 1px solid transparent; box-shadow: none; color: var(--text-sub); font-weight: 500; }
+.owner-tabs button.active { background: var(--active-gradient); color: #fff; font-weight: 700; box-shadow: none; }
+.owner-tabs button:not(.active):hover { background: var(--tab-bg); color: var(--text-heading); }
+.tx-item {
+  background: transparent; border: 0; border-bottom: 1px solid var(--form-border);
+  border-radius: 0; box-shadow: none; margin-bottom: 0; padding: 15px 2px;
+}
+.tx-info { flex: 1; }
+.tx-info .category { color: var(--text-main); font-size: 13px; font-weight: 600; }
+.tx-info .meta { color: var(--text-sub); font-size: 12px; font-weight: 400; line-height: 1.65; margin-top: 5px; }
+.tx-info .cat-emoji { font-size: 14px; }
+.tx-amount { flex-shrink: 0; }
+.tx-amount .amount { font-size: clamp(14px, 4.1vw, 17px); font-weight: 750; letter-spacing: -0.035em; color: var(--text-heading); }
+.tx-amount .amount.income { color: var(--income-color); }
+.tx-amount .amount.expense { color: var(--expense-color); }
+.summary-item { box-shadow: none; border: 1px solid var(--form-border); padding: 16px 8px; }
+.summary-item .label { color: var(--text-sub); font-size: 12px; }
+.summary-item:not(.balance) .value { font-weight: 650; }
+.summary-item.balance {
+  background: color-mix(in srgb, var(--balance-color) 8%, var(--form-bg));
+  border-color: color-mix(in srgb, var(--balance-color) 32%, var(--form-border));
+}
+.summary-item.balance .label { color: var(--text-heading); font-weight: 650; }
+.summary-item.balance .value { font-weight: 800; color: var(--text-heading); }
+@media (max-width: 360px) {
+  .brand-header .header-icon-btn { min-width: 34px; padding: 6px; }
+  .brand-header-actions { gap: 2px; }
+  .tx-item, .tx-inner { gap: 6px; }
+  .summary-item { padding: 14px 5px; }
+}
