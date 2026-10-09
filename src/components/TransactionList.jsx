@@ -1,6 +1,6 @@
 import { useMoney, usePrivacy } from '../lib/privacy'
 import { useEffect, useRef, useState } from 'react'
-import { DEFAULT_CATEGORIES, CATEGORY_EMOJI } from '../categories'
+import { DEFAULT_CATEGORIES, getCategoryEmoji } from '../categories'
 import CategorySelect from './CategorySelect'
 import Modal from './Modal'
 import ConfirmDialog from './ConfirmDialog'
@@ -227,7 +227,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, onCo
               <div className="tx-inner">
                 <div className="tx-info">
                   <span className="category">
-                    {CATEGORY_EMOJI[tx.category] && <span className="cat-emoji">{CATEGORY_EMOJI[tx.category]}</span>}
+                    <span className="cat-emoji" aria-hidden="true">{getCategoryEmoji(tx.category)}</span>
                     <Highlight text={tx.category} query={search} />
                     {(tx.transfer_id||tx.category==='배우자 이체')&&<button type="button" className="transfer-link" onClick={e=>{e.stopPropagation();setTransferDetails(tx)}}>연결 보기 ↗</button>}
                   </span>

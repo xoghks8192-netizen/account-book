@@ -823,7 +823,7 @@ export default function App() {
 
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
             <Collapsible title="내역 추가" forceClose={formCloseToken} forceOpen={formOpenToken}>
-              <TransactionForm mutationState={mutationState} onRetrySave={retrySave} copyDraft={copyDraft}
+              <TransactionForm mutationState={mutationState} onRetrySave={retrySave} copyDraft={copyDraft} transactions={transactions}
                 ref={formRef}
                 onAdd={handleAdd}
                 onSuccess={handleAddSuccess}

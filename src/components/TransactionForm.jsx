@@ -1,14 +1,14 @@
 import { usePrivacy } from '../lib/privacy'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
-import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY, CATEGORY_EMOJI } from '../categories'
-import CategoryManager from './CategoryManager'
+import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from '../categories'
+import CategoryPicker from './CategoryPicker'
 import { todayKst } from '../lib/dates'
 
 function todayStr() {
   return todayKst()
 }
 
-const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory, mutationState, onRetrySave, copyDraft }, ref) {
+const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, currentUser, owners, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onMoveCategory, mutationState, onRetrySave, copyDraft, transactions = [] }, ref) {
   const moneyHidden=usePrivacy()
   const [type, setType] = useState('expense')
   const [date, setDate] = useState(todayStr())
@@ -20,7 +20,6 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
   const savingRef = useRef(false)
   const [saveError, setSaveError] = useState('')
   const [linkedAssetId, setLinkedAssetId] = useState('')
-  const [showCategoryManager, setShowCategoryManager] = useState(false)
   const [showMore, setShowMore] = useState(false)
   const amountRef = useRef(null)
   useImperativeHandle(ref, () => ({
@@ -116,51 +115,16 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
       </div>
 
       <div className="form-row">
-        <div className="category-grid-header">
-          <label>카테고리</label>
-          <button
-            type="button"
-            onClick={() => setShowCategoryManager((prev) => !prev)}
-            style={{
-              border: '1.5px solid #e8e3f7',
-              borderRadius: 10,
-              background: showCategoryManager ? '#b896ff' : '#fdeef3',
-              color: showCategoryManager ? '#fff' : '#b88a9c',
-              fontWeight: 600,
-              fontSize: 12,
-              padding: '2px 10px',
-              cursor: 'pointer',
-            }}
-          >
-            수정
-          </button>
-        </div>
-        <div className="category-icon-grid">
-          {[...new Set([...categories[type], category])].map((c) => (
-            <button
-              key={c}
-              type="button"
-              className={`cat-icon-btn${category === c ? ' selected' : ''}`}
-              onClick={() => setCategory(c)}
-            >
-              <span className="cat-icon-emoji">{CATEGORY_EMOJI[c] || '📌'}</span>
-              <span className="cat-icon-label">{c}</span>
-            </button>
-          ))}
-        </div>
-        {showCategoryManager && (
-          <CategoryManager
-            options={categories[type]}
-            onAdd={(name) => onAddCategory(type, name)}
-            onRemove={(name) => {
-              onRemoveCategory(type, name)
-              if (name === category) {
-                setCategory(categories[type].find((c) => c !== name))
-              }
-            }}
-            onMove={(name, direction) => onMoveCategory(type, name, direction)}
-          />
-        )}
+        <label>카테고리</label>
+        <CategoryPicker value={category} options={categories[type]} type={type} transactions={transactions}
+          onChange={setCategory}
+          onAdd={(name) => onAddCategory(type, name)}
+          onRemove={(name) => {
+            onRemoveCategory(type, name)
+            if (name === category) setCategory(categories[type].find(c => c !== name))
+          }}
+          onMove={(name, direction) => onMoveCategory(type, name, direction)}
+        />
       </div>
 
       <div className="form-row">
