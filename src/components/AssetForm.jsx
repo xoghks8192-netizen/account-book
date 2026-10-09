@@ -1,5 +1,6 @@
 import { usePrivacy } from '../lib/privacy'
 import { useState } from 'react'
+import AmountHint from './AmountHint'
 import { ASSET_CATEGORIES, STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
 import CategoryManager from './CategoryManager'
 
@@ -209,6 +210,7 @@ export default function AssetForm({ onAdd, owners, categories = ASSET_CATEGORIES
             onChange={(e) => setAmount(e.target.value)}
             required
           />
+          <AmountHint value={amount} />
         </div>
       )}
 

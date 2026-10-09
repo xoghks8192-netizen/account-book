@@ -2,6 +2,9 @@ import { useMoney, usePrivacy } from '../lib/privacy'
 import { useState } from 'react'
 import { STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
 import Modal from './Modal'
+import AmountHint from './AmountHint'
+import ExpandableText from './ExpandableText'
+import { joinDetails } from '../lib/displayText'
 import ConfirmDialog from './ConfirmDialog'
 
 
@@ -88,11 +91,16 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
         />
       )}
       {editing && (
-        <Modal title="자산 수정" onClose={handleCancel} busy={saving} dirty={
+<Modal title="자산 수정" onClose={handleCancel} busy={saving} dirty={
           name !== asset.name || owner !== asset.owner || liquidity !== (asset.liquidity ?? defaultLiquidity(asset.category)) ||
           memo !== (asset.memo ?? '') || Number(amount) !== Number(asset.amount) ||
           String(shares) !== String(asset.shares ?? '') || String(avgPrice) !== String(asset.avg_price ?? '') ||
           String(currentPrice) !== String(asset.current_price ?? '') || ticker !== (asset.ticker ?? '')
+        } footer={
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <button onClick={handleSave} disabled={saving} className="submit-btn" style={{ flex: 1 }}>저장</button>
+            <button data-modal-dismiss type="button" style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
+          </div>
         }>
           <div className="form-row">
             <label>이름</label>
@@ -134,6 +142,7 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
               <div className="form-row">
                 <label>금액</label>
                 <input type={moneyHidden ? "password" : "number"} inputMode="numeric" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
+                <AmountHint value={amount} />
               </div>
               {amount !== '' && Number(amount) !== asset.amount && (
                 <div style={{ textAlign: 'right', fontSize: 13, fontWeight: 700, color: Number(amount) > asset.amount ? '#ff5c5c' : '#6cb6ff', marginBottom: 8 }}>
@@ -146,20 +155,17 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
             <label>메모 (선택)</label>
             <input type="text" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="메모" />
           </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button onClick={handleSave} disabled={saving} className="submit-btn" style={{ flex: 1 }}>저장</button>
-            <button data-modal-dismiss type="button" style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
-          </div>
+
         </Modal>
       )}
 
       <div className="tx-item">
         <div className="tx-info">
-          <span className="category">{asset.name}</span>
+          <span className="category"><ExpandableText title="자산 이름" text={asset.name} /></span>
           <span className="meta">
-            {asset.owner}
-            {isStockItem ? ` · ${formatAmount(asset.shares)}주 · 평단 ${formatAmount(asset.avg_price)} · 현재 ${formatAmount(asset.current_price)}` : ''}
-            {asset.memo && !moneyHidden ? ` · ${asset.memo}` : ''}
+            <ExpandableText title="자산 상세" text={joinDetails(asset.owner,
+              isStockItem ? `${formatAmount(asset.shares)}주 · 평단 ${formatAmount(asset.avg_price)} · 현재 ${formatAmount(asset.current_price)}` : '',
+              asset.memo && !moneyHidden ? asset.memo : '')} />
           </span>
           {refreshError && <span className="meta" style={{ color: '#ff7aa2' }}>{refreshError}</span>}
         </div>

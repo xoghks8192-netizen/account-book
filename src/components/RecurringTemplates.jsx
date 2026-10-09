@@ -5,6 +5,8 @@ import { DEFAULT_CATEGORIES } from '../categories'
 import Collapsible from './Collapsible'
 import CategorySelect from './CategorySelect'
 import Modal from './Modal'
+import AmountHint from './AmountHint'
+import { joinDetails } from '../lib/displayText'
 import ConfirmDialog from './ConfirmDialog'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
@@ -424,12 +426,17 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
       )}
 
       {editingId && visibleTemplates.find((t) => t.id === editingId) && (
-        <Modal title="고정 항목 수정" onClose={() => setEditingId(null)} busy={savingEdit} dirty={(() => {
+<Modal title="고정 항목 수정" onClose={() => setEditingId(null)} busy={savingEdit} dirty={(() => {
           const original = templates.find(t => t.id === editingId)
           return original && (editName !== original.name || editType !== original.type || editCategory !== original.category ||
             Number(editAmount) !== Number(original.amount) || editMemo !== (original.memo ?? '') ||
             editAuthor !== (original.author || owners[0]) || String(editLinkedAssetId) !== String(original.linked_asset_id ?? ''))
-        })()}>
+        })()} footer={
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <button onClick={() => handleUpdate(editingId)} disabled={savingEdit} className="submit-btn" style={{ flex: 1 }}>저장</button>
+            <button data-modal-dismiss type="button" style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
+          </div>
+        }>
           <div className="type-toggle">
             <button type="button" className={`income ${editType === 'income' ? 'active' : ''}`} onClick={() => handleEditTypeChange('income')}>수입</button>
             <button type="button" className={`expense ${editType === 'expense' ? 'active' : ''}`} onClick={() => handleEditTypeChange('expense')}>지출</button>
@@ -445,6 +452,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
           <div className="form-row">
             <label>금액</label>
             <input type={moneyHidden ? "password" : "number"} inputMode="numeric" min="1" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
+            <AmountHint value={editAmount} />
           </div>
           <div className="form-row">
             <label>구분</label>
@@ -463,10 +471,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
             <label>메모 (선택)</label>
             <input type="text" value={editMemo} onChange={(e) => setEditMemo(e.target.value)} placeholder="메모" />
           </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button onClick={() => handleUpdate(editingId)} className="submit-btn" style={{ flex: 1 }}>저장</button>
-            <button data-modal-dismiss type="button" style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
-          </div>
+
         </Modal>
       )}
 
@@ -502,8 +507,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
               <div className="tx-info">
                 <span className="category">{t.name}</span>
                 <span className="meta">
-                  {t.category}
-                  {t.author ? ` · ${t.author}` : ''} ·{' '}
+                  {joinDetails(t.category, t.author)}{joinDetails(t.category, t.author) ? ' · ' : ''}
                   <span className={t.type === 'income' ? 'amount income' : 'amount expense'}>
                     {t.type === 'income' ? '+' : '-'}
                     {formatAmount(t.amount)}원
@@ -579,6 +583,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0"
             />
+            <AmountHint value={amount} />
           </div>
           <div className="form-row">
             <label>구분</label>

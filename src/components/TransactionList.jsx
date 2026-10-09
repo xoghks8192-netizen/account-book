@@ -3,6 +3,9 @@ import { useEffect, useRef, useState } from 'react'
 import { DEFAULT_CATEGORIES, getCategoryEmoji } from '../categories'
 import CategorySelect from './CategorySelect'
 import Modal from './Modal'
+import AmountHint from './AmountHint'
+import ExpandableText from './ExpandableText'
+import { joinDetails } from '../lib/displayText'
 import ConfirmDialog from './ConfirmDialog'
 import TransferDetails from './TransferDetails'
 
@@ -139,10 +142,15 @@ export default function TransactionList({ transactions, onDelete, onUpdate, onCo
         />
       )}
       {editingTx && (
-        <Modal title="내역 수정" onClose={() => setEditingId(null)} busy={saving} dirty={
+<Modal title="내역 수정" onClose={() => setEditingId(null)} busy={saving} dirty={
           editDate !== editingTx.date || editType !== editingTx.type || editCategory !== editingTx.category ||
           Number(editAmount) !== Number(editingTx.amount) || editOwner !== editingTx.owner ||
           editMemo !== (editingTx.memo ?? '') || String(editLinkedAssetId) !== String(editingTx.linked_asset_id ?? '')
+        } footer={
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <button onClick={() => handleSave(editingId)} disabled={saving} className="submit-btn" style={{ flex: 1 }}>저장</button>
+            <button data-modal-dismiss type="button" style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
+          </div>
         }>
           {editingTx.transfer_id && <p style={{ color: 'var(--text-sub)', fontSize: 13 }}>연결된 이체입니다. 금액과 날짜는 배우자 내역에도 함께 반영됩니다. 구분·카테고리·소유자를 바꾸려면 삭제 후 다시 입력해주세요.</p>}
           {!editingTx.transfer_id && editingTx.category === '배우자 이체' && <p style={{ color: 'var(--text-sub)', fontSize: 13 }}>기존에 입력한 이체는 자동 연결되지 않습니다. 상대방 내역은 별도로 확인해주세요.</p>}
@@ -167,6 +175,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, onCo
           <div className="form-row">
             <label>금액</label>
             <input type={moneyHidden ? "password" : "number"} inputMode="numeric" min="1" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
+            <AmountHint value={editAmount} />
           </div>
           <div className="form-row">
             <label>구분</label>
@@ -192,10 +201,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, onCo
               </div>
             </>
           )}
-          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button onClick={() => handleSave(editingId)} disabled={saving} className="submit-btn" style={{ flex: 1 }}>저장</button>
-            <button data-modal-dismiss type="button" style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
-          </div>
+
         </Modal>
       )}
 
@@ -203,7 +209,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, onCo
         const collapsed = collapsedDates.has(date)
         const dayTotal = items.reduce((s, t) => s + (t.type === 'expense' ? -t.amount : t.amount), 0)
         return (
-        <div key={date}>
+        <div key={date} className="tx-date-group">
           <div className="tx-date-header" onClick={() => toggleDate(date)} style={{ cursor: 'pointer', userSelect: 'none' }}>
             <span>{formatDate(date)} <span className="date-count">· {items.length}건</span></span>
             <span className="tx-date-meta">
@@ -232,8 +238,9 @@ export default function TransactionList({ transactions, onDelete, onUpdate, onCo
                     {(tx.transfer_id||tx.category==='배우자 이체')&&<button type="button" className="transfer-link" onClick={e=>{e.stopPropagation();setTransferDetails(tx)}}>연결 보기 ↗</button>}
                   </span>
                   <span className="meta">
-                    {tx.owner ? tx.owner : ''}
-                    {tx.memo && !moneyHidden ? <>{tx.owner ? ' · ' : ''}<Highlight text={tx.memo} query={search} /></> : ''}
+                    <ExpandableText title="내역 상세" text={joinDetails(tx.owner, !moneyHidden && tx.memo ? tx.memo : '')}>
+                      <Highlight text={joinDetails(tx.owner, !moneyHidden && tx.memo ? tx.memo : '')} query={search} />
+                    </ExpandableText>
                   </span>
                 </div>
                 <div className="tx-amount">

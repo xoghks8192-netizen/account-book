@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-export default function Modal({ title, onClose, children, dirty = false, busy = false }) {
+export default function Modal({ title, onClose, children, footer, dirty = false, busy = false }) {
   const [confirmDiscard, setConfirmDiscard] = useState(false)
   const ref=useRef(null)
   const close=useRef(onClose)
@@ -35,7 +35,7 @@ export default function Modal({ title, onClose, children, dirty = false, busy = 
   },[])
   return createPortal(
     <div className="modal-overlay" onClick={requestClose}>
-      <div className="modal-content" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} ref={ref} onClick={(e) => e.stopPropagation()} onClickCapture={e => {
+      <div className={`modal-content${footer ? ' modal-with-footer' : ''}`} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} ref={ref} onClick={(e) => e.stopPropagation()} onClickCapture={e => {
         if (e.target.closest('[data-modal-dismiss]')) { e.preventDefault(); e.stopPropagation(); requestClose() }
       }}>
         <div className="modal-header">
@@ -45,6 +45,7 @@ export default function Modal({ title, onClose, children, dirty = false, busy = 
           </button>
         </div>
         <div className="modal-body" hidden={confirmDiscard}>{children}</div>
+        {footer && !confirmDiscard && <div className="modal-footer">{footer}</div>}
         {confirmDiscard && <div className="discard-confirm" role="alert">
           <p>변경 내용을 버릴까요?</p>
           <div className="confirm-actions">

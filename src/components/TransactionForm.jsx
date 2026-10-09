@@ -2,6 +2,7 @@ import { usePrivacy } from '../lib/privacy'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { DEFAULT_CATEGORIES, TRANSFER_CATEGORY } from '../categories'
 import CategoryPicker from './CategoryPicker'
+import AmountHint from './AmountHint'
 import { todayKst } from '../lib/dates'
 
 function todayStr() {
@@ -141,6 +142,7 @@ const TransactionForm = forwardRef(function TransactionForm({ onAdd, onSuccess, 
           required
           ref={amountRef}
         />
+        <AmountHint value={amount} />
       </div>
 
       <div className="form-row">
