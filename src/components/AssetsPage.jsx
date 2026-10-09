@@ -153,14 +153,10 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
   const myAssets = activeAssets.filter(
     (a) => a.category !== '비상금' || a.owner === currentUser || a.owner === '공동',
   )
-  const myEmergencyAssets = myAssets.filter((a) => a.category === '비상금')
   // 총자산/유동성 계산에서 비상금 제외 (역산 방지)
   const nonEmergencyAssets = myAssets.filter((a) => a.category !== '비상금')
   const visible = ownerFilter === '전체' ? nonEmergencyAssets : nonEmergencyAssets.filter((a) => a.owner === ownerFilter)
   const total = visible.reduce((s, a) => s + Number(a.amount), 0)
-  const emergencyTotal = myEmergencyAssets
-    .filter((a) => ownerFilter === '전체' || a.owner === ownerFilter)
-    .reduce((s, a) => s + Number(a.amount), 0)
 
   function moveAsset(id, direction, groupItems) {
     const ids = groupItems.map((a) => a.id)
@@ -240,7 +236,6 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
   const nonLiquidTotal = nonLiquidAssets.reduce((s, a) => s + Number(a.amount), 0)
 
   const animatedTotal = useCountUp(total)
-  const animatedEmergency = useCountUp(emergencyTotal)
   const animatedLiquid = useCountUp(liquidTotal)
   const animatedNonLiquid = useCountUp(nonLiquidTotal)
 
@@ -296,11 +291,6 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
 
   const summaryModalConfigs = {
     총자산: { title: '총 자산', items: visible, total },
-    비상금: {
-      title: '비상금',
-      items: myEmergencyAssets.filter((a) => ownerFilter === '전체' || a.owner === ownerFilter),
-      total: emergencyTotal,
-    },
     유동자산: { title: '💧 유동자산', items: liquidAssets, total: liquidTotal },
     비유동자산: { title: '🔒 비유동자산', items: nonLiquidAssets, total: nonLiquidTotal },
   }
@@ -330,10 +320,6 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
               {householdTotal > lastMonthTotal ? '▲ +' : '▼ '}{formatAmount(Math.abs(householdTotal - lastMonthTotal))}
             </div>
           )}
-        </div>
-        <div className="summary-item income clickable" onClick={() => setSummaryModal('비상금')}>
-          <div className="label">비상금</div>
-          <div className="value">{formatAmount(animatedEmergency)}</div>
         </div>
       </div>
 
