@@ -95,11 +95,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, onCo
 
   if (transactions.length === 0) {
     return (
-      <div className="empty-state">
-        <div className="empty-state-icon">🌿</div>
-        <div className="empty-state-title">{filtered ? '조건에 맞는 내역이 없어요' : '아직 내역이 없어요'}</div>
-        <div className="empty-state-desc">{filtered ? '검색어나 필터를 바꿔보세요.' : '이번 달 첫 번째 내역을 추가해볼까요?'}</div>
-      </div>
+<EmptyState message={<>{filtered ? '조건에 맞는 내역이 없어요' : '아직 내역이 없어요'}</>} />
     )
   }
 
@@ -231,7 +227,8 @@ export default function TransactionList({ transactions, onDelete, onUpdate, onCo
                     {(tx.transfer_id||tx.category==='배우자 이체')&&<button type="button" className="transfer-link" onClick={e=>{e.stopPropagation();setTransferDetails(tx)}}>연결 보기 ↗</button>}
                   </span>
                   <span className="meta">
-                    <ExpandableText title="내역 상세" text={joinDetails(tx.owner, !moneyHidden && tx.memo ? tx.memo : '')}>
+                    <ExpandableText title="내역 상세" text={joinDetails(tx.owner, !moneyHidden && tx.memo ? tx.memo : '')}
+                      details={[['날짜', formatLedgerDate(tx.date, true)], ['소유자', tx.owner], ['카테고리', tx.category], ['금액', formatAmount(tx.amount) + '원'], ['메모', !moneyHidden ? tx.memo : '']]}>
                       <Highlight text={joinDetails(tx.owner, !moneyHidden && tx.memo ? tx.memo : '')} query={search} />
                     </ExpandableText>
                   </span>
@@ -260,3 +257,4 @@ export default function TransactionList({ transactions, onDelete, onUpdate, onCo
     </>
   )
 }
+import EmptyState from './EmptyState'

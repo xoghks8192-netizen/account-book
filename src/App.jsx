@@ -719,7 +719,7 @@ export default function App() {
           <div className="summary">
             <div className="summary-item income clickable" onClick={() => setSummaryModal('수입')}>
               <div className="label">수입</div>
-              <div className="value">{formatAmount(animatedIncome)}</div>
+          <div className="value" data-zero={totalIncome === 0}>{formatAmount(animatedIncome)}</div>
               {prevIncome > 0 && (() => { const d = totalIncome - prevIncome; return d !== 0 ? (
                 <div className={`summary-diff ${d > 0 ? 'up' : 'down'}`}>{d > 0 ? '▲' : '▼'} {formatAmount(Math.abs(d))}</div>
               ) : null })()}
@@ -729,7 +729,7 @@ export default function App() {
             </div>
             <div className="summary-item expense clickable" onClick={() => setSummaryModal('지출')}>
               <div className="label">지출</div>
-              <div className="value">{formatAmount(animatedExpense)}</div>
+          <div className="value" data-zero={totalExpense === 0}>{formatAmount(animatedExpense)}</div>
               {prevExpense > 0 && (() => { const d = totalExpense - prevExpense; return d !== 0 ? (
                 <div className={`summary-diff ${d > 0 ? 'down' : 'up'}`}>{d > 0 ? '▲' : '▼'} {formatAmount(Math.abs(d))}</div>
               ) : null })()}
@@ -739,7 +739,7 @@ export default function App() {
             </div>
             <div className="summary-item balance">
               <div className="label">합계</div>
-              <div className="value">{formatAmount(animatedBalance)}</div>
+          <div className="value" data-zero={balance === 0}>{formatAmount(animatedBalance)}</div>
               {(prevIncome > 0 || prevExpense > 0) && (() => { const d = balance - prevBalance; return d !== 0 ? (
                 <div className={`summary-diff ${d > 0 ? 'up' : 'down'}`}>{d > 0 ? '▲' : '▼'} {formatAmount(Math.abs(d))}</div>
               ) : null })()}
@@ -755,10 +755,7 @@ export default function App() {
             return (
               <Modal title={summaryModal} onClose={() => { setSummaryModal(null); setExpandedCategory(null) }}>
                 {Object.keys(byCategory).length === 0 ? (
-                  <div className="empty-state" style={{ padding: '24px 0' }}>
-                    <div className="empty-state-icon">🌿</div>
-                    <div className="empty-state-title">{summaryModal} 내역이 없어요</div>
-                  </div>
+<EmptyState message={<>{summaryModal} 내역이 없어요</>} />
                 ) : (
                   Object.entries(byCategory)
                     .sort((a, b) => b[1] - a[1])
@@ -1027,3 +1024,4 @@ export default function App() {
     </div>
   )
 }
+import EmptyState from './components/EmptyState'

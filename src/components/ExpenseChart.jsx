@@ -42,10 +42,7 @@ export default function ExpenseChart({ transactions }) {
         <button className={mode === 'income' ? 'active' : ''} onClick={() => { setMode('income'); setShowAll(false) }}>수입</button>
       </div>
       {total <= 0 ? (
-        <div className="empty-state" style={{ padding: '20px 0' }}>
-          <div className="empty-state-icon">📊</div>
-          <div className="empty-state-title">{mode === 'income' ? '수입' : '지출'} 내역이 없어요</div>
-        </div>
+<EmptyState message={<>{mode === 'income' ? '수입' : '지출'} 내역이 없어요</>} />
       ) : (
         <>
           <div className="donut" style={{ background: `conic-gradient(${stops.join(', ')})` }}>
@@ -78,3 +75,4 @@ export default function ExpenseChart({ transactions }) {
     </div>
   )
 }
+import EmptyState from './EmptyState'

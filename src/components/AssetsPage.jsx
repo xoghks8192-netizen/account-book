@@ -316,7 +316,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
       <div className="summary">
         <div className="summary-item balance clickable" onClick={() => setSummaryModal('총자산')}>
           <div className="label">총 자산</div>
-          <div className="value">{formatAmount(animatedTotal)}</div>
+          <div className="value" data-zero={total === 0}>{formatAmount(animatedTotal)}</div>
           {lastMonthTotal !== null && householdTotal !== lastMonthTotal && (
             <div style={{ fontSize: 11, fontWeight: 700, color: householdTotal > lastMonthTotal ? '#4caf83' : '#ff5c5c', marginTop: 2 }}>
               {householdTotal > lastMonthTotal ? '▲ +' : '▼ '}{formatAmount(Math.abs(householdTotal - lastMonthTotal))}
@@ -328,22 +328,18 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
       <div className="summary">
         <div className="summary-item income clickable" onClick={() => setSummaryModal('유동자산')}>
           <div className="label">유동자산</div>
-          <div className="value">{formatAmount(animatedLiquid)}</div>
+          <div className="value" data-zero={liquidTotal === 0}>{formatAmount(animatedLiquid)}</div>
         </div>
         <div className="summary-item expense clickable" onClick={() => setSummaryModal('비유동자산')}>
           <div className="label">비유동자산</div>
-          <div className="value">{formatAmount(animatedNonLiquid)}</div>
+          <div className="value" data-zero={nonLiquidTotal === 0}>{formatAmount(animatedNonLiquid)}</div>
         </div>
       </div>
 
       {activeModal && (
         <Modal title={activeModal.title} onClose={() => setSummaryModal(null)}>
           {activeModal.items.length === 0 ? (
-            <div className="empty-state">
-            <div className="empty-state-icon">🌿</div>
-            <div className="empty-state-title">아직 자산이 없어요</div>
-            <div className="empty-state-desc">자산 항목 추가로 첫 번째 자산을 등록해볼까요?</div>
-          </div>
+<EmptyState message={<>아직 자산이 없어요</>} />
           ) : (
             Object.entries(groupByCategory(activeModal.items)).map(([category, items]) => (
               <div key={category}>
@@ -388,11 +384,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
         <div className="container">불러오는 중...</div>
       ) : visible.length === 0 ? (
         <div className="form">
-          <div className="empty-state">
-            <div className="empty-state-icon">🌿</div>
-            <div className="empty-state-title">아직 자산이 없어요</div>
-            <div className="empty-state-desc">자산 항목 추가로 첫 번째 자산을 등록해볼까요?</div>
-          </div>
+<EmptyState message={<>아직 자산이 없어요</>} />
         </div>
       ) : (
         <>
@@ -460,11 +452,11 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
 
       {!loading && deletedAssets.length > 0 && (
         <div className="list">
-          <Collapsible title={`🗑 삭제된 자산 (${deletedAssets.length})`} className="section-collapsible">
+          <Collapsible title={`삭제된 자산 (${deletedAssets.length})`} className="section-collapsible deleted-assets">
             {deletedAssets.map((asset) => (
               <div key={asset.id} className="tx-item">
                 <div className="tx-info">
-                  <span className="category">{asset.name}</span>
+                  <span className="category">{asset.name}<span className="deleted-badge">삭제됨</span></span>
                   <span className="meta">
                     {asset.category} · {asset.owner} · {formatAmount(asset.amount)}원
                   </span>
@@ -516,3 +508,4 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
 })
 
 export default AssetsPage
+import EmptyState from './EmptyState'

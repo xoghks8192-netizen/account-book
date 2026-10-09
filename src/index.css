@@ -3829,6 +3829,20 @@ button:disabled { cursor: default; }
 .transaction-fields:disabled { opacity:.7; }
 
 /* Reading hierarchy: quiet surfaces, clear amounts and selected context. */
+.summary .summary-item .value[data-zero="true"], .tx-amount .amount[data-zero="true"] { color: var(--text-sub); }
+.profit-badge { display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; padding: 3px 6px; margin-top: 4px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+.profit-badge.gain { color: var(--expense-color); background: color-mix(in srgb, var(--expense-color) 10%, var(--form-bg)); }
+.profit-badge.loss { color: var(--income-color); background: color-mix(in srgb, var(--income-color) 10%, var(--form-bg)); }
+.profit-badge.flat { color: var(--text-sub); background: var(--tab-bg); }
+.detail-rows { margin: 0; }
+.detail-rows > div { display: grid; grid-template-columns: 85px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--form-border); }
+.detail-rows dt { color: var(--text-sub); font-size: 12px; }
+.detail-rows dd { margin: 0; color: var(--text-main); text-align: right; font-size: 13px; font-weight: 500; white-space: pre-wrap; overflow-wrap: anywhere; }
+.deleted-assets { background: var(--card-bg); border: 1px dashed var(--input-border); border-radius: 16px; padding: 14px; }
+.deleted-badge { display: inline-block; flex-shrink: 0; margin-left: 6px; padding: 2px 6px; border-radius: 5px; background: var(--form-bg); color: var(--text-sub); font-size: 10px; font-weight: 500; }
+.empty-state.quiet-empty { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 24px 8px; color: var(--text-sub); }
+.quiet-empty svg { flex-shrink: 0; }
+.quiet-empty p { margin: 0; font-size: 13px; line-height: 1.6; }
 .section-heading h3 { width: 100%; margin: 0; }
 .section-heading h3::after { display: none; }
 .section-trigger { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--text-heading); font: inherit; text-align: left; cursor: pointer; }

@@ -104,13 +104,11 @@ export default function TransactionCalendar({ transactions, year, month, onDelet
               </div>
             ))
           ) : (
-            <div className="empty-state" style={{ padding: '20px 0' }}>
-              <div className="empty-state-icon">📅</div>
-              <div className="empty-state-title">내역이 없어요</div>
-            </div>
+<EmptyState message={<>내역이 없어요</>} />
           )}
         </div>
       )}
     </div>
   )
 }
+import EmptyState from './EmptyState'

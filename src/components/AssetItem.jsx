@@ -160,7 +160,13 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
 
       <div className={`tx-item${isStockItem ? ' stock-asset-item' : ''}`}>
         <div className="tx-info">
-          <span className="category"><ExpandableText title="자산 이름" text={asset.name} /></span>
+          <span className="category"><ExpandableText title="자산 상세" text={asset.name} details={[
+            ['자산명', asset.name], ['소유자', asset.owner], ['분류', asset.category], ['평가금액', formatAmount(asset.amount) + '원'],
+            ['보유 수량', isStockItem ? formatAmount(asset.shares) + '주' : ''],
+            ['평균 매입가', isStockItem ? formatAmount(asset.avg_price) + '원' : ''],
+            ['현재가', isStockItem ? formatAmount(asset.current_price) + '원' : ''],
+            ['메모', !moneyHidden ? asset.memo : ''],
+          ]} /></span>
           <span className="meta">
             {isStockItem ? <span className="stock-owner-line"><span>{asset.owner}</span><span>{formatAmount(asset.shares)}주</span></span>
               : <ExpandableText title="자산 상세" text={joinDetails(asset.owner, asset.memo && !moneyHidden ? asset.memo : '')} />}
@@ -169,10 +175,10 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
         </div>
         <div className="tx-amount">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-            <span className="amount">{formatAmount(asset.amount)}원</span>
+            <span className="amount" data-zero={Number(asset.amount) === 0}>{formatAmount(asset.amount)}원</span>
             {isStockItem && (
-              <span style={{ fontSize: 11, color: profit >= 0 ? '#ff5c5c' : '#6cb6ff', fontWeight: 700 }}>
-                {profit >= 0 ? '+' : ''}{formatAmount(profit)}원 · {moneyHidden ? '••••' : `${profitRate >= 0 ? '+' : ''}${profitRate.toFixed(1)}`}%
+              <span className={`profit-badge ${moneyHidden || profit === 0 ? 'flat' : profit > 0 ? 'gain' : 'loss'}`}>
+                {moneyHidden ? '' : profit > 0 ? '▲ +' : profit < 0 ? '▼ ' : '— '}{formatAmount(profit)}원 · {moneyHidden ? '••••' : `${profitRate > 0 ? '+' : ''}${profitRate.toFixed(1)}`}%
               </span>
             )}
           </div>
