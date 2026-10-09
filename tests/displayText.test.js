@@ -1,6 +1,13 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { joinDetails, koreanWon } from '../src/lib/displayText.js'
+import { joinDetails, koreanWon, formatLedgerDate } from '../src/lib/displayText.js'
+
+test('ledger dates include Korean weekday without timezone drift', () => {
+  assert.equal(formatLedgerDate('2026-10-09'), '10월 9일 (금)')
+  assert.equal(formatLedgerDate('2026-10-09', true), '2026년 10월 9일 (금)')
+  assert.equal(formatLedgerDate('2024-02-29'), '2월 29일 (목)')
+  for (const value of ['', null, '2026-02-30', '2026-13-01']) assert.equal(formatLedgerDate(value), '')
+})
 
 test('detail separators omit empty and whitespace-only fields', () => {
   assert.equal(joinDetails('', null, '  ', undefined), '')

@@ -1,6 +1,7 @@
 import Modal from './Modal'
 import { useMoney } from '../lib/privacy'
 import { summarizeResults } from '../lib/ledgerView'
+import { formatLedgerDate } from '../lib/displayText'
 
 export default function TransferSummary({ rows, owner, monthLabel, onClose }) {
   const money = useMoney()
@@ -13,7 +14,7 @@ export default function TransferSummary({ rows, owner, monthLabel, onClose }) {
       <h4>{type === 'expense' ? '보낸 내역' : '받은 내역'}</h4>
       {transfers.filter(t => t.type === type).length === 0 && <p className="view-note">해당 내역이 없어요.</p>}
       {transfers.filter(t => t.type === type).map(t => <div key={t.id} className="transfer-summary-row">
-        <span>{t.date}<small>{t.transfer_id ? '연결된 배우자 이체' : '기존 이체 · 연결 정보 없음'}</small></span>
+        <span>{formatLedgerDate(t.date, true)}<small>{t.transfer_id ? '연결된 배우자 이체' : '기존 이체 · 연결 정보 없음'}</small></span>
         <strong>{type === 'income' ? '+' : '−'}{money(t.amount)}원</strong>
       </div>)}
     </section>)}

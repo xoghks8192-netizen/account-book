@@ -1,4 +1,5 @@
 import { useMoney } from '../lib/privacy'
+import { formatLedgerDate } from '../lib/displayText'
 import { useEffect, useMemo, useState } from 'react'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
@@ -79,7 +80,7 @@ export default function TransactionCalendar({ transactions, year, month, onDelet
 
       {selectedDate && (
         <div className="calendar-detail">
-          <div className="calendar-detail-title">{selectedDate}</div>
+          <div className="calendar-detail-title">{formatLedgerDate(selectedDate, true)}</div>
           {selected ? (
             selected.items.map((t) => (
               <div key={t.id} className="tx-item">

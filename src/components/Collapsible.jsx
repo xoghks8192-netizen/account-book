@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useId } from 'react'
+import HeaderIcon from './HeaderIcon'
 
 export default function Collapsible({ title, children, defaultOpen = false, className = 'form', headerExtra, forceClose, forceOpen }) {
   const [open, setOpen] = useState(defaultOpen)
+  const bodyId = useId()
 
   useEffect(() => {
     if (forceClose) setOpen(false)
@@ -13,14 +15,13 @@ export default function Collapsible({ title, children, defaultOpen = false, clas
 
   return (
     <div className={className}>
-      <div className="collapsible-header">
-        <h3>{title}</h3>
-        {open && headerExtra && <div className="collapsible-extra">{headerExtra}</div>}
-        <button type="button" className="collapsible-toggle" onClick={() => setOpen((o) => !o)}>
-          {open ? '접기 ▲' : '보기 ▼'}
-        </button>
+      <div className="collapsible-header section-heading">
+        <h3><button type="button" className="section-trigger" aria-expanded={open} aria-controls={bodyId} onClick={() => setOpen(o => !o)}>
+          <span>{title}</span><span className={`section-chevron${open ? ' is-open' : ''}`}><HeaderIcon name="chevron" /></span>
+        </button></h3>
       </div>
-      {open && <div className="collapsible-body">{children}</div>}
+      {open && headerExtra && <div className="section-header-extra">{headerExtra}</div>}
+      <div id={bodyId} hidden={!open}>{open && <div className="collapsible-body">{children}</div>}</div>
     </div>
   )
 }

@@ -3,6 +3,7 @@ import Modal from './Modal'
 import ProblemNotice from './ProblemNotice'
 import { supabase } from '../lib/supabase'
 import { useMoney } from '../lib/privacy'
+import { formatLedgerDate } from '../lib/displayText'
 export default function TransferDetails({transaction,onClose}) {
  const money=useMoney()
  const [rows,setRows]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(false),[retry,setRetry]=useState(0)
@@ -24,7 +25,7 @@ export default function TransferDetails({transaction,onClose}) {
     sender&&receiver?<div className="transfer-summary">
       <div className="transfer-route"><span>{sender.owner}<small>보낸 사람</small></span><span aria-hidden="true">→</span><span>{receiver.owner}<small>받은 사람</small></span></div>
       <strong>{money(sender.amount)}원</strong>
-      <p>{sender.date}</p>
+      <p>{formatLedgerDate(sender.date, true)}</p>
       <p className="help-text">{sender.amount===receiver.amount&&sender.date===receiver.date?'양쪽 내역의 금액·날짜가 일치해요.':'양쪽 내역이 달라요. 수정 전에 확인해주세요.'}</p>
       <p className="help-text">금액·날짜 수정과 삭제는 양쪽에 함께 반영돼요.</p>
     </div>:<p role="alert">연결된 내역이 일부 없어요. 새 이체를 입력하기 전에 기존 내역을 확인해주세요.</p>}

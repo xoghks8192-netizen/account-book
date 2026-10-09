@@ -6,7 +6,7 @@ import Modal from './Modal'
 import EditActions from './EditActions'
 import AmountHint from './AmountHint'
 import ExpandableText from './ExpandableText'
-import { joinDetails } from '../lib/displayText'
+import { joinDetails, formatLedgerDate } from '../lib/displayText'
 import ConfirmDialog from './ConfirmDialog'
 import TransferDetails from './TransferDetails'
 
@@ -24,13 +24,7 @@ function Highlight({ text, query }) {
   )
 }
 
-const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토']
-function formatDate(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00')
-  const mm = d.getMonth() + 1
-  const dd = d.getDate()
-  return `${mm}/${dd} ${DAY_NAMES[d.getDay()]}`
-}
+const formatDate = formatLedgerDate
 
 export default function TransactionList({ transactions, onDelete, onUpdate, onCopy, filtered = false, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, search = '', scrollToId = null }) {
   const moneyHidden=usePrivacy()
@@ -159,6 +153,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, onCo
           <div className="form-row">
             <label>날짜</label>
             <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
+            <div className="date-reading">{formatLedgerDate(editDate, true)}</div>
           </div>
           <div className="form-row">
             <label>카테고리</label>

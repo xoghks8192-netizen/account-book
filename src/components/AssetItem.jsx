@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
 import Modal from './Modal'
 import EditActions from './EditActions'
+import HeaderIcon from './HeaderIcon'
 import AmountHint from './AmountHint'
 import ExpandableText from './ExpandableText'
 import { joinDetails } from '../lib/displayText'
@@ -171,17 +172,17 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
             <span className="amount">{formatAmount(asset.amount)}원</span>
             {isStockItem && (
               <span style={{ fontSize: 11, color: profit >= 0 ? '#ff5c5c' : '#6cb6ff', fontWeight: 700 }}>
-                {profit >= 0 ? '+' : ''}{formatAmount(profit)} ({profitRate.toFixed(1)}%)
+                {profit >= 0 ? '+' : ''}{formatAmount(profit)}원 · {moneyHidden ? '••••' : `${profitRate >= 0 ? '+' : ''}${profitRate.toFixed(1)}`}%
               </span>
             )}
           </div>
           {isStockItem && asset.ticker && (
-            <button onClick={handleRefreshPrice} disabled={refreshing} title="시세 새로고침">
-              {refreshing ? '⏳' : '🔄'}
+            <button className="asset-action" onClick={handleRefreshPrice} disabled={refreshing} title="시세 새로고침" aria-label={refreshing ? '시세 확인 중' : '시세 새로고침'}>
+              <span className={refreshing ? 'icon-spinning' : ''}><HeaderIcon name="refresh" /></span>
             </button>
           )}
-          <button onClick={() => { handleCancel(); setEditing(true) }} title="수정">✎</button>
-          <button onClick={() => setConfirmDelete(true)} title="삭제">✕</button>
+          <button className="asset-action" onClick={() => { handleCancel(); setEditing(true) }} title="수정" aria-label="자산 수정"><HeaderIcon name="edit" /></button>
+          <button className="asset-action" onClick={() => setConfirmDelete(true)} title="삭제" aria-label="자산 삭제"><HeaderIcon name="delete" /></button>
         </div>
         {isStockItem && <div className="stock-price-details">
           <div><span>평균 매입가</span><strong>{formatAmount(asset.avg_price)}원</strong></div>
