@@ -14,14 +14,15 @@ import ProblemNotice from './ProblemNotice'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 
-const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory, onAssetsChange, onToast }, ref) {
+const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory, onAssetsChange, onToast, initialAssets = null }, ref) {
   const formatAmount = useMoney()
-  const [assets, setAssets] = useState([])
+  const [assets, setAssets] = useState(() => initialAssets || [])
+  const hadInitialAssets = useRef(initialAssets !== null)
   const writeRevision = useRef(0)
   const [loading, setLoading] = useState(true)
   const [retry,setRetry] = useState(0)
-  useEffect(() => { onAssetsChange?.(assets) }, [assets])
   const [error, setError] = useState(null)
+  useEffect(() => { if (!loading && !error) onAssetsChange?.(assets) }, [assets, loading, error, onAssetsChange])
   const [ownerFilter, setOwnerFilter] = useState('전체')
   const [summaryModal, setSummaryModal] = useState(null)
   const [lastMonthTotal, setLastMonthTotal] = useState(null)
@@ -49,6 +50,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
     if (!householdId) return
     let cancelled = false
     async function load() {
+      const version = writeRevision.current
       setLoading(true)
       setError(null)
       const { data, error } = await supabase
@@ -59,7 +61,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
         .order('id', { ascending: true })
       if (cancelled) return
       if (error) setError(error.message)
-      else setAssets(data)
+      else if (version === writeRevision.current) setAssets(data)
       setLoading(false)
     }
     load()
@@ -256,7 +258,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
     .reduce((s, a) => s + Number(a.amount), 0)
 
   useEffect(() => {
-    if (!householdId || loading) return
+    if (!householdId || loading || error) return
     const today = todayKst()
     supabase
       .from('net_worth_snapshots')
@@ -270,7 +272,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
         },
         { onConflict: 'household_id,snapshot_date' },
       )
-  }, [householdId, loading, householdTotal, householdLiquidTotal, householdNonLiquidTotal])
+  }, [householdId, loading, error, householdTotal, householdLiquidTotal, householdNonLiquidTotal])
 
   useEffect(() => {
     if (!householdId) return
@@ -381,7 +383,8 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
 
       {error && <ProblemNotice message="자산 데이터를 불러오거나 저장하지 못했어요." onRetry={()=>setRetry(n=>n+1)}/>}
 
-      {loading ? (
+      {loading && hadInitialAssets.current && <p role="status" className="utility-note">최근 조회한 자산이에요. 최신 금액을 확인하고 있어요.</p>}
+      {loading && !hadInitialAssets.current ? (
         <div className="container">불러오는 중...</div>
       ) : visible.length === 0 ? (
         <div className="form">

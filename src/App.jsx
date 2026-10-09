@@ -4,7 +4,7 @@ import { exportLegacyCsv } from './lib/backupExport'
 import ProblemNotice from './components/ProblemNotice'
 import { reportProblem } from './lib/diagnostics'
 import { todayKst, currentMonth, monthRange } from './lib/dates'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from './lib/supabase'
 import TransactionForm from './components/TransactionForm'
 import TransactionList from './components/TransactionList'
@@ -98,7 +98,7 @@ export default function App() {
 
   useEffect(() => {
     if (isReload) return
-    const t = setTimeout(() => setSplashDone(true), 1500)
+    const t = setTimeout(() => setSplashDone(true), 400)
     return () => clearTimeout(t)
   }, [])
   const [page, setPage] = useState(() => localStorage.getItem(PAGE_KEY) === 'assets' ? 'assets' : 'transactions')
@@ -136,7 +136,7 @@ export default function App() {
   const [dateTo, setDateTo] = useState('')
   const [ownerFilter, setOwnerFilter] = useState('전체')
   const [showPasswordForm, setShowPasswordForm] = useState(false)
-  const [linkableAssets, setLinkableAssets] = useState([])
+  const [assetSnapshot, setAssetSnapshot] = useState(null)
   const [exporting, setExporting] = useState(false)
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'light')
   const [colorTheme, setColorTheme] = useState(() => localStorage.getItem(COLOR_KEY) || 'purple')
@@ -211,6 +211,16 @@ export default function App() {
   const householdId = user?.householdId
   const myName = user?.displayName
   const owners = [...(user?.members ?? []), '공동']
+  // Memory only, scoped to the verified account and restore generation.
+  const assetScope = JSON.stringify([householdId, user?.username, dataVersion])
+  const activeAssetScope = useRef(assetScope)
+  activeAssetScope.current = assetScope
+  const cachedAssets = assetSnapshot?.scope === assetScope ? assetSnapshot.rows : null
+  const linkableAssets = (cachedAssets || []).filter(a => !a.deleted_at && !STOCK_CATEGORIES.includes(a.category))
+  const receiveAssets = useCallback(rows => {
+    if (activeAssetScope.current === assetScope) setAssetSnapshot({ scope: assetScope, rows })
+  }, [assetScope])
+  useEffect(() => { if (!householdId) setAssetSnapshot(null) }, [householdId])
   const exportKey = backupStorageKey(householdId, user?.username)
   useEffect(() => {
     try { setLastExport(localStorage.getItem(exportKey)) } catch { setLastExport(null) }
@@ -261,23 +271,7 @@ export default function App() {
     localStorage.setItem(PAGE_KEY, page)
   }, [page])
 
-  useEffect(() => {
-    if (!householdId || !user) return
-    let cancelled = false
-    supabase
-      .from('households')
-      .select('categories, dating_start, wedding_date')
-      .eq('id', householdId)
-      .single()
-      .then(({ data }) => {
-        if (cancelled || !data) return
-        const next = { ...user, categories: data.categories ?? {}, datingStart: data.dating_start, weddingDate: data.wedding_date }
-        saveSession(next)
-        setUser(next)
-      })
-    return () => { cancelled = true }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [householdId])
+  // Session verification already returns fresh categories and anniversary dates.
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -294,8 +288,7 @@ export default function App() {
   }, [colorTheme])
 
   useEffect(() => {
-    setLinkableAssets([])
-    if (!householdId) return
+    if (!householdId || page !== 'transactions') return
     let cancelled = false
     async function load() {
       const { data, error } = await supabase
@@ -304,14 +297,14 @@ export default function App() {
         .eq('household_id', householdId)
         .order('id', { ascending: true })
       if (!cancelled && !error) {
-        setLinkableAssets(data.filter((a) => !STOCK_CATEGORIES.includes(a.category)))
+        receiveAssets(data)
       }
     }
     load()
     return () => {
       cancelled = true
     }
-  }, [page, householdId, dataVersion])
+  }, [page, householdId, receiveAssets])
 
   async function handleAdd(tx) {
     if (checkingDuplicate.current) return null
@@ -665,7 +658,7 @@ export default function App() {
         onTouchEnd={handleMonthSwipeEnd}
       >
       {page === 'assets' ? (
-        <AssetsPage key={dataVersion} ref={assetsPageRef}
+        <AssetsPage key={assetScope} ref={assetsPageRef} initialAssets={cachedAssets} onAssetsChange={receiveAssets}
           currentUser={myName}
           owners={owners}
           householdId={householdId}
