@@ -1,7 +1,7 @@
 import { useState, useEffect, useId } from 'react'
 import HeaderIcon from './HeaderIcon'
 
-export default function Collapsible({ title, children, defaultOpen = false, className = 'form', headerExtra, forceClose, forceOpen }) {
+export default function Collapsible({ title, children, defaultOpen = false, className = 'form', headerExtra, forceClose, forceOpen, embedded = false }) {
   const [open, setOpen] = useState(defaultOpen)
   const bodyId = useId()
 
@@ -12,6 +12,8 @@ export default function Collapsible({ title, children, defaultOpen = false, clas
   useEffect(() => {
     if (forceOpen) setOpen(true)
   }, [forceOpen])
+
+  if (embedded) return <div className="embedded-section">{headerExtra && <div className="section-header-extra">{headerExtra}</div>}{children}</div>
 
   return (
     <div className={className}>

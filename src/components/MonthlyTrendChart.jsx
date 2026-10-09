@@ -53,7 +53,7 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners, de
   const h = hovered !== null ? data[hovered] : null
 
   return (
-    <Collapsible title="월별 추이" defaultOpen={defaultOpen}>
+    <Collapsible title="월별 추이" className="analysis-section" defaultOpen={defaultOpen}>
       <div className="trend-chart">
         {data.map(({ label, expense, income }, i) => (
           <div

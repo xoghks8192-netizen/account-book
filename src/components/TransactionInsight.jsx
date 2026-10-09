@@ -62,7 +62,7 @@ ${expenseLines}
   }
 
   return (
-    <Collapsible title="AI 분석">
+    <Collapsible title="AI 분석" className="analysis-section">
       <button onClick={handleAnalyze} disabled={loading} className="submit-btn">
         {loading ? '분석 중...' : `${monthLabel} 내역 분석하기`}
       </button>

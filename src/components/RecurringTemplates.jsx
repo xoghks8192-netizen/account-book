@@ -14,7 +14,7 @@ import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 const UNDO_TIMEOUT = 8000
 
-export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, owners, householdId, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onToast, currentMonthTransactions = [] }) {
+export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, owners, householdId, assets = [], categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, onToast, currentMonthTransactions = [], embedded = false }) {
   const moneyHidden=usePrivacy()
   const formatAmount = useMoney()
   const [templates, setTemplates] = useState([])
@@ -350,7 +350,7 @@ export default function RecurringTemplates({ onQuickAdd, onUndo, currentUser, ow
   })
 
   return (
-    <Collapsible title="고정 지출/수입">
+    <Collapsible title="고정 지출/수입" embedded={embedded}>
       {confirmDeleteId && (
         <ConfirmDialog
           message="이 항목을 삭제할까요?"

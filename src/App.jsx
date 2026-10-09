@@ -119,6 +119,9 @@ export default function App() {
   const [showPinSetup, setShowPinSetup] = useState(false)
   const [hasPin, setHasPin] = useState(!!localStorage.getItem('app_pin'))
   const [formOpenToken, setFormOpenToken] = useState(0)
+  const [entryPanel, setEntryPanel] = useState(null)
+  const [ledgerView, setLedgerView] = useState('list')
+  useEffect(() => { if (formOpenToken) setEntryPanel('add') }, [formOpenToken])
   const formRef = useRef(null)
   const assetsPageRef = useRef(null)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
@@ -172,6 +175,7 @@ export default function App() {
   }
   useEffect(() => () => duplicateAnswer.current?.(false), [])
   const [formCloseToken, setFormCloseToken] = useState(0)
+  useEffect(() => { if (formCloseToken) setEntryPanel(null) }, [formCloseToken])
 
   useEffect(() => {
     if (!showMoreMenu) return
@@ -800,10 +804,14 @@ export default function App() {
           <ExpenseChart transactions={ownedTransactions} />
           {ownerFilter !== '전체' && ownerFilter !== '공동' && <div className="transfer-entry"><button type="button" onClick={() => setShowTransfers(true)}>보낸 이체 · 받은 이체 보기 ↗</button></div>}
 
-          <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} refreshKey={JSON.stringify(transactions)} />
-
+          <div className="ledger-workspace">
+          <div className="ledger-actions">
+            {(ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName) && <button type="button" aria-expanded={entryPanel === 'add'} aria-controls="ledger-add-panel" onClick={() => setEntryPanel(p => p === 'add' ? null : 'add')}><span>＋</span> 내역 추가</button>}
+            <button type="button" aria-expanded={entryPanel === 'recurring'} aria-controls="ledger-recurring-panel" onClick={() => setEntryPanel(p => p === 'recurring' ? null : 'recurring')}><span>↻</span> 고정 지출/수입</button>
+          </div>
+          <div id="ledger-add-panel" className="ledger-input-panel" hidden={entryPanel !== 'add'}>
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
-            <Collapsible title="내역 추가" forceClose={formCloseToken} forceOpen={formOpenToken}>
+            <Collapsible title="내역 추가" embedded>
               <TransactionForm mutationState={mutationState} onRetrySave={retrySave} copyDraft={copyDraft} transactions={transactions}
                 ref={formRef}
                 onAdd={handleAdd}
@@ -818,9 +826,42 @@ export default function App() {
               />
             </Collapsible>
           ) : null}
+          </div>
 
+          <div id="ledger-recurring-panel" className="ledger-recurring-panel" hidden={entryPanel !== 'recurring'}>
+          <RecurringTemplates
+            embedded
+            currentUser={myName}
+            owners={owners}
+            householdId={householdId}
+            assets={linkableAssets}
+            categories={categories}
+            onAddCategory={handleAddCategory}
+            onRemoveCategory={handleRemoveCategory}
+            onUndo={wrappedDelete}
+            onToast={showToast}
+            currentMonthTransactions={transactions}
+            onQuickAdd={(t) =>
+              handleAdd({
+                type: t.type,
+                category: t.category,
+                amount: t.amount,
+                memo: t.memo,
+                author: t.author,
+                owner: t.author,
+                date: todayKst(),
+                linked_asset_id: t.linked_asset_id ?? null,
+              })
+            }
+          />
+          </div>
+          <section className="ledger-browser" aria-label="거래 내역 확인">
+          <div className="ledger-view-switch" role="group" aria-label="내역 표시 방식">
+            <button type="button" aria-pressed={ledgerView === 'list'} onClick={() => setLedgerView('list')}>내역</button>
+            <button type="button" aria-pressed={ledgerView === 'calendar'} onClick={() => setLedgerView('calendar')}>캘린더</button>
+          </div>
           {error && <ProblemNotice message="내역을 불러오지 못했어요. 연결 상태를 확인해주세요." onRetry={refreshTransactions}/>}
-
+          <div hidden={ledgerView !== 'list'}>
           {loading ? (
             <div className="skeleton-list">
               {[1,2,3,4,5].map((i) => (
@@ -832,6 +873,7 @@ export default function App() {
             </div>
           ) : (
             <Collapsible
+              embedded
               title="내역"
               headerExtra={
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -940,42 +982,14 @@ export default function App() {
               />
             </Collapsible>
           )}
+          </div>
+          <div hidden={ledgerView !== 'calendar'}>
+            {loading ? <div className="skeleton-list" aria-label="캘린더 불러오는 중"><div className="skeleton-item" /></div> : <TransactionCalendar transactions={ownedTransactions} year={cursor.year} month={cursor.month} onDeleteDate={wrappedDelete} onChangeMonth={changeMonth} />}
+          </div>
+          </section>
 
-          <RecurringTemplates
-            currentUser={myName}
-            owners={owners}
-            householdId={householdId}
-            assets={linkableAssets}
-            categories={categories}
-            onAddCategory={handleAddCategory}
-            onRemoveCategory={handleRemoveCategory}
-            onUndo={wrappedDelete}
-            onToast={showToast}
-            currentMonthTransactions={transactions}
-            onQuickAdd={(t) =>
-              handleAdd({
-                type: t.type,
-                category: t.category,
-                amount: t.amount,
-                memo: t.memo,
-                author: t.author,
-                owner: t.author,
-                date: todayKst(),
-                linked_asset_id: t.linked_asset_id ?? null,
-              })
-            }
-          />
-
-          <Collapsible title="거래 캘린더">
-            <TransactionCalendar
-              transactions={ownedTransactions}
-              year={cursor.year}
-              month={cursor.month}
-              onDeleteDate={wrappedDelete}
-              onChangeMonth={changeMonth}
-            />
-          </Collapsible>
-
+          <div className="ledger-analysis">
+          <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} refreshKey={JSON.stringify(transactions)} />
           <TransactionInsight
             transactions={ownedTransactions}
             totalIncome={totalIncome}
@@ -983,6 +997,8 @@ export default function App() {
             balance={balance}
             monthLabel={`${cursor.year}년 ${cursor.month + 1}월`}
           />
+          </div>
+          </div>
         </div>
       )}
       </div>
