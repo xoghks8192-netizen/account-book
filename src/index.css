@@ -3835,6 +3835,19 @@ button:disabled { cursor: default; }
 .modal-with-footer .modal-body[hidden] { display: none; }
 .modal-footer { border-top: 1px solid var(--form-border); background: var(--form-bg); padding-top: 12px; margin-top: 8px; }
 .modal-footer .submit-btn { margin-top: 0; }
+.edit-actions { display: flex; gap: 8px; }
+.edit-action { flex: 1; min-width: 0; min-height: 46px; padding: 12px; border: 1px solid transparent; border-radius: 12px; font: inherit; font-size: 15px; font-weight: 700; line-height: 1.4; cursor: pointer; }
+.edit-action.primary { background: var(--active-gradient); color: #fff; }
+.edit-action.secondary { background: var(--tab-bg); color: var(--text-main); border-color: var(--input-border); }
+.edit-action:disabled { opacity: .6; cursor: default; }
+.tx-item.stock-asset-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; row-gap: 10px; }
+.stock-owner-line { display: flex; gap: 8px; align-items: baseline; white-space: nowrap; }
+.stock-owner-line > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.stock-owner-line > span:last-child { flex-shrink: 0; }
+.stock-price-details { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; padding-top: 8px; border-top: 1px dashed var(--form-border); }
+.stock-price-details > div { min-width: 0; display: flex; justify-content: space-between; gap: 6px; flex-wrap: wrap; font-size: 11px; color: var(--text-sub); }
+.stock-price-details strong { font-size: 12px; font-weight: 600; color: var(--text-main); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.stock-price-details .stock-memo { grid-column: 1 / -1; }
 .amount-hint { color: var(--text-sub); font-size: 12px; line-height: 1.5; margin-top: 6px; font-variant-numeric: tabular-nums; }
 .expandable-text { display: block; max-width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .clamp-two { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; white-space: normal; }

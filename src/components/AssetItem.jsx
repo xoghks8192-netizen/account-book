@@ -2,6 +2,7 @@ import { useMoney, usePrivacy } from '../lib/privacy'
 import { useState } from 'react'
 import { STOCK_CATEGORIES, LIQUIDITY_OPTIONS, defaultLiquidity } from '../assetMeta'
 import Modal from './Modal'
+import EditActions from './EditActions'
 import AmountHint from './AmountHint'
 import ExpandableText from './ExpandableText'
 import { joinDetails } from '../lib/displayText'
@@ -97,10 +98,7 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
           String(shares) !== String(asset.shares ?? '') || String(avgPrice) !== String(asset.avg_price ?? '') ||
           String(currentPrice) !== String(asset.current_price ?? '') || ticker !== (asset.ticker ?? '')
         } footer={
-          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button onClick={handleSave} disabled={saving} className="submit-btn" style={{ flex: 1 }}>저장</button>
-            <button data-modal-dismiss type="button" style={{ flex: 1, padding: 13, border: 'none', borderRadius: 999, background: '#fdeef3', color: '#b88a9c', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-ui)', cursor: 'pointer' }}>취소</button>
-          </div>
+          <EditActions onSave={handleSave} saving={saving} />
         }>
           <div className="form-row">
             <label>이름</label>
@@ -159,13 +157,12 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
         </Modal>
       )}
 
-      <div className="tx-item">
+      <div className={`tx-item${isStockItem ? ' stock-asset-item' : ''}`}>
         <div className="tx-info">
           <span className="category"><ExpandableText title="자산 이름" text={asset.name} /></span>
           <span className="meta">
-            <ExpandableText title="자산 상세" text={joinDetails(asset.owner,
-              isStockItem ? `${formatAmount(asset.shares)}주 · 평단 ${formatAmount(asset.avg_price)} · 현재 ${formatAmount(asset.current_price)}` : '',
-              asset.memo && !moneyHidden ? asset.memo : '')} />
+            {isStockItem ? <span className="stock-owner-line"><span>{asset.owner}</span><span>{formatAmount(asset.shares)}주</span></span>
+              : <ExpandableText title="자산 상세" text={joinDetails(asset.owner, asset.memo && !moneyHidden ? asset.memo : '')} />}
           </span>
           {refreshError && <span className="meta" style={{ color: '#ff7aa2' }}>{refreshError}</span>}
         </div>
@@ -186,6 +183,11 @@ export default function AssetItem({ asset, owners, onUpdate, onDelete }) {
           <button onClick={() => { handleCancel(); setEditing(true) }} title="수정">✎</button>
           <button onClick={() => setConfirmDelete(true)} title="삭제">✕</button>
         </div>
+        {isStockItem && <div className="stock-price-details">
+          <div><span>평균 매입가</span><strong>{formatAmount(asset.avg_price)}원</strong></div>
+          <div><span>현재가</span><strong>{formatAmount(asset.current_price)}원</strong></div>
+          {asset.memo && !moneyHidden && <div className="stock-memo"><ExpandableText title="자산 메모" text={asset.memo} /></div>}
+        </div>}
       </div>
     </>
   )
