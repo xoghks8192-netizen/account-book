@@ -3930,6 +3930,9 @@ button:disabled { cursor: default; }
   font: inherit; font-size: 13px; font-weight: 650; cursor: pointer;
 }
 .ledger-actions > button span { font-size: 18px; vertical-align: -1px; margin-right: 4px; }
+.ledger-actions > button { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.ledger-actions > button svg { width: 17px; height: 17px; flex-shrink: 0; }
+.ledger-browser > .section-heading h3 { margin: 0; font-size: 15px; color: var(--text-heading); }
 .ledger-actions > button[aria-expanded="true"] { color: var(--balance-color); border-color: var(--balance-color); background: var(--tab-bg); }
 .ledger-input-panel, .ledger-recurring-panel { padding: 18px; margin-bottom: 16px; border: 1px solid var(--form-border); border-radius: 16px; background: var(--form-bg); }
 .ledger-browser { padding: 16px; border: 1px solid var(--form-border); border-radius: 20px; background: var(--form-bg); }

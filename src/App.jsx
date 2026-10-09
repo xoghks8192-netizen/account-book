@@ -807,7 +807,7 @@ export default function App() {
           <div className="ledger-workspace">
           <div className="ledger-actions">
             {(ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName) && <button type="button" aria-expanded={entryPanel === 'add'} aria-controls="ledger-add-panel" onClick={() => setEntryPanel(p => p === 'add' ? null : 'add')}><span>＋</span> 내역 추가</button>}
-            <button type="button" aria-expanded={entryPanel === 'recurring'} aria-controls="ledger-recurring-panel" onClick={() => setEntryPanel(p => p === 'recurring' ? null : 'recurring')}><span>↻</span> 고정 지출/수입</button>
+            <button type="button" aria-expanded={entryPanel === 'recurring'} aria-controls="ledger-recurring-panel" onClick={() => setEntryPanel(p => p === 'recurring' ? null : 'recurring')}><HeaderIcon name="calendar" /> 고정 지출/수입</button>
           </div>
           <div id="ledger-add-panel" className="ledger-input-panel" hidden={entryPanel !== 'add'}>
           {ownerFilter === '전체' || ownerFilter === '공동' || ownerFilter === myName ? (
@@ -855,7 +855,7 @@ export default function App() {
             }
           />
           </div>
-          <section className="ledger-browser" aria-label="거래 내역 확인">
+          <Collapsible title="내역 · 캘린더" className="ledger-browser">
           <div className="ledger-view-switch" role="group" aria-label="내역 표시 방식">
             <button type="button" aria-pressed={ledgerView === 'list'} onClick={() => setLedgerView('list')}>내역</button>
             <button type="button" aria-pressed={ledgerView === 'calendar'} onClick={() => setLedgerView('calendar')}>캘린더</button>
@@ -986,7 +986,7 @@ export default function App() {
           <div hidden={ledgerView !== 'calendar'}>
             {loading ? <div className="skeleton-list" aria-label="캘린더 불러오는 중"><div className="skeleton-item" /></div> : <TransactionCalendar transactions={ownedTransactions} year={cursor.year} month={cursor.month} onDeleteDate={wrappedDelete} onChangeMonth={changeMonth} />}
           </div>
-          </section>
+          </Collapsible>
 
           <div className="ledger-analysis">
           <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} refreshKey={JSON.stringify(transactions)} />
@@ -1009,19 +1009,6 @@ export default function App() {
           <span className="tab-label">내역</span>
           {page === 'transactions' && <span className="tab-pill" />}
         </button>
-        <button
-          type="button"
-          className="tab-add-button"
-          aria-label={page === 'assets' ? '자산 추가' : '내역 추가'}
-          title={page === 'assets' ? '자산 추가' : '내역 추가'}
-          onClick={() => {
-            if (page === 'assets') assetsPageRef.current?.openAddForm()
-            else {
-              setFormOpenToken((n) => n + 1)
-              setTimeout(() => formRef.current?.focusAmount(), 100)
-            }
-          }}
-        >+</button>
         <button className={page === 'assets' ? 'active' : ''} onClick={() => navigateTo('assets')}>
           <span className="tab-icon">💰</span>
           <span className="tab-label">자산</span>
