@@ -855,7 +855,7 @@ export default function App() {
             }
           />
           </div>
-          <Collapsible title="내역 · 캘린더" className="ledger-browser">
+          <Collapsible title="내역 · 캘린더" className="ledger-browser analysis-section">
           <div className="ledger-view-switch" role="group" aria-label="내역 표시 방식">
             <button type="button" aria-pressed={ledgerView === 'list'} onClick={() => setLedgerView('list')}>내역</button>
             <button type="button" aria-pressed={ledgerView === 'calendar'} onClick={() => setLedgerView('calendar')}>캘린더</button>

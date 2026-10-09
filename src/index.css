@@ -3935,7 +3935,6 @@ button:disabled { cursor: default; }
 .ledger-browser > .section-heading h3 { margin: 0; font-size: 15px; color: var(--text-heading); }
 .ledger-actions > button[aria-expanded="true"] { color: var(--balance-color); border-color: var(--balance-color); background: var(--tab-bg); }
 .ledger-input-panel, .ledger-recurring-panel { padding: 18px; margin-bottom: 16px; border: 1px solid var(--form-border); border-radius: 16px; background: var(--form-bg); }
-.ledger-browser { padding: 16px; border: 1px solid var(--form-border); border-radius: 20px; background: var(--form-bg); }
 .ledger-view-switch { display: flex; gap: 4px; padding: 4px; width: fit-content; border-radius: 12px; background: var(--tab-bg); margin-bottom: 18px; }
 .ledger-view-switch button { min-width: 82px; min-height: 38px; padding: 6px 16px; border: 0; border-radius: 9px; background: transparent; color: var(--text-sub); font: inherit; font-size: 14px; cursor: pointer; }
 .ledger-view-switch button[aria-pressed="true"] { background: var(--form-bg); color: var(--text-heading); font-weight: 750; box-shadow: 0 1px 4px #0000000d; }
@@ -3951,5 +3950,5 @@ button:disabled { cursor: default; }
 .ledger-actions button:focus-visible, .ledger-view-switch button:focus-visible { outline: 2px solid var(--focus-border); outline-offset: 3px; }
 @media (max-width: 360px) {
   .ledger-workspace { margin-left: 12px; margin-right: 12px; }
-  .ledger-browser, .ledger-input-panel, .ledger-recurring-panel { padding: 12px; }
+  .ledger-input-panel, .ledger-recurring-panel { padding: 12px; }
 }
