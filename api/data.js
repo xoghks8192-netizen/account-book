@@ -1,12 +1,14 @@
 import { requireSession, fail } from '../server/auth.js'
 import { columns, dataPlan } from '../server/dataPolicy.js'
 import { handleBackup } from '../server/backup.js'
+import { handleAssetOrder } from '../server/assetOrder.js'
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store')
   if (req.method !== 'POST') return res.status(405).json({ message: '허용되지 않는 요청입니다.' })
   try {
     const { db, user } = await requireSession(req)
+    if (['asset-order-get', 'asset-order-save'].includes(req.body?.action)) return res.status(200).json(await handleAssetOrder(req.body, db, user))
     if (req.body?.action?.startsWith('backup-')) return await handleBackup(req,res,db,user)
     const p = dataPlan(req.body, user)
     if (p.values) {

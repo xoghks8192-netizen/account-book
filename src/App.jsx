@@ -27,7 +27,7 @@ import PinLock from './components/PinLock'
 import ConfirmDialog from './components/ConfirmDialog'
 import { useCountUp } from './hooks/useCountUp'
 import { useTransactions } from './hooks/useTransactions'
-import { summarizeResults, copyTransaction, backupStorageKey, formatExportTime } from './lib/ledgerView'
+import { isTransfer, summarizeResults, copyTransaction, backupStorageKey, formatExportTime } from './lib/ledgerView'
 import TransferSummary from './components/TransferSummary'
 import AppSplash from './components/AppSplash'
 import HeaderIcon from './components/HeaderIcon'
@@ -381,24 +381,19 @@ export default function App() {
   const ownedPrevTransactions =
     ownerFilter === '전체' ? prevTransactions : prevTransactions.filter((t) => t.owner === ownerFilter)
 
-  const totalIncome = ownedTransactions
-    .filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY)
-    .reduce((s, t) => s + Number(t.amount), 0)
-  const totalExpense = ownedTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
+  const totals = summarizeResults(ownedTransactions)
+  const totalIncome = totals.income
+  const totalExpense = totals.expense
   const balance = totalIncome - totalExpense
 
   const animatedIncome = useCountUp(totalIncome)
   const animatedExpense = useCountUp(totalExpense)
   const animatedBalance = useCountUp(balance)
-  const transferReceived = ownedTransactions
-    .filter((t) => t.type === 'income' && t.category === TRANSFER_CATEGORY)
-    .reduce((s, t) => s + Number(t.amount), 0)
+  const transferReceived = totals.received
 
   const transferSent =
     ownerFilter !== '전체' && ownerFilter !== '공동'
-      ? transactions
-          .filter((t) => t.type === 'expense' && (t.transfer_id || t.category === TRANSFER_CATEGORY) && t.owner === ownerFilter)
-          .reduce((s, t) => s + Number(t.amount), 0)
+      ? totals.sent
       : 0
 
   function groupByCategory(items) {
@@ -409,14 +404,13 @@ export default function App() {
   }
 
   const incomeByCategory = groupByCategory(
-    ownedTransactions.filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY),
+    ownedTransactions.filter((t) => t.type === 'income' && !isTransfer(t)),
   )
-  const expenseByCategory = groupByCategory(ownedTransactions.filter((t) => t.type === 'expense'))
+  const expenseByCategory = groupByCategory(ownedTransactions.filter((t) => t.type === 'expense' && !isTransfer(t)))
 
-  const prevIncome = ownedPrevTransactions
-    .filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY)
-    .reduce((s, t) => s + Number(t.amount), 0)
-  const prevExpense = ownedPrevTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
+  const previousTotals = summarizeResults(ownedPrevTransactions)
+  const prevIncome = previousTotals.income
+  const prevExpense = previousTotals.expense
   const prevBalance = prevIncome - prevExpense
 
   const filteredTransactions = useMemo(() => {
@@ -664,6 +658,7 @@ export default function App() {
       >
       {page === 'assets' ? (
         <AssetsPage key={assetScope} ref={assetsPageRef} initialAssets={cachedAssets} onAssetsChange={receiveAssets}
+          username={user.username}
           currentUser={myName}
           owners={owners}
           householdId={householdId}
@@ -755,7 +750,7 @@ export default function App() {
             const byCategory = isIncome ? incomeByCategory : expenseByCategory
             const total = isIncome ? totalIncome : totalExpense
             const txType = isIncome ? 'income' : 'expense'
-            const txPool = ownedTransactions.filter((t) => t.type === txType && (!isIncome || t.category !== TRANSFER_CATEGORY))
+            const txPool = ownedTransactions.filter((t) => t.type === txType && !isTransfer(t))
             return (
               <Modal title={summaryModal} onClose={() => { setSummaryModal(null); setExpandedCategory(null) }}>
                 {Object.keys(byCategory).length === 0 ? (
@@ -984,13 +979,14 @@ export default function App() {
           )}
           </div>
           <div hidden={ledgerView !== 'calendar'}>
-            {loading ? <div className="skeleton-list" aria-label="캘린더 불러오는 중"><div className="skeleton-item" /></div> : <TransactionCalendar transactions={ownedTransactions} year={cursor.year} month={cursor.month} onDeleteDate={wrappedDelete} onChangeMonth={changeMonth} />}
+            {loading ? <div className="skeleton-list" aria-label="캘린더 불러오는 중"><div className="skeleton-item" /></div> : <TransactionCalendar transactions={ownedTransactions} year={cursor.year} month={cursor.month} onDeleteDate={wrappedDelete} onChangeMonth={changeMonth} onUpdate={wrappedUpdate} assets={linkableAssets} owners={owners} categories={categories} onAddCategory={handleAddCategory} onRemoveCategory={handleRemoveCategory} />}
           </div>
           </Collapsible>
 
           <div className="ledger-analysis">
-          <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} owners={owners} refreshKey={JSON.stringify(transactions)} />
+          <MonthlyTrendChart householdId={householdId} ownerFilter={ownerFilter} year={cursor.year} month={cursor.month} refreshKey={JSON.stringify(transactions)} />
           <TransactionInsight
+            ownerLabel={ownerFilter}
             transactions={ownedTransactions}
             totalIncome={totalIncome}
             totalExpense={totalExpense}

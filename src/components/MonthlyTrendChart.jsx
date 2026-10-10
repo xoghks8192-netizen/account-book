@@ -3,34 +3,41 @@ import { currentMonth, monthRange } from '../lib/dates'
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import Collapsible from './Collapsible'
-import { TRANSFER_CATEGORY } from '../categories'
+import { summarizeResults } from '../lib/ledgerView'
 
 
-export default function MonthlyTrendChart({ householdId, ownerFilter, owners, defaultOpen = false, refreshKey = '' }) {
+export default function MonthlyTrendChart({ householdId, ownerFilter, year, month, defaultOpen = false, refreshKey = '' }) {
   const formatAmount = useMoney()
   const [data, setData] = useState([])
   const [hovered, setHovered] = useState(null)
   const hideTimer = useRef(null)
+  const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(true)
+  useEffect(() => () => clearTimeout(hideTimer.current), [])
 
   useEffect(() => {
     if (!householdId) return
     let cancelled = false
     async function load() {
       const months = []
-      const now = currentMonth()
+      setLoading(true); setError(false); setHovered(null)
+      clearTimeout(hideTimer.current)
+      const now = Number.isInteger(year) && Number.isInteger(month) ? {year, month} : currentMonth()
       for (let i = 5; i >= 0; i--) {
         const { start, end } = monthRange(now.year, now.month - i)
         months.push({ label: `${Number(start.slice(5, 7))}월`, start, end })
       }
 
-      const { data: rows } = await supabase
+      const { data: rows, error: fetchError } = await supabase
         .from('transactions')
-        .select('date, type, amount, owner, category')
+        .select('date, type, amount, owner, category, transfer_id')
         .eq('household_id', householdId)
         .gte('date', months[0].start)
         .lt('date', months[months.length - 1].end)
 
-      if (!rows || cancelled) return
+      if (cancelled) return
+      setLoading(false)
+      if (fetchError || !rows) { setError(true); setData([]); return }
 
       const result = months.map(({ label, start, end }) => {
         const filtered = rows.filter((r) => {
@@ -38,22 +45,22 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners, de
           if (ownerFilter !== '전체' && r.owner !== ownerFilter) return false
           return true
         })
-        const expense = filtered.filter((r) => r.type === 'expense').reduce((s, r) => s + Number(r.amount), 0)
-        const income = filtered.filter((r) => r.type === 'income' && r.category !== TRANSFER_CATEGORY).reduce((s, r) => s + Number(r.amount), 0)
+        const { expense, income } = summarizeResults(filtered)
         return { label, expense, income }
       })
       setData(result)
     }
     load()
     return () => { cancelled = true }
-  }, [householdId, ownerFilter, refreshKey])
+  }, [householdId, ownerFilter, refreshKey, year, month])
 
-  if (!data.length) return null
   const maxVal = Math.max(...data.map((d) => Math.max(d.expense, d.income)), 1)
   const h = hovered !== null ? data[hovered] : null
 
   return (
     <Collapsible title="월별 추이" className="analysis-section" defaultOpen={defaultOpen}>
+      <p className="utility-note">{year}년 {month + 1}월까지 최근 6개월 · {ownerFilter} · 이체 제외</p>
+      {loading ? <p role="status">불러오는 중…</p> : error ? <p role="alert">추이를 불러오지 못했어요. 잠시 후 다시 확인해주세요.</p> : <>
       <div className="trend-chart">
         {data.map(({ label, expense, income }, i) => (
           <div
@@ -96,6 +103,7 @@ export default function MonthlyTrendChart({ householdId, ownerFilter, owners, de
         <span className="trend-legend-item income">수입</span>
         <span className="trend-legend-item expense">지출</span>
       </div>
+      </>}
     </Collapsible>
   )
 }

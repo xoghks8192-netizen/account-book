@@ -1,6 +1,7 @@
 import { useMoney } from '../lib/privacy'
 import { useState } from 'react'
-import { getCategoryColor, TRANSFER_CATEGORY } from '../categories'
+import { isTransfer } from '../lib/ledgerView'
+import { getCategoryColor } from '../categories'
 
 const VISIBLE_COUNT = 5
 
@@ -11,8 +12,8 @@ export default function ExpenseChart({ transactions }) {
   const [mode, setMode] = useState('expense')
 
   const filtered = mode === 'expense'
-    ? transactions.filter((t) => t.type === 'expense')
-    : transactions.filter((t) => t.type === 'income' && t.category !== TRANSFER_CATEGORY)
+    ? transactions.filter((t) => t.type === 'expense' && !isTransfer(t))
+    : transactions.filter((t) => t.type === 'income' && !isTransfer(t))
 
   const byCategory = filtered.reduce((acc, t) => {
     acc[t.category] = (acc[t.category] || 0) + Number(t.amount)

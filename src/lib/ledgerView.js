@@ -1,7 +1,9 @@
+export function isTransfer(row) { return !!row.transfer_id || row.category === '배우자 이체' }
+
 export function summarizeResults(rows) {
   return rows.reduce((sum, row) => {
     const amount = Number(row.amount) || 0
-    const transfer = !!row.transfer_id || row.category === '배우자 이체'
+    const transfer = isTransfer(row)
     const key = transfer ? (row.type === 'income' ? 'received' : 'sent') : (row.type === 'income' ? 'income' : 'expense')
     sum[key] += amount
     sum.count++

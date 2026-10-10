@@ -1,6 +1,8 @@
 import { useMoney } from '../lib/privacy'
 import { formatLedgerDate } from '../lib/displayText'
 import { useEffect, useMemo, useState } from 'react'
+import { isTransfer } from '../lib/ledgerView'
+import TransactionList from './TransactionList'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -9,7 +11,7 @@ function pad(n) {
   return String(n).padStart(2, '0')
 }
 
-export default function TransactionCalendar({ transactions, year, month, onDeleteDate, onChangeMonth }) {
+export default function TransactionCalendar({ transactions, year, month, onDeleteDate, onChangeMonth, onUpdate, assets, owners, categories, onAddCategory, onRemoveCategory }) {
   const formatAmount = useMoney()
   const [selectedDate, setSelectedDate] = useState(null)
 
@@ -20,8 +22,9 @@ export default function TransactionCalendar({ transactions, year, month, onDelet
   const byDate = useMemo(() => {
     const map = {}
     for (const t of transactions) {
-      if (!map[t.date]) map[t.date] = { income: 0, expense: 0, items: [] }
-      if (t.type === 'income') map[t.date].income += Number(t.amount)
+      if (!map[t.date]) map[t.date] = { income: 0, expense: 0, transfers: 0, items: [] }
+      if (isTransfer(t)) map[t.date].transfers++
+      else if (t.type === 'income') map[t.date].income += Number(t.amount)
       else map[t.date].expense += Number(t.amount)
       map[t.date].items.push(t)
     }
@@ -71,6 +74,7 @@ export default function TransactionCalendar({ transactions, year, month, onDelet
                 <span className="calendar-amounts">
                   {info.income > 0 && <span className="calendar-income">+{formatAmount(info.income)}</span>}
                   {info.expense > 0 && <span className="calendar-expense">-{formatAmount(info.expense)}</span>}
+                  {info.transfers > 0 && <span className="utility-note">이체</span>}
                 </span>
               )}
             </button>
@@ -82,27 +86,7 @@ export default function TransactionCalendar({ transactions, year, month, onDelet
         <div className="calendar-detail">
           <div className="calendar-detail-title">{formatLedgerDate(selectedDate, true)}</div>
           {selected ? (
-            selected.items.map((t) => (
-              <div key={t.id} className="tx-item">
-                <div className="tx-info">
-                  <span className="category">{t.category}</span>
-                  <span className="meta">
-                    {t.owner ?? ''} · {t.memo ?? ''}
-                  </span>
-                </div>
-                <div className="tx-amount">
-                  <span className={`amount ${t.type}`}>
-                    {t.type === 'income' ? '+' : '-'}
-                    {formatAmount(Number(t.amount))}
-                  </span>
-                  {onDeleteDate && (
-                    <button type="button" onClick={() => onDeleteDate(t.id)} title="삭제">
-                      ✕
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
+            <TransactionList key={selectedDate} transactions={selected.items} onDelete={onDeleteDate} onUpdate={onUpdate} assets={assets} owners={owners} categories={categories} onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory} editOnClick />
           ) : (
 <EmptyState message={<>내역이 없어요</>} />
           )}

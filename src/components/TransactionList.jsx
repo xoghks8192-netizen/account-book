@@ -9,6 +9,7 @@ import ExpandableText from './ExpandableText'
 import { joinDetails, formatLedgerDate } from '../lib/displayText'
 import ConfirmDialog from './ConfirmDialog'
 import TransferDetails from './TransferDetails'
+import { summarizeResults } from '../lib/ledgerView'
 
 
 function Highlight({ text, query }) {
@@ -26,7 +27,7 @@ function Highlight({ text, query }) {
 
 const formatDate = formatLedgerDate
 
-export default function TransactionList({ transactions, onDelete, onUpdate, onCopy, filtered = false, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, search = '', scrollToId = null }) {
+export default function TransactionList({ transactions, onDelete, onUpdate, onCopy, filtered = false, assets = [], owners, categories = DEFAULT_CATEGORIES, onAddCategory, onRemoveCategory, search = '', scrollToId = null, editOnClick = false }) {
   const moneyHidden=usePrivacy()
   const formatAmount = useMoney()
   const [editingId, setEditingId] = useState(null)
@@ -196,7 +197,8 @@ export default function TransactionList({ transactions, onDelete, onUpdate, onCo
 
       {groups.map(({ date, items }) => {
         const collapsed = collapsedDates.has(date)
-        const dayTotal = items.reduce((s, t) => s + (t.type === 'expense' ? -t.amount : t.amount), 0)
+        const daily = summarizeResults(items)
+        const dayTotal = daily.income - daily.expense
         return (
         <div key={date} className="tx-date-group">
           <div className="tx-date-header" onClick={() => toggleDate(date)} style={{ cursor: 'pointer', userSelect: 'none' }}>
@@ -223,7 +225,7 @@ export default function TransactionList({ transactions, onDelete, onUpdate, onCo
                 <div className="tx-info">
                   <span className="category">
                     <span className="cat-emoji" aria-hidden="true">{getCategoryEmoji(tx.category)}</span>
-                    <Highlight text={tx.category} query={search} />
+                    {editOnClick ? <button type="button" className="calendar-edit-entry" onClick={e => { e.stopPropagation(); startEdit(tx) }}>{tx.category} 수정</button> : <Highlight text={tx.category} query={search} />}
                     {(tx.transfer_id||tx.category==='배우자 이체')&&<button type="button" className="transfer-link" onClick={e=>{e.stopPropagation();setTransferDetails(tx)}}>연결 보기 ↗</button>}
                   </span>
                   <span className="meta">

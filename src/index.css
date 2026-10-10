@@ -3944,6 +3944,8 @@ button:disabled { cursor: default; }
 .ledger-browser .month-nav h2 { font-size: 15px; font-weight: 650; }
 .ledger-browser .month-nav > button { width: 36px; height: 36px; border: 0; border-radius: 10px; background: var(--tab-bg); color: var(--text-heading); font-size: 22px; cursor: pointer; }
 .ledger-analysis { margin-top: 0; }
+.confirm-btn.primary { background: var(--active-gradient); color: #fff; }
+.calendar-edit-entry { border: 0; padding: 0; background: none; color: var(--text-heading); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .analysis-section { padding: 16px 2px; border-top: 1px solid var(--form-border); }
 .analysis-section h3 { margin: 0; font-size: 15px; color: var(--text-heading); }
 .analysis-section .collapsible-body { margin-top: 16px; }

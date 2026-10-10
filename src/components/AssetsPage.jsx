@@ -12,9 +12,11 @@ import NetWorthChart from './NetWorthChart'
 import Modal from './Modal'
 import ProblemNotice from './ProblemNotice'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
+import { useAssetOrder } from '../hooks/useAssetOrder'
+import ConfirmDialog from './ConfirmDialog'
 
 
-const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory, onAssetsChange, onToast, initialAssets = null }, ref) {
+const AssetsPage = forwardRef(function AssetsPage({ currentUser, username, owners, householdId, categories, onAddCategory, onRemoveCategory, onMoveCategory, onAssetsChange, onToast, initialAssets = null }, ref) {
   const formatAmount = useMoney()
   const [assets, setAssets] = useState(() => initialAssets || [])
   const hadInitialAssets = useRef(initialAssets !== null)
@@ -27,6 +29,9 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
   const [summaryModal, setSummaryModal] = useState(null)
   const [lastMonthTotal, setLastMonthTotal] = useState(null)
   const [reordering, setReordering] = useState(false)
+  const [assetConfirmation, setAssetConfirmation] = useState(null)
+  const confirmBusy = useRef(false)
+  const [confirmSaving, setConfirmSaving] = useState(false)
   useAutoRefresh(async (canApply) => {
     const version = writeRevision.current
     if (reordering) return
@@ -42,9 +47,21 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
       setTimeout(() => assetFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
     }
   }))
-  const [assetOrder, setAssetOrder] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(`asset_order_${householdId}`) || '[]') } catch { return [] }
-  })
+  const { order: assetOrder, update: setAssetOrder, save: saveOrder, status: orderStatus, message: orderMessage, reload: reloadOrder } = useAssetOrder(householdId, username, reordering)
+  async function toggleReordering() {
+    if (orderStatus === 'loading' || orderStatus === 'saving') return
+    if (reordering) {
+      if (await saveOrder()) { setReordering(false); onToast?.('✓ 자산 순서가 계정에 저장되었습니다') }
+    } else setReordering(true)
+  }
+  async function confirmAssetAction() {
+    if (confirmBusy.current || !assetConfirmation) return
+    confirmBusy.current = true; setConfirmSaving(true)
+    try {
+      const ok = assetConfirmation.kind === 'restore' ? await handleRestore(assetConfirmation.id, true) : await handlePermanentDelete(assetConfirmation.id)
+      if (ok !== false) setAssetConfirmation(null)
+    } finally { confirmBusy.current = false; setConfirmSaving(false) }
+  }
 
   useEffect(() => {
     if (!householdId) return
@@ -119,7 +136,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
   }
 
   async function handleRestore(id, undo = false) {
-    if (!undo && !window.confirm('이 자산을 복구할까요?')) return
+    if (!undo) { setAssetConfirmation({ kind: 'restore', id }); return }
     const { data, error } = await supabase
       .from('assets')
       .update({ deleted_at: null })
@@ -129,7 +146,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
     if (error) {
       setError(error.message)
       onToast?.('복구하지 못했어요. 삭제된 자산에서 다시 시도해주세요.')
-      return
+      return false
     }
     writeRevision.current++
     setAssets((prev) => prev.map((a) => (a.id === id ? data : a)))
@@ -137,11 +154,10 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
   }
 
   async function handlePermanentDelete(id) {
-    if (!window.confirm('이 자산을 완전히 삭제할까요? 복구할 수 없습니다.')) return
     const { error } = await supabase.from('assets').delete().eq('id', id)
     if (error) {
       setError(error.message)
-      return
+      return false
     }
     writeRevision.current++
     setAssets((prev) => prev.filter((a) => a.id !== id))
@@ -161,6 +177,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
   const total = visible.reduce((s, a) => s + Number(a.amount), 0)
 
   function moveAsset(id, direction, groupItems) {
+    if (orderStatus === 'saving') return
     const ids = groupItems.map((a) => a.id)
     const idx = ids.indexOf(id)
     if (direction === 'up' && idx === 0) return
@@ -170,19 +187,18 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
     ;[newIds[idx], newIds[swapIdx]] = [newIds[swapIdx], newIds[idx]]
     const merged = [...assetOrder.filter((oid) => !ids.includes(oid)), ...newIds]
     setAssetOrder(merged)
-    localStorage.setItem(`asset_order_${householdId}`, JSON.stringify(merged))
   }
 
   function saveGroupOrder(newIds) {
     const merged = [...assetOrder.filter((oid) => !newIds.includes(oid)), ...newIds]
     setAssetOrder(merged)
-    localStorage.setItem(`asset_order_${householdId}`, JSON.stringify(merged))
   }
 
   const dragState = useRef({ id: null, startY: 0, currentIdx: 0, items: [] })
   const [dragId, setDragId] = useState(null)
 
   function handleDragStart(e, asset, sorted) {
+    if (orderStatus === 'saving') return
     const touch = e.touches[0]
     dragState.current = { id: asset.id, startY: touch.clientY, currentIdx: sorted.findIndex((a) => a.id === asset.id), items: sorted.map((a) => a.id) }
     setDragId(asset.id)
@@ -301,6 +317,9 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
 
   return (
     <div>
+      {assetConfirmation && <ConfirmDialog message={assetConfirmation.kind === 'restore' ? '이 자산을 복구할까요?' : '이 자산을 완전히 삭제할까요? 복구할 수 없습니다.'} confirmLabel={assetConfirmation.kind === 'restore' ? '복구' : '영구 삭제'} tone={assetConfirmation.kind === 'restore' ? 'primary' : 'delete'} busy={confirmSaving} onConfirm={confirmAssetAction} onCancel={() => { if (!confirmBusy.current) setAssetConfirmation(null) }} />}
+      {orderMessage && <div className="utility-note" role="status">{orderMessage} {!reordering && <button type="button" onClick={reloadOrder}>다시 연결</button>}</div>}
+      {orderStatus === 'saving' && <p className="utility-note" role="status">자산 순서를 동기화하고 있어요…</p>}
       <div className="owner-tabs">
         {['전체', ...owners].map((o) => (
           <button
@@ -389,7 +408,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
       ) : (
         <>
           {liquidAssets.length > 0 && (
-            <Collapsible title={`💧 유동자산 · ${formatAmount(liquidTotal)}원`} headerExtra={<button type="button" className={`reorder-toggle-btn${reordering ? ' active' : ''}`} onClick={() => setReordering((v) => !v)}>{reordering ? '완료' : '⇅ 순서'}</button>}>
+            <Collapsible title={`💧 유동자산 · ${formatAmount(liquidTotal)}원`} headerExtra={<button type="button" disabled={orderStatus === 'loading' || orderStatus === 'saving'} className={`reorder-toggle-btn${reordering ? ' active' : ''}`} onClick={toggleReordering}>{reordering ? '저장' : '⇅ 순서'}</button>}>
               {Object.entries(liquidGrouped).map(([category, items]) => {
                 const sorted = sortByOrder(items)
                 return (
@@ -419,7 +438,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
           )}
 
           {nonLiquidAssets.length > 0 && (
-            <Collapsible title={`🔒 비유동자산 · ${formatAmount(nonLiquidTotal)}원`} headerExtra={<button type="button" className={`reorder-toggle-btn${reordering ? ' active' : ''}`} onClick={() => setReordering((v) => !v)}>{reordering ? '완료' : '⇅ 순서'}</button>}>
+            <Collapsible title={`🔒 비유동자산 · ${formatAmount(nonLiquidTotal)}원`} headerExtra={<button type="button" disabled={orderStatus === 'loading' || orderStatus === 'saving'} className={`reorder-toggle-btn${reordering ? ' active' : ''}`} onClick={toggleReordering}>{reordering ? '저장' : '⇅ 순서'}</button>}>
               {Object.entries(nonLiquidGrouped).map(([category, items]) => {
                 const sorted = sortByOrder(items)
                 return (
@@ -481,7 +500,7 @@ const AssetsPage = forwardRef(function AssetsPage({ currentUser, owners, househo
                   </button>
                   <button
                     type="button"
-                    onClick={() => handlePermanentDelete(asset.id)}
+                    onClick={() => setAssetConfirmation({ kind: 'delete', id: asset.id })}
                     style={{
                       border: 'none',
                       borderRadius: 999,
